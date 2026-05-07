@@ -336,6 +336,15 @@
             font-weight: 600;
         }
 
+        /* Update to specific table containers */
+        .table-responsive-batch {
+            max-height: 250px; /* Approximately 5 rows depending on styling */
+            overflow-y: auto;
+        }
+        .table-responsive-food {
+            overflow: visible; /* Prevents scrolling */
+        }
+
         .hidden { display: none !important; }
     </style>
 </head>
@@ -372,7 +381,10 @@
         <div id="view-verify" class="view-section">
             <div class="mb-4 d-flex flex-column flex-sm-row justify-content-between align-items-sm-end gap-3">
                 <div>
-                    <h4 class="text-white mb-1 fw-bold">ตรวจสอบการชำระเงิน</h4>
+                    <h4 class="text-white mb-1 fw-bold d-flex align-items-center gap-3">
+                        ตรวจสอบการชำระเงิน
+                        <span class="badge bg-secondary bg-opacity-25 text-light border border-secondary fs-6 fw-normal" id="verifyRecordCountDisplay">0 รายการ</span>
+                    </h4>
                 </div>
                 <button class="btn btn-primary d-flex align-items-center gap-2 fw-bold" style="background-color: var(--accent-blue); border:none;" onclick="fetchData()">
                     <i class="bi bi-arrow-clockwise"></i> รีเฟรชข้อมูล
@@ -400,7 +412,10 @@
         <!-- VIEW 2: รายการทั้งหมด (All Records) -->
         <div id="view-all" class="view-section hidden">
             <div class="mb-4">
-                <h4 class="text-white mb-1 fw-bold">รายการทั้งหมด</h4>
+                <h4 class="text-white mb-1 fw-bold d-flex align-items-center gap-3 flex-wrap">
+                    รายการทั้งหมด
+                    <span class="badge bg-secondary bg-opacity-25 text-light border border-secondary fs-6 fw-normal text-start lh-base" id="allRecordCountDisplay">0 รายการ</span>
+                </h4>
             </div>
 
             <!-- Filters -->
@@ -501,38 +516,66 @@
 
             <!-- สรุปแยกประเภทย่อย และอาหาร -->
             <div class="row g-4">
-                <!-- สถิติอาหาร กลางวัน -->
+                <!-- สถิติงาน กลางวัน -->
                 <div class="col-md-6">
-                    <div class="report-sub-card">
-                        <h6 class="text-white mb-3 fw-bold"><i class="bi bi-brightness-high-fill text-warning me-2"></i> สรุปอาหาร งานกลางวัน</h6>
-                        <div class="table-responsive">
-                            <table class="table table-sm text-nowrap mb-0" style="min-width: unset;">
-                                <thead>
-                                    <tr>
-                                        <th class="py-2">ประเภทอาหาร</th>
-                                        <th class="text-end py-2">จำนวนที่เสิร์ฟ</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="reportFoodDayTable"></tbody>
-                            </table>
+                    <div class="report-sub-card d-flex flex-column h-100">
+                        <h6 class="text-white mb-3 fw-bold"><i class="bi bi-brightness-high-fill text-warning me-2"></i> สรุปงานกลางวัน</h6>
+                        
+                        <div class="mb-3 p-3 rounded" style="background-color: rgba(255,255,255,0.02); border: 1px solid var(--border-color);">
+                            <div class="text-muted-custom mb-2 fw-bold"><i class="bi bi-people-fill me-1"></i> จำนวนคนร่วมงาน</div>
+                            <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-2 mb-2">
+                                <span class="text-white">ผู้ใหญ่ (ศิษย์เก่า + ติดตามผู้ใหญ่)</span>
+                                <span class="count-badge text-warning bg-warning bg-opacity-10" id="reportDayAdult">0</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-2 mb-2">
+                                <span class="text-white">เด็กโต (>12 ปี)</span>
+                                <span class="count-badge text-warning bg-warning bg-opacity-10" id="reportDayChildO12">0</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-white">เด็กเล็ก (<12 ปี)</span>
+                                <span class="count-badge text-warning bg-warning bg-opacity-10" id="reportDayChildU12">0</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded flex-grow-1" style="background-color: rgba(255,255,255,0.02); border: 1px solid var(--border-color);">
+                            <div class="text-muted-custom mb-2 fw-bold"><i class="bi bi-cup-hot-fill me-1"></i> ประเภทอาหาร (จำนวนที่เสิร์ฟ)</div>
+                            <div class="table-responsive-food">
+                                <table class="table table-sm text-nowrap mb-0" style="min-width: unset;">
+                                    <tbody id="reportFoodDayTable"></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- สถิติอาหาร กลางคืน -->
+                <!-- สถิติงาน กลางคืน -->
                 <div class="col-md-6">
-                    <div class="report-sub-card">
-                        <h6 class="text-white mb-3 fw-bold"><i class="bi bi-moon-stars-fill text-info me-2"></i> สรุปอาหาร งานกลางคืน</h6>
-                        <div class="table-responsive">
-                            <table class="table table-sm text-nowrap mb-0" style="min-width: unset;">
-                                <thead>
-                                    <tr>
-                                        <th class="py-2">ประเภทอาหาร</th>
-                                        <th class="text-end py-2">จำนวนที่เสิร์ฟ</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="reportFoodNightTable"></tbody>
-                            </table>
+                    <div class="report-sub-card d-flex flex-column h-100">
+                        <h6 class="text-white mb-3 fw-bold"><i class="bi bi-moon-stars-fill text-info me-2"></i> สรุปงานกลางคืน</h6>
+                        
+                        <div class="mb-3 p-3 rounded" style="background-color: rgba(255,255,255,0.02); border: 1px solid var(--border-color);">
+                            <div class="text-muted-custom mb-2 fw-bold"><i class="bi bi-people-fill me-1"></i> จำนวนคนร่วมงาน</div>
+                            <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-2 mb-2">
+                                <span class="text-white">ผู้ใหญ่ (ศิษย์เก่า + ติดตามผู้ใหญ่)</span>
+                                <span class="count-badge text-info bg-info bg-opacity-10" id="reportNightAdult">0</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-2 mb-2">
+                                <span class="text-white">เด็กโต (>12 ปี)</span>
+                                <span class="count-badge text-info bg-info bg-opacity-10" id="reportNightChildO12">0</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-white">เด็กเล็ก (<12 ปี)</span>
+                                <span class="count-badge text-info bg-info bg-opacity-10" id="reportNightChildU12">0</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded flex-grow-1" style="background-color: rgba(255,255,255,0.02); border: 1px solid var(--border-color);">
+                            <div class="text-muted-custom mb-2 fw-bold"><i class="bi bi-cup-hot-fill me-1"></i> ประเภทอาหาร (จำนวนที่เสิร์ฟ)</div>
+                            <div class="table-responsive-food">
+                                <table class="table table-sm text-nowrap mb-0" style="min-width: unset;">
+                                    <tbody id="reportFoodNightTable"></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -541,9 +584,9 @@
                 <div class="col-md-6">
                     <div class="report-sub-card">
                         <h6 class="text-white mb-3 fw-bold"><i class="bi bi-mortarboard-fill text-muted me-2"></i> สถิติแยกตามรุ่น</h6>
-                        <div class="table-responsive">
+                        <div class="table-responsive-batch">
                             <table class="table table-sm text-nowrap mb-0" style="min-width: unset;">
-                                <thead>
+                                <thead style="position: sticky; top: 0; background-color: var(--bg-panel); z-index: 1;">
                                     <tr>
                                         <th class="py-2">ชื่อรุ่น</th>
                                         <th class="text-center py-2">จำนวนคน</th>
@@ -885,6 +928,9 @@
 
             const pendingData = formattedData.filter(item => item.paymentStatus === 'PENDING');
 
+            // อัปเดตตัวเลขจำนวนรายการรอตรวจสอบ
+            document.getElementById('verifyRecordCountDisplay').innerText = `${pendingData.length} รายการ`;
+
             if (pendingData.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-muted-custom">🎉 ไม่มีรายการรอดำเนินการ</td></tr>`;
                 return;
@@ -926,6 +972,23 @@
                 }
                 return true;
             });
+
+            // คำนวณจำนวนคนจากรายการที่ถูก Filter
+            let sumAlumni = filteredData.length; // จำนวนศิษย์เก่า (1 รายการ = ศิษย์เก่า 1 คน)
+            let sumFollowerAdult = 0;
+            let sumFollowerChildO12 = 0;
+            let sumFollowerChildU12 = 0;
+
+            filteredData.forEach(item => {
+                sumFollowerAdult += item.adult;
+                sumFollowerChildO12 += item.childO12;
+                sumFollowerChildU12 += item.childU12;
+            });
+            
+            let sumTotalPax = sumAlumni + sumFollowerAdult + sumFollowerChildO12 + sumFollowerChildU12;
+
+            // อัปเดตตัวเลขจำนวนรายการและจำนวนคน (แยกประเภทชัดเจน)
+            document.getElementById('allRecordCountDisplay').innerHTML = `พบ <strong>${filteredData.length}</strong> จาก ${formattedData.length} รายการ <span style="color: var(--accent-yellow); margin-left: 5px;">[รวม ${sumTotalPax} คน <i class="bi bi-chevron-right fs-6"></i> ศิษย์เก่า ${sumAlumni} | ผู้ติดตามผู้ใหญ่ ${sumFollowerAdult} | เด็กโต ${sumFollowerChildO12} | เด็กเล็ก ${sumFollowerChildU12}]</span>`;
 
             if (filteredData.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted-custom">ไม่พบข้อมูลที่ค้นหา</td></tr>`;
@@ -976,8 +1039,9 @@
             // คำนวณข้อมูลย่อย (เฉพาะ PAID เท่านั้น)
             const batchStats = {};
             const typeStats = {};
-            const foodDay = {};
-            const foodNight = {};
+            
+            const eventDay = { adult: 0, childO12: 0, childU12: 0, food: {} };
+            const eventNight = { adult: 0, childO12: 0, childU12: 0, food: {} };
 
             formattedData.forEach(item => {
                 if (item.paymentStatus !== 'PAID') return; // ข้ามถ้าไม่ใช่ PAID
@@ -995,20 +1059,48 @@
                 typeStats[tCode].count++;
                 typeStats[tCode].revenue += money;
 
-                // Food Stats
+                // คำนวณจำนวนคนร่วมงาน (ศิษย์เก่า 1 คน + ผู้ติดตาม)
+                const paxAdult = 1 + item.adult; 
+                const paxChildO12 = item.childO12;
+                const paxChildU12 = item.childU12;
+                const totalPax = paxAdult + paxChildO12 + paxChildU12; // ยอดรวมคนเพื่อให้จัดอาหาร
+
+                // แยกกลางวัน / กลางคืน
                 const fType = item.foodTypeDisplay;
-                if (fType !== '-') {
-                    if (item.eventTypeRaw === 'DAY_ONLY' || item.eventTypeRaw === 'DAY_NIGHT') {
-                        foodDay[fType] = (foodDay[fType] || 0) + 1;
+                
+                if (item.eventTypeRaw === 'DAY_ONLY' || item.eventTypeRaw === 'DAY_NIGHT') {
+                    eventDay.adult += paxAdult;
+                    eventDay.childO12 += paxChildO12;
+                    eventDay.childU12 += paxChildU12;
+                    if (fType !== '-') {
+                        eventDay.food[fType] = (eventDay.food[fType] || 0) + totalPax; // อาหาร 1 ที่/คน
                     }
-                    if (item.eventTypeRaw === 'NIGHT_ONLY' || item.eventTypeRaw === 'DAY_NIGHT') {
-                        foodNight[fType] = (foodNight[fType] || 0) + 1;
+                }
+                
+                if (item.eventTypeRaw === 'NIGHT_ONLY' || item.eventTypeRaw === 'DAY_NIGHT') {
+                    eventNight.adult += paxAdult;
+                    eventNight.childO12 += paxChildO12;
+                    eventNight.childU12 += paxChildU12;
+                    if (fType !== '-') {
+                        eventNight.food[fType] = (eventNight.food[fType] || 0) + totalPax;
                     }
                 }
             });
 
-            // เรียงลำดับ Batch ก่อนแสดงผล
-            let sortedBatchKeys = sortBatches(Object.keys(batchStats));
+            // เรียงลำดับ Batch ตามจำนวนคน (มากไปน้อย)
+            let sortedBatchKeys = Object.keys(batchStats).sort((a, b) => {
+                // 1. เรียงตามจำนวนคน มาก -> น้อย
+                const countDiff = batchStats[b].count - batchStats[a].count;
+                if (countDiff !== 0) return countDiff;
+                
+                // 2. ถ้าจำนวนคนเท่ากัน ให้เรียงตามชื่อรุ่น (HS ขึ้นก่อน ตามด้วยตัวเลข)
+                let isHsA = a.toUpperCase().startsWith('HS');
+                let isHsB = b.toUpperCase().startsWith('HS');
+                if (isHsA && !isHsB) return -1;
+                if (!isHsA && isHsB) return 1;
+                if (isHsA && isHsB) return (parseInt(a.substring(2)) || 0) - (parseInt(b.substring(2)) || 0);
+                return (parseInt(a.split('/')[0]) || 0) - (parseInt(b.split('/')[0]) || 0);
+            });
 
             // วาดตาราง รุ่น
             const tBodyBatch = document.getElementById('reportBatchTable');
@@ -1036,35 +1128,43 @@
                 `;
             });
 
-            // วาดตาราง อาหารกลางวัน
+            // --- วาดสรุปงานกลางวัน ---
+            document.getElementById('reportDayAdult').innerText = eventDay.adult.toLocaleString();
+            document.getElementById('reportDayChildO12').innerText = eventDay.childO12.toLocaleString();
+            document.getElementById('reportDayChildU12').innerText = eventDay.childU12.toLocaleString();
+
             const tBodyFoodDay = document.getElementById('reportFoodDayTable');
             tBodyFoodDay.innerHTML = "";
             let sumFoodDay = 0;
-            Object.keys(foodDay).sort().forEach(key => {
-                sumFoodDay += foodDay[key];
+            Object.keys(eventDay.food).sort().forEach(key => {
+                sumFoodDay += eventDay.food[key];
                 tBodyFoodDay.innerHTML += `
                     <tr>
-                        <td class="text-white align-middle">${key}</td>
-                        <td class="text-end align-middle"><span class="count-badge text-warning bg-warning bg-opacity-10">${foodDay[key].toLocaleString()}</span></td>
+                        <td class="text-white align-middle border-bottom-0 pb-1">${key}</td>
+                        <td class="text-end align-middle border-bottom-0 pb-1"><span class="count-badge text-warning bg-warning bg-opacity-10">${eventDay.food[key].toLocaleString()}</span></td>
                     </tr>
                 `;
             });
-            if(sumFoodDay === 0) tBodyFoodDay.innerHTML = `<tr><td colspan="2" class="text-muted-custom text-center">ไม่มีข้อมูล</td></tr>`;
+            if(sumFoodDay === 0) tBodyFoodDay.innerHTML = `<tr><td colspan="2" class="text-muted-custom text-center border-bottom-0">ไม่มีข้อมูลอาหาร</td></tr>`;
 
-            // วาดตาราง อาหารกลางคืน
+            // --- วาดสรุปงานกลางคืน ---
+            document.getElementById('reportNightAdult').innerText = eventNight.adult.toLocaleString();
+            document.getElementById('reportNightChildO12').innerText = eventNight.childO12.toLocaleString();
+            document.getElementById('reportNightChildU12').innerText = eventNight.childU12.toLocaleString();
+
             const tBodyFoodNight = document.getElementById('reportFoodNightTable');
             tBodyFoodNight.innerHTML = "";
             let sumFoodNight = 0;
-            Object.keys(foodNight).sort().forEach(key => {
-                sumFoodNight += foodNight[key];
+            Object.keys(eventNight.food).sort().forEach(key => {
+                sumFoodNight += eventNight.food[key];
                 tBodyFoodNight.innerHTML += `
                     <tr>
-                        <td class="text-white align-middle">${key}</td>
-                        <td class="text-end align-middle"><span class="count-badge text-info bg-info bg-opacity-10">${foodNight[key].toLocaleString()}</span></td>
+                        <td class="text-white align-middle border-bottom-0 pb-1">${key}</td>
+                        <td class="text-end align-middle border-bottom-0 pb-1"><span class="count-badge text-info bg-info bg-opacity-10">${eventNight.food[key].toLocaleString()}</span></td>
                     </tr>
                 `;
             });
-            if(sumFoodNight === 0) tBodyFoodNight.innerHTML = `<tr><td colspan="2" class="text-muted-custom text-center">ไม่มีข้อมูล</td></tr>`;
+            if(sumFoodNight === 0) tBodyFoodNight.innerHTML = `<tr><td colspan="2" class="text-muted-custom text-center border-bottom-0">ไม่มีข้อมูลอาหาร</td></tr>`;
         }
 
         // --- ระบบเปิดหน้าต่าง Offcanvas ---
