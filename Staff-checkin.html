@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>STAFF SCANNER</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+    <style>
+        :root { --primary-orange: #FF6600; --primary-blue: #003366; --bg-gray: #f4f6f9; }
+        body { background-color: var(--bg-gray); font-family: 'Sarabun', sans-serif; }
+        .staff-header { background-color: var(--primary-blue); color: white; padding: 15px; text-align: center; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
+        .card-box { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 20px; margin-bottom: 20px; }
+        #reader { width: 100%; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary-blue); min-height: 250px; background: #000; }
+        .data-label { font-size: 0.85rem; color: #6c757d; margin-bottom: 2px; }
+        .data-value { font-size: 1.1rem; font-weight: bold; color: #333; margin-bottom: 10px; }
+        .btn-huge { padding: 15px; font-size: 1.1rem; font-weight: bold; border-radius: 10px; }
+        #result-section { display: none; }
+        .alert-wristband { background-color: #e0f0ff; border-left: 5px solid var(--primary-blue); color: var(--primary-blue); }
+        .alert-pending { background-color: #fff3cd; border-left: 5px solid #ffc107; color: #856404; }
+    </style>
+</head>
+<body>
+
+<div class="staff-header">STAFF </div>
+
+<div class="container mt-3 pb-5" style="max-width: 500px;">
+
+    <div id="scanner-section">
+        <div class="card-box text-center p-2">
+            <div id="reader"></div>
+        </div>
+
+        <div class="card-box">
+            <h6 class="text-primary mb-3">ไม่มี QR</h6>
+            <form id="manualSearchForm" onsubmit="handleManualSearch(event)">
+                <input type="tel" class="form-control mb-2" id="searchPhone" placeholder="เบอร์โทรศัพท์ (10 หลัก)" pattern="0[0-9]{9}" required>
+                <input type="text" class="form-control mb-3" id="searchName" placeholder="ชื่อจริง (ไม่ต้องใส่คำนำหน้า)" required>
+                <button type="submit" class="btn btn-outline-primary w-100 fw-bold py-2">ค้นหา</button>
+            </form>
+        </div>
+
+        <button type="button" class="btn btn-warning w-100 btn-huge text-dark shadow-sm" onclick="openWalkinModal()">
+            Walk-in
+        </button>
+    </div>
+
+    <div id="result-section">
+        <div class="card-box">
+            <h5 class="text-center text-primary mb-3">ข้อมูล</h5>
+            <hr>
+            <div class="data-value" id="r_name">-</div>
+
+            <div class="data-value text-success" id="r_event">-</div>
+
+            <div class="alert alert-wristband p-3 mb-3 fw-bold" id="alert-wristband" style="display: none;">
+                🔵 แจกสายรัดข้อมือ: <span id="r_wristband_count" class="fs-4 text-danger">0</span> เส้น
+            </div>
+
+            <div class="alert alert-pending p-3 mb-3 fw-bold" id="alert-pending" style="display: none;">
+                ⚠️ สถานะ: PENDING (รอตรวจสอบสลิป)<br>
+                <small class="fw-normal">กรุณาตรวจสอบสลิปในมือถือผู้ร่วมงาน หรือเก็บเงินสด</small>
+            </div>
+
+            <div class="p-3 bg-light rounded border mb-4">
+                <div class="fw-bold mb-2">ผู้ติดตาม:</div>
+                <div class="row text-center">
+                    <div class="col-4"><small class="text-muted">ผู้ใหญ่</small><br><span id="r_adult" class="fs-5 fw-bold">0</span></div>
+                    <div class="col-4"><small class="text-muted">เด็กโต</small><br><span id="r_childO12" class="fs-5 fw-bold">0</span></div>
+                    <div class="col-4"><small class="text-muted">เด็กเล็ก</small><br><span id="r_childU12" class="fs-5 fw-bold">0</span></div>
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-success w-100 btn-huge mb-2 shadow-sm" onclick="confirmCheckIn()">✅ ยืนยัน</button>
+            <button type="button" class="btn btn-outline-primary w-100 btn-huge mb-3" onclick="openExtraModal()">➕ เพิ่มผู้ติดตาม</button>
+            <button type="button" class="btn btn-secondary w-100 py-2" onclick="resetScanner()">ย้อนกลับ / สแกนคิวต่อไป</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="extraModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">➕ เพิ่มผู้ติดตามหน้างาน</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small">เรทราคา: กลางวัน 300.- / กลางคืน 1,000.- / เด็กโต 500.-</p>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="fw-bold">ผู้ใหญ่</label>
+                    <input type="number" id="exAdult" class="form-control w-25 text-center" value="0" min="0" onchange="calcExtraPrice()">
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="fw-bold">เด็กโต (>12 ปี)</label>
+                    <input type="number" id="exChildO12" class="form-control w-25 text-center" value="0" min="0" onchange="calcExtraPrice()">
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <label class="fw-bold">เด็กเล็ก (<12 ปี)</label>
+                    <input type="number" id="exChildU12" class="form-control w-25 text-center" value="0" min="0">
+                </div>
+                <hr>
+                <div class="text-center mb-3">
+                    <h6 class="text-muted mb-1">ยอดชำระเงินเพิ่ม</h6>
+                    <h3 class="text-danger fw-bold"><span id="exPriceDisplay">0</span> บาท</h3>
+                </div>
+                <div id="extraSlipSection" style="display: none;">
+                    <label class="fw-bold text-primary mb-1">ถ่ายรูปสลิป</label>
+                    <input type="file" id="exSlipInput" class="form-control" accept="image/*" capture="environment" onchange="compressImage(event, 'exSlipPreview', 'exSlipBase64')">
+                    <img id="exSlipPreview" class="img-fluid mt-2 rounded shadow-sm" style="display:none; max-height: 150px; margin: 0 auto;">
+                    <input type="hidden" id="exSlipBase64">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                <button type="button" class="btn btn-success" onclick="submitCheckInWithExtra()">💾 ยืนยันบันทึกและเข้างาน</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="walkinModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">Walk-in </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-2 mb-2">
+                    <div class="col-4">
+                        <select id="wkPrefix" class="form-select" required>
+                            <option value="">คำนำหน้า*</option>
+                            <option value="นาย">นาย</option>
+                            <option value="นาง">นาง</option>
+                            <option value="นางสาว">นางสาว</option>
+                            <option value="อื่นๆ">อื่นๆ</option>
+                        </select>
+                    </div>
+                    <div class="col-8">
+                        <input type="text" id="wkFirst" class="form-control" placeholder="ชื่อจริง" required>
+                    </div>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-7">
+                        <input type="text" id="wkLast" class="form-control" placeholder="นามสกุล" required>
+                    </div>
+                    <div class="col-5">
+                        <input type="text" id="wkNick" class="form-control" placeholder="ชื่อเล่น" required>
+                    </div>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6"><input type="tel" id="wkPhone" class="form-control" placeholder="เบอร์โทร" maxlength="10" required></div>
+                    <div class="col-6">
+                        <select id="wkBatch" class="form-select" required>
+                            <option value="">-- เลือกรุ่น --</option>
+                        </select>
+                    </div>
+                </div>
+                <select id="wkEvent" class="form-select mb-3" onchange="calcWalkinPrice()" required>
+                    <option value="">-- เลือกประเภทร่วมงาน  --</option>
+                    <option value="DAY_ONLY">เฉพาะกลางวัน </option>
+                    <option value="NIGHT_ONLY">เฉพาะกลางคืน </option>
+                    <option value="DAY_NIGHT">กลางวันและกลางคืน </option>
+                </select>
+                <label class="fw-bold mb-1">ผู้ติดตาม</label>
+                <div class="row g-2 mb-3 text-center">
+                    <div class="col-4"><small>ผู้ใหญ่</small><input type="number" id="wkAdult" class="form-control text-center" value="0" min="0" onchange="calcWalkinPrice()"></div>
+                    <div class="col-4"><small>เด็กโต</small><input type="number" id="wkChildO12" class="form-control text-center" value="0" min="0" onchange="calcWalkinPrice()"></div>
+                    <div class="col-4"><small>เด็กเล็ก</small><input type="number" id="wkChildU12" class="form-control text-center" value="0" min="0"></div>
+                </div>
+                <hr>
+                <div class="text-center mb-3">
+                    <h6 class="text-muted mb-1">ยอดชำระเงินหน้างาน</h6>
+                    <h3 class="text-danger fw-bold"><span id="wkPriceDisplay">0</span> บาท</h3>
+                </div>
+                <div id="wkSlipSection" style="display: none;">
+                    <label class="fw-bold text-primary mb-1">ถ่ายรูปสลิป</label>
+                    <input type="file" id="wkSlipInput" class="form-control" accept="image/*" capture="environment" onchange="compressImage(event, 'wkSlipPreview', 'wkSlipBase64')">
+                    <img id="wkSlipPreview" class="img-fluid mt-2 rounded shadow-sm" style="display:none; max-height: 150px; margin: 0 auto;">
+                    <input type="hidden" id="wkSlipBase64">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                <button type="button" class="btn btn-success w-100" onclick="submitWalkin()">💾 บันทึกและให้เข้างาน</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ⚠️ CONFIGURATION ⚠️ (กรุณาเปลี่ยนให้เป็นของจริงก่อนใช้งาน)
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwzYxbwKueYVTr-ZGqzU6pgieySxS08pX6NgTtPTtQsxYOqDsGuvQ0xgZYQHfCuVk116Q/exec"; 
+    const IMGBB_API_KEY = "4c346c47d9368db66076ef2e49b5b285";
+    const OPERATOR_NAME = "STAFF_GATE_1"; 
+    
+    let html5QrcodeScanner;
+    let currentTicket = null;
+    let extraAmount = 0;
+    let walkinAmount = 0;
+    let isProcessing = false; 
+
+    // Lazy Load Modals
+    let extraModalInstance = null;
+    let walkinModalInstance = null;
+    function getExtraModal() { if (!extraModalInstance) extraModalInstance = new bootstrap.Modal(document.getElementById('extraModal')); return extraModalInstance; }
+    function getWalkinModal() { if (!walkinModalInstance) walkinModalInstance = new bootstrap.Modal(document.getElementById('walkinModal')); return walkinModalInstance; }
+
+    // --- 1. Initialization ---
+    window.addEventListener('DOMContentLoaded', () => {
+        const batchSelect = document.getElementById('wkBatch');
+        for(let i=1; i<=30; i++) batchSelect.innerHTML += `<option value="${i}/${i+3}">รุ่น ${i}/${i+3}</option>`;
+
+        // 🚀 สั่งเปิดกล้องหลังอัตโนมัติ (Auto-Start Environment Camera)
+        html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start(
+            { facingMode: "environment" }, // บังคับใช้กล้องหลังเสมอ
+            { fps: 10, qrbox: { width: 250, height: 250 } },
+            onScanSuccess,
+            (errorMessage) => { /* ซ่อน Error จุกจิกเวลามันหากรอบ QR ไม่เจอ */ }
+        ).catch(err => {
+            console.error("Camera Error:", err);
+            document.getElementById('reader').innerHTML = `<div class="p-4 text-danger fw-bold">กรุณาอนุญาตให้เว็บเข้าถึงกล้องถ่ายรูป<br><small>(${err})</small></div>`;
+        });
+    });
+
+    // --- 2. Actions (Scanner & Search) ---
+    async function onScanSuccess(decodedText) {
+        if (isProcessing) return; 
+        isProcessing = true; 
+        
+        showLoading("กำลังตรวจสอบตั๋ว...");
+        try {
+            const res = await fetchGAS({ action: "getTicket", ticketId: decodedText });
+            processTicketData(res);
+        } catch(e) { Swal.fire('Error', `ขัดข้อง: ${e.message}`, 'error').then(() => { isProcessing = false; }); }
+    }
+
+    async function handleManualSearch(e) {
+        e.preventDefault();
+        if (isProcessing) return;
+        isProcessing = true;
+        
+        showLoading("กำลังค้นหาข้อมูล...");
+        try {
+            const res = await fetchGAS({ action: "search", Phone: document.getElementById('searchPhone').value, FirstName: document.getElementById('searchName').value });
+            processTicketData(res);
+        } catch(e) { Swal.fire('Error', `ขัดข้อง: ${e.message}`, 'error').then(() => { isProcessing = false; }); }
+    }
+
+    // --- 3. Process Ticket Logic ---
+    function processTicketData(res) {
+        Swal.close();
+        if (!res.success) { Swal.fire('ไม่พบข้อมูล', res.message, 'warning').then(() => { isProcessing = false; }); return; }
+
+        if (res.checkinStatus === true) {
+            const timeStr = res.checkinTime ? new Date(res.checkinTime).toLocaleTimeString('th-TH') : "ก่อนหน้านี้";
+            Swal.fire({ icon: 'error', title: '❌ ตั๋วถูกใช้ไปแล้ว!', html: `รหัส <b>${res.ticketId}</b><br>เช็คอินเมื่อ ${timeStr}`, confirmButtonColor: '#dc3545' }).then(() => { isProcessing = false; });
+            return;
+        }
+
+        currentTicket = res;
+        document.getElementById('r_name').innerText = `${res.name} (รุ่น ${res.batch})`;
+        document.getElementById('r_event').innerText = res.eventType === 'DAY_ONLY' ? "เฉพาะกลางวัน" : "กลางวันและกลางคืน";
+        document.getElementById('r_adult').innerText = res.adult;
+        document.getElementById('r_childO12').innerText = res.childO12;
+        document.getElementById('r_childU12').innerText = res.childU12;
+
+        const alertWb = document.getElementById('alert-wristband');
+        if (res.eventType === "DAY_NIGHT") {
+            // ✅ แก้ไข: (เจ้าของบัตร 1 คน) + ผู้ติดตามผู้ใหญ่ + ผู้ติดตามเด็กโต
+            const wbCount = 1 + parseInt(res.adult || 0) + parseInt(res.childO12 || 0);
+            document.getElementById('r_wristband_count').innerText = wbCount;
+            alertWb.style.display = 'block';
+        } else { alertWb.style.display = 'none'; }
+
+        document.getElementById('alert-pending').style.display = (res.paymentStatus === 'PENDING') ? 'block' : 'none';
+        document.getElementById('scanner-section').style.display = 'none';
+        document.getElementById('result-section').style.display = 'block';
+    }
+
+    async function confirmCheckIn() {
+        showLoading("กำลังประทับตราเช็คอิน...");
+        try {
+            const res = await fetchGAS({
+                action: "checkin", ticketId: currentTicket.ticketId, eventType: currentTicket.eventType,
+                actualCount: parseInt(currentTicket.adult||0) + parseInt(currentTicket.childO12||0) + parseInt(currentTicket.childU12||0), operator: OPERATOR_NAME
+            });
+            if(res.success) {
+                let msg = 'เช็คอินเรียบร้อย ให้เข้างานได้';
+                if(currentTicket.eventType === "DAY_NIGHT") {
+                    const wbc = 1 + parseInt(currentTicket.adult||0) + parseInt(currentTicket.childO12||0);
+                    msg = `แจกสายรัดข้อมือ <b>${wbc} เส้น</b> และให้เข้างานได้`;
+                }
+                Swal.fire({icon: 'success', title: 'สำเร็จ!', html: msg}).then(() => resetScanner());
+            } else { Swal.fire('ข้อผิดพลาด', res.errorText || res.message, 'error').then(() => { isProcessing = false; }); }
+        } catch(e) { Swal.fire('Error', `บันทึกไม่สำเร็จ: ${e.message}`, 'error').then(() => { isProcessing = false; }); }
+    }
+
+    // --- 4. Extra Pax Logic (เพิ่มคนหน้างาน) ---
+    function openExtraModal() {
+        document.getElementById('exAdult').value = 0; document.getElementById('exChildO12').value = 0; document.getElementById('exChildU12').value = 0;
+        document.getElementById('exSlipInput').value = ""; document.getElementById('exSlipPreview').style.display = 'none'; document.getElementById('exSlipBase64').value = "";
+        calcExtraPrice(); getExtraModal().show();
+    }
+
+    function calcExtraPrice() {
+        const type = currentTicket.eventType;
+        const adult = parseInt(document.getElementById('exAdult').value) || 0;
+        const childO12 = parseInt(document.getElementById('exChildO12').value) || 0;
+        const rateAdult = type === "DAY_ONLY" ? 300 : 1000;
+        const rateChild = type === "DAY_ONLY" ? 0 : 500; 
+        extraAmount = (adult * rateAdult) + (childO12 * rateChild);
+        document.getElementById('exPriceDisplay').innerText = extraAmount.toLocaleString();
+        document.getElementById('extraSlipSection').style.display = extraAmount > 0 ? 'block' : 'none';
+    }
+
+    async function submitCheckInWithExtra() {
+        const a = parseInt(document.getElementById('exAdult').value) || 0;
+        const cO12 = parseInt(document.getElementById('exChildO12').value) || 0;
+        const cU12 = parseInt(document.getElementById('exChildU12').value) || 0;
+        const base64Slip = document.getElementById('exSlipBase64').value;
+
+        if (a===0 && cO12===0 && cU12===0) { Swal.fire('แจ้งเตือน', 'กรุณาระบุจำนวนที่มาเพิ่ม', 'warning'); return; }
+        if (extraAmount > 0 && !base64Slip) { Swal.fire('แจ้งเตือน', 'กรุณาถ่ายรูปสลิป', 'error'); return; }
+
+        getExtraModal().hide(); showLoading("กำลังอัปโหลดสลิปและบันทึก...");
+        try {
+            let slipUrl = "";
+            if (extraAmount > 0) slipUrl = await uploadToImgBB(base64Slip);
+
+            const res = await fetchGAS({
+                action: "checkin", ticketId: currentTicket.ticketId, eventType: currentTicket.eventType,
+                actualCount: parseInt(currentTicket.adult||0) + parseInt(currentTicket.childO12||0) + parseInt(currentTicket.childU12||0), operator: OPERATOR_NAME,
+                addedAdult: a, addedChildO12: cO12, addedChildU12: cU12, extraAmount: extraAmount, slipUrl: slipUrl
+            });
+
+            if(res.success) {
+                let wbMsg = "เช็คอินรวมผู้ติดตามเรียบร้อย";
+                if(currentTicket.eventType === "DAY_NIGHT") {
+                    // ✅ แก้ไข: ยอดสายรัด = 1 (เจ้าของ) + ผู้ติดตามเดิม + ผู้ติดตามใหม่
+                    const totalWb = 1 + parseInt(currentTicket.adult||0) + parseInt(currentTicket.childO12||0) + a + cO12;
+                    wbMsg = `เช็คอินสำเร็จ<br><br><span class="fs-5 text-primary">🔵 แจกสายรัดข้อมือทั้งหมด: <b>${totalWb} เส้น</b></span>`;
+                }
+                Swal.fire({icon:'success', title:'สำเร็จ!', html: wbMsg}).then(() => resetScanner());
+            } else { Swal.fire('ข้อผิดพลาด', res.message, 'error').then(() => { isProcessing = false; }); }
+        } catch(e) { Swal.fire('Error', `บันทึกไม่สำเร็จ: ${e.message}`, 'error').then(() => { isProcessing = false; }); }
+    }
+
+    // --- 5. Walk-in Logic ---
+    function openWalkinModal() {
+        document.getElementById('wkFirst').value = ""; document.getElementById('wkLast').value = ""; document.getElementById('wkPhone').value = "";
+        document.getElementById('wkBatch').value = ""; document.getElementById('wkEvent').value = "";
+        document.getElementById('wkAdult').value = 0; document.getElementById('wkChildO12').value = 0; document.getElementById('wkChildU12').value = 0;
+        document.getElementById('wkSlipInput').value = ""; document.getElementById('wkSlipPreview').style.display = 'none'; document.getElementById('wkSlipBase64').value = "";
+        calcWalkinPrice(); getWalkinModal().show();
+    }
+
+    function calcWalkinPrice() {
+        const type = document.getElementById('wkEvent').value;
+        const adultFollowers = parseInt(document.getElementById('wkAdult').value) || 0;
+        const childO12 = parseInt(document.getElementById('wkChildO12').value) || 0;
+
+        if (!type) { walkinAmount = 0; document.getElementById('wkPriceDisplay').innerText = "0"; return; }
+
+        let rateAdult = 0;
+        let rateChild = 0;
+
+        if (type === "DAY_ONLY") {
+            rateAdult = 300; rateChild = 0;
+        } else if (type === "NIGHT_ONLY") {
+            rateAdult = 1000; rateChild = 500;
+        } else if (type === "DAY_NIGHT") {
+            rateAdult = 1300; rateChild = 500;
+        }
+
+        const totalAdults = 1 + adultFollowers; // รวมคนสมัครหลัก + ผู้ติดตามผู้ใหญ่
+        
+        walkinAmount = (totalAdults * rateAdult) + (childO12 * rateChild);
+        document.getElementById('wkPriceDisplay').innerText = walkinAmount.toLocaleString();
+        document.getElementById('wkSlipSection').style.display = walkinAmount > 0 ? 'block' : 'none';
+    }
+
+    async function submitWalkin() {
+        const fName = document.getElementById('wkFirst').value, lName = document.getElementById('wkLast').value, phone = document.getElementById('wkPhone').value;
+        const batch = document.getElementById('wkBatch').value, eventType = document.getElementById('wkEvent').value, base64Slip = document.getElementById('wkSlipBase64').value;
+
+        if(!fName || !lName || !phone || !batch || !eventType) { Swal.fire('แจ้งเตือน', 'กรุณากรอกข้อมูล * ให้ครบ', 'warning'); return; }
+        if(walkinAmount > 0 && !base64Slip) { Swal.fire('แจ้งเตือน', 'กรุณาถ่ายรูปสลิป', 'error'); return; }
+
+        getWalkinModal().hide(); showLoading("สร้างตั๋วและเช็คอิน...");
+        try {
+            let slipUrl = "";
+            if (walkinAmount > 0) slipUrl = await uploadToImgBB(base64Slip);
+
+            const res = await fetchGAS({
+                action: "walkin", FirstName: fName, LastName: lName, Phone: phone, Batch: batch, EventType: eventType,
+                AdultCount: document.getElementById('wkAdult').value, ChildOver12Count: document.getElementById('wkChildO12').value,
+                ChildUnder12Count: document.getElementById('wkChildU12').value, SlipURL: slipUrl, operator: OPERATOR_NAME
+            });
+
+            if(res.success) {
+                let wbMsg = "ลงทะเบียน Walk-in และเช็คอินเรียบร้อย";
+                if(res.eventType === "DAY_NIGHT") {
+                    // ✅ แก้ไข: 1 (ตัวเอง) + ผู้ใหญ่ + เด็กโต
+                    const wbCount = 1 + parseInt(document.getElementById('wkAdult').value||0) + parseInt(document.getElementById('wkChildO12').value||0);
+                    wbMsg = `เช็คอินสำเร็จ<br><br><span class="fs-5 text-primary">🔵 แจกสายรัดข้อมือ <b>${wbCount} เส้น</b></span>`;
+                }
+                Swal.fire({icon: 'success', title: 'สำเร็จ!', html: wbMsg}).then(() => resetScanner());
+            } else { Swal.fire('ข้อผิดพลาด', res.message, 'error').then(() => { isProcessing = false; }); }
+        } catch(e) { Swal.fire('Error', `บันทึกไม่สำเร็จ: ${e.message}`, 'error').then(() => { isProcessing = false; }); }
+    }
+
+    // --- 6. Helper & Bulletproof Functions ---
+    async function fetchGAS(payload) {
+        if (WEB_APP_URL.includes("YOUR_WEB_APP_URL")) throw new Error("นักพัฒนายังไม่ได้ใส่ลิงก์ Web App URL");
+        
+        const res = await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) });
+        const text = await res.text();
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            throw new Error(`Google Apps Script ส่งข้อมูลผิดปกติ: ${text.substring(0, 30)}...`);
+        }
+    }
+
+    async function uploadToImgBB(base64Full) {
+        if (IMGBB_API_KEY.includes("YOUR_IMGBB_API_KEY")) throw new Error("นักพัฒนายังไม่ได้ใส่ API Key ของ ImgBB");
+        
+        const formData = new FormData();
+        formData.append("image", base64Full.split(',')[1]);
+        
+        const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
+        const res = await response.json();
+        
+        if(res.success) return res.data.url;
+        throw new Error(res.error ? res.error.message : "อัปโหลดรูปล้มเหลว");
+    }
+
+    function compressImage(event, previewId, base64Id) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+                let width = img.width, height = img.height;
+                if (width > 800) { height = Math.round((height * 800) / width); width = 800; }
+                canvas.width = width; canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+                const base64Url = canvas.toDataURL('image/jpeg', 0.5);
+                document.getElementById(previewId).src = base64Url; document.getElementById(previewId).style.display = 'block'; document.getElementById(base64Id).value = base64Url;
+            }
+            img.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+    }
+
+    function showLoading(msg) { Swal.fire({ title: msg, allowOutsideClick: false, didOpen: () => { Swal.showLoading() } }); }
+    
+    function resetScanner() {
+        currentTicket = null; 
+        isProcessing = false; 
+        document.getElementById('manualSearchForm').reset();
+        document.getElementById('result-section').style.display = 'none';
+        document.getElementById('scanner-section').style.display = 'block';
+    }
+</script>

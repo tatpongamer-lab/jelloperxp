@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Dashboard</title>
+
+    <!-- Google Fonts: Prompt -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            /* Color Palette Premium Dark Mode */
+            --bg-base: #0d1117;
+            --bg-panel: #161b22;
+            --bg-surface: #21262d;
+            --border-color: #30363d;
+            
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            
+            --accent-blue: #58a6ff;
+            --accent-orange: #d97706;
+            --accent-green: #3fb950;
+            --accent-purple: #a371f7;
+            --accent-yellow: #facc15; /* สีเหลืองสว่างสำหรับตัวเลข */
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            font-family: 'Prompt', sans-serif;
+            overflow-x: hidden;
+            font-size: 14px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- Scrollbar --- */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-base); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+
+        /* --- Top Navigation --- */
+        .top-navbar {
+            background-color: var(--bg-panel);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .nav-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            height: 70px;
+        }
+        .brand {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            white-space: nowrap;
+        }
+        .logo-circles { display: flex; }
+        .circle-1, .circle-2 { width: 20px; height: 20px; border-radius: 50%; mix-blend-mode: screen; }
+        .circle-1 { background-color: #3b82f6; margin-right: -8px; }
+        .circle-2 { background-color: #f59e0b; }
+
+        .nav-tabs-custom {
+            display: flex;
+            gap: 5px;
+            height: 100%;
+        }
+        .nav-tab {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            cursor: pointer;
+            height: 100%;
+            white-space: nowrap;
+        }
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background-color: rgba(255,255,255,0.02);
+        }
+        .nav-tab.active {
+            color: var(--accent-blue);
+            border-bottom-color: var(--accent-blue);
+            background-color: rgba(88, 166, 255, 0.05);
+        }
+
+        /* Responsive Navbar */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                height: auto;
+                align-items: stretch;
+                padding: 15px 0 0 0;
+            }
+            .brand { padding: 0 20px 10px 20px; justify-content: center; }
+            .nav-tabs-custom {
+                overflow-x: auto;
+                padding: 0 10px;
+                border-top: 1px solid var(--border-color);
+                justify-content: flex-start;
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+            .nav-tabs-custom::-webkit-scrollbar { display: none; }
+            .nav-tab { padding: 12px 16px; height: auto; }
+        }
+
+        /* --- Main Content --- */
+        .main-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        /* --- Filters & Inputs --- */
+        .form-control, .form-select {
+            background-color: var(--bg-surface) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-primary) !important;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 14px;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent-blue) !important;
+            box-shadow: 0 0 0 0.25rem rgba(88, 166, 255, 0.25) !important;
+        }
+        .input-group-text {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-right: none;
+            color: var(--text-secondary);
+        }
+        .search-input { border-left: none; }
+
+        /* --- Data Table --- */
+        .table-box {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow-x: auto;
+            max-height: calc(100vh - 260px);
+            overflow-y: auto;
+        }
+        .table {
+            color: var(--text-primary);
+            vertical-align: middle;
+            margin-bottom: 0;
+            min-width: 800px;
+        }
+        .table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: #1c2128; 
+            border-bottom: 2px solid var(--border-color);
+            color: var(--text-primary);
+            font-weight: 600;
+            padding: 16px;
+            font-size: 14px;
+        }
+        .table tbody td {
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px;
+            background-color: transparent;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .table tbody tr:hover td { background-color: rgba(255,255,255,0.04); }
+        .table tbody tr:last-child td { border-bottom: none; }
+
+        /* Badges */
+        .custom-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+        .badge-pending { border-color: #b05a04; color: #f0883e; background: rgba(240, 136, 62, 0.15); }
+        .badge-paid { border-color: #2ea043; color: #3fb950; background: rgba(46, 160, 67, 0.15); }
+        .badge-rejected { border-color: #f85149; color: #ff7b72; background: rgba(248, 81, 73, 0.15); }
+
+        /* --- Offcanvas (Slip Panel) --- */
+        .offcanvas { 
+            background-color: var(--bg-panel); 
+            border-left: 1px solid var(--border-color); 
+            color: var(--text-primary); 
+            width: 100% !important;
+            max-width: 480px !important;
+        }
+        .offcanvas-header { 
+            border-bottom: 1px solid var(--border-color); 
+            padding: 20px 24px;
+        }
+        .offcanvas-body {
+            padding: 24px;
+            background-color: var(--bg-base);
+        }
+        .btn-close-custom { color: var(--text-secondary); background: none; border: none; font-size: 1.5rem; }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 24px;
+            background-color: var(--bg-panel);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        .info-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;}
+        .info-label { color: var(--text-secondary); font-size: 13px; display: flex; align-items: center; gap: 8px;}
+        .info-value { font-size: 15px; font-weight: 500; color: white; text-align: right;}
+
+        /* Slip Card UI */
+        .slip-card {
+            background-color: transparent;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .slip-real-img { width: 100%; border-radius: 8px; cursor: pointer; object-fit: contain; max-height: 400px; display: block; border: 1px solid var(--border-color);}
+        
+        .no-slip-box {
+            padding: 40px 20px;
+            border-radius: 12px;
+            border: 2px dashed var(--border-color);
+            background-color: rgba(255, 255, 255, 0.02);
+            text-align: center;
+        }
+
+        /* Actions */
+        .action-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn-action {
+            flex: 1 1 calc(50% - 5px);
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            border: none;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+            color: white;
+            transition: opacity 0.2s;
+        }
+        .btn-action:hover { opacity: 0.8; }
+        .btn-approve { background-color: #2ea043; }
+        .btn-reject { background-color: #d73a49; }
+        .btn-pending { background-color: #b05a04; color: white; flex: 1 1 100%;}
+
+        /* --- Statistics Cards --- */
+        .stat-card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            height: 100%;
+            transition: transform 0.2s, border-color 0.2s;
+            cursor: pointer;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-blue);
+        }
+        .stat-icon {
+            width: 54px; height: 54px;
+            min-width: 54px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+        }
+        .stat-icon.blue { background-color: rgba(88, 166, 255, 0.15); color: var(--accent-blue); }
+        .stat-icon.orange { background-color: rgba(217, 119, 6, 0.15); color: var(--accent-orange); }
+        .stat-icon.green { background-color: rgba(63, 185, 80, 0.15); color: var(--accent-green); }
+        .stat-icon.purple { background-color: rgba(163, 113, 247, 0.15); color: var(--accent-purple); }
+        
+        .stat-info { display: flex; flex-direction: column; }
+        .stat-value { font-size: 26px; font-weight: 700; color: #ffffff; line-height: 1.2; }
+        .stat-label { color: var(--text-secondary); font-size: 13px; }
+        
+        /* Detailed Report Sub-tables */
+        .report-sub-card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            height: 100%;
+        }
+
+        .text-muted-custom { color: var(--text-secondary) !important; }
+        .text-highlight { color: var(--accent-yellow) !important; font-weight: 600; }
+        
+        /* Report Enhancements */
+        .count-badge {
+            background-color: rgba(88, 166, 255, 0.15);
+            color: var(--accent-blue);
+            font-size: 14px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- ================= TOP NAVIGATION ================= -->
+    <nav class="top-navbar shadow-sm">
+        <div class="nav-container">
+            <div class="brand">
+                <div class="logo-circles">
+                    <div class="circle-1"></div>
+                    <div class="circle-2"></div>
+                </div>
+                PCSHSNST
+            </div>
+            <div class="nav-tabs-custom">
+                <a class="nav-tab active" id="tab-verify" onclick="switchTab('verify')">
+                    <i class="bi bi-shield-check"></i> ตรวจสอบการชำระ
+                </a>
+                <a class="nav-tab" id="tab-all" onclick="switchTab('all')">
+                    <i class="bi bi-list-task"></i> รายการทั้งหมด
+                </a>
+                <a class="nav-tab" id="tab-report" onclick="switchTab('report')">
+                    <i class="bi bi-bar-chart-fill"></i> รายงานสถิติ
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <div class="main-container">
+        
+        <!-- VIEW 1: ตรวจสอบการชำระ (Verify) -->
+        <div id="view-verify" class="view-section">
+            <div class="mb-4 d-flex flex-column flex-sm-row justify-content-between align-items-sm-end gap-3">
+                <div>
+                    <h4 class="text-white mb-1 fw-bold">ตรวจสอบการชำระเงิน</h4>
+                </div>
+                <button class="btn btn-primary d-flex align-items-center gap-2 fw-bold" style="background-color: var(--accent-blue); border:none;" onclick="fetchData()">
+                    <i class="bi bi-arrow-clockwise"></i> รีเฟรชข้อมูล
+                </button>
+            </div>
+
+            <div class="table-box">
+                <table class="table text-nowrap">
+                    <thead>
+                        <tr>
+                            <th>ชื่อ-นามสกุล</th>
+                            <th>รุ่น</th>
+                            <th>ประเภทบัตร</th>
+                            <th class="text-end">ยอดที่ต้องชำระ</th>
+                            <th class="text-center">สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBodyVerify">
+                        <tr><td colspan="5" class="text-center py-5 text-muted-custom">กำลังโหลดข้อมูล...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- VIEW 2: รายการทั้งหมด (All Records) -->
+        <div id="view-all" class="view-section hidden">
+            <div class="mb-4">
+                <h4 class="text-white mb-1 fw-bold">รายการทั้งหมด</h4>
+            </div>
+
+            <!-- Filters -->
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-3">
+                    <select id="filterStatus" class="form-select fw-medium" onchange="renderAllTable()">
+                        <option value="ALL">สถานะ: ทั้งหมด</option>
+                        <option value="PENDING">รอดำเนินการ</option>
+                        <option value="PAID">อนุมัติแล้ว</option>
+                        <option value="REJECTED">ปฏิเสธ</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-3">
+                    <select id="filterType" class="form-select fw-medium" onchange="renderAllTable()">
+                        <option value="ALL">ประเภท: ทั้งหมด</option>
+                        <!-- จะถูกเติมข้อมูลอัตโนมัติ -->
+                    </select>
+                </div>
+                <div class="col-12 col-md-2">
+                    <select id="filterBatch" class="form-select fw-medium" onchange="renderAllTable()">
+                        <option value="ALL">รุ่น: ทั้งหมด</option>
+                        <!-- จะถูกเติมข้อมูลอัตโนมัติ -->
+                    </select>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" id="searchInput" class="form-control search-input" placeholder="ค้นหา ชื่อ, เบอร์โทร..." onkeyup="renderAllTable()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-box">
+                <table class="table text-nowrap">
+                    <thead>
+                        <tr>
+                            <th>ชื่อ-นามสกุล</th>
+                            <th>เบอร์โทร</th>
+                            <th>รุ่น</th>
+                            <th>ประเภทบัตร</th>
+                            <th class="text-end">ยอดชำระ</th>
+                            <th class="text-center">สถานะ</th>
+                            <th>เวลาทำรายการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBodyAll">
+                        <!-- Data populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- VIEW 3: รายงาน (Report) -->
+        <div id="view-report" class="view-section hidden">
+            <div class="mb-4">
+                <h4 class="text-white mb-1 fw-bold">สรุปรายงานสถิติ</h4>
+            </div>
+
+            <!-- การ์ดภาพรวม -->
+            <div class="row g-3 mb-4">
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <div class="stat-card" onclick="viewDetailedList('ALL')" title="คลิกเพื่อดูทั้งหมด">
+                        <div class="stat-icon blue"><i class="bi bi-people-fill"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="statTotal">0</div>
+                            <div class="stat-label">ลงทะเบียนทั้งหมด</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <div class="stat-card" onclick="viewDetailedList('PENDING')" title="คลิกเพื่อดูรายการรอดำเนินการ">
+                        <div class="stat-icon orange"><i class="bi bi-hourglass-split"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value text-warning" id="statPending">0</div>
+                            <div class="stat-label">รอตรวจสอบยอด</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <div class="stat-card" onclick="viewDetailedList('PAID')" title="คลิกเพื่อดูรายการที่อนุมัติแล้ว">
+                        <div class="stat-icon green"><i class="bi bi-check-circle-fill"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value" style="color: #4ade80;" id="statPaid">0</div>
+                            <div class="stat-label">อนุมัติเรียบร้อย</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <div class="stat-card" onclick="viewDetailedList('PAID')" title="รายได้จากรายการที่อนุมัติ">
+                        <div class="stat-icon purple"><i class="bi bi-cash-stack"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-value" style="color: var(--accent-yellow);" id="statRevenue">0</div>
+                            <div class="stat-label">รายได้รวม (บาท)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- สรุปแยกประเภทย่อย และอาหาร -->
+            <div class="row g-4">
+                <!-- สถิติอาหาร กลางวัน -->
+                <div class="col-md-6">
+                    <div class="report-sub-card">
+                        <h6 class="text-white mb-3 fw-bold"><i class="bi bi-brightness-high-fill text-warning me-2"></i> สรุปอาหาร งานกลางวัน</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm text-nowrap mb-0" style="min-width: unset;">
+                                <thead>
+                                    <tr>
+                                        <th class="py-2">ประเภทอาหาร</th>
+                                        <th class="text-end py-2">จำนวนที่เสิร์ฟ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportFoodDayTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- สถิติอาหาร กลางคืน -->
+                <div class="col-md-6">
+                    <div class="report-sub-card">
+                        <h6 class="text-white mb-3 fw-bold"><i class="bi bi-moon-stars-fill text-info me-2"></i> สรุปอาหาร งานกลางคืน</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm text-nowrap mb-0" style="min-width: unset;">
+                                <thead>
+                                    <tr>
+                                        <th class="py-2">ประเภทอาหาร</th>
+                                        <th class="text-end py-2">จำนวนที่เสิร์ฟ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportFoodNightTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- สถิติแยกรุ่น -->
+                <div class="col-md-6">
+                    <div class="report-sub-card">
+                        <h6 class="text-white mb-3 fw-bold"><i class="bi bi-mortarboard-fill text-muted me-2"></i> สถิติแยกตามรุ่น</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm text-nowrap mb-0" style="min-width: unset;">
+                                <thead>
+                                    <tr>
+                                        <th class="py-2">ชื่อรุ่น</th>
+                                        <th class="text-center py-2">จำนวนคน</th>
+                                        <th class="text-end py-2">ยอดเงินอนุมัติ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportBatchTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- สถิติแยกประเภทบัตร -->
+                <div class="col-md-6">
+                    <div class="report-sub-card">
+                        <h6 class="text-white mb-3 fw-bold"><i class="bi bi-ticket-detailed-fill text-muted me-2"></i> สถิติแยกตามประเภทบัตร</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm text-nowrap mb-0" style="min-width: unset;">
+                                <thead>
+                                    <tr>
+                                        <th class="py-2">ประเภทบัตร</th>
+                                        <th class="text-center py-2">จำนวนใบ</th>
+                                        <th class="text-end py-2">ยอดเงินอนุมัติ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportTypeTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= OFFCANVAS (SLIP PANEL) ================= -->
+    <div class="offcanvas offcanvas-end shadow-lg" tabindex="-1" id="slipPanel">
+        <div class="offcanvas-header d-flex justify-content-between align-items-center">
+            <h5 class="offcanvas-title fw-bold m-0 text-white"><i class="bi bi-journal-check me-2"></i> ข้อมูลการจอง</h5>
+            <button type="button" class="btn-close-custom" data-bs-dismiss="offcanvas"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="offcanvas-body">
+            
+            <!-- User Info -->
+            <div class="info-grid">
+                <div class="info-row border-bottom border-secondary pb-2 mb-2">
+                    <div class="info-label"><i class="bi bi-person"></i> ชื่อ-สกุล</div>
+                    <div class="info-value" id="panelName">-</div>
+                </div>
+                <div class="info-row border-bottom border-secondary pb-2 mb-2">
+                    <div class="info-label"><i class="bi bi-telephone"></i> เบอร์โทร</div>
+                    <div class="info-value" id="panelPhone">-</div>
+                </div>
+                <div class="info-row border-bottom border-secondary pb-2 mb-2">
+                    <div class="info-label"><i class="bi bi-mortarboard"></i> รุ่น</div>
+                    <div class="info-value" id="panelBatch">-</div>
+                </div>
+                <div class="info-row border-bottom border-secondary pb-2 mb-2">
+                    <div class="info-label"><i class="bi bi-ticket-detailed"></i> ประเภทบัตร</div>
+                    <div class="info-value" id="panelType">-</div>
+                </div>
+                <div class="info-row border-bottom border-secondary pb-2 mb-2">
+                    <div class="info-label"><i class="bi bi-cup-hot"></i> อาหาร</div>
+                    <div class="info-value" id="panelFood">-</div>
+                </div>
+                
+                <!-- 🆕 เพิ่มส่วน "ผู้ติดตาม" ตรงนี้ -->
+                <div class="info-row border-bottom border-secondary pb-2 mb-2 align-items-start pt-1">
+                    <div class="info-label mt-1"><i class="bi bi-people"></i> ผู้ติดตาม</div>
+                    <div class="info-value text-end" id="panelFollowers">
+                        <!-- ถูกแทนที่ด้วย Javascript -->
+                        <span class="text-muted-custom">ไม่มีผู้ติดตาม</span>
+                    </div>
+                </div>
+
+                <div class="info-row align-items-center mt-2">
+                    <div class="info-label"><i class="bi bi-currency-bitcoin"></i> ยอดที่ต้องชำระ</div>
+                    <div class="info-value fs-4 fw-bold" style="color: var(--accent-yellow);" id="panelTotalDue">0 บาท</div>
+                </div>
+                
+                <!-- Admin Note -->
+                <div class="info-row align-items-start mt-3 pt-3 border-top border-secondary">
+                    <div class="info-label w-100 mb-2"><i class="bi bi-journal-text"></i> บันทึกจาก Admin (Admin Note)</div>
+                    <textarea id="panelAdminNote" class="form-control bg-dark text-white border-secondary w-100" rows="2" placeholder="พิมพ์หมายเหตุถึงรายการนี้..."></textarea>
+                </div>
+            </div>
+
+            <!-- Slip Image (รองรับหลายรูป และไม่มีรูป) -->
+            <h6 class="mb-3 text-white fw-bold">หลักฐานการโอนเงิน (สลิป)</h6>
+            <div class="slip-card" id="slipContainer">
+                <!-- รูปภาพสลิป หรือ แจ้งเตือนไม่มีรูป จะถูกแทรกที่นี่ -->
+            </div>
+            <div class="text-center mt-2 mb-4 text-muted small" id="zoomHint" style="display: none;">
+                <i class="bi bi-zoom-in"></i> คลิกที่รูปสลิปเพื่อดูขนาดเต็ม
+            </div>
+
+            <!-- Action Buttons -->
+            <h6 class="mb-3 text-white fw-bold">จัดการสถานะ</h6>
+            <div class="action-group">
+                <button class="btn-action btn-approve" onclick="updateStatus('PAID')">
+                    <i class="bi bi-check-circle"></i> อนุมัติ
+                </button>
+                <button class="btn-action btn-reject" onclick="updateStatus('REJECTED')">
+                    <i class="bi bi-x-circle"></i> ปฏิเสธ
+                </button>
+                <button class="btn-action btn-pending" onclick="updateStatus('PENDING')">
+                    <i class="bi bi-clock-history"></i> รอดำเนินการ
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ⚠️ การเชื่อมต่อ Google Apps Script
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwzYxbwKueYVTr-ZGqzU6pgieySxS08pX6NgTtPTtQsxYOqDsGuvQ0xgZYQHfCuVk116Q/exec"; 
+        
+        // 🚨 สำคัญมาก: ใส่รหัส PIN ของคุณที่นี่
+        const ADMIN_PIN = "123456"; 
+        
+        let rawData = [];
+        let formattedData = [];
+        let selectedRecord = null;
+        let currentTab = 'verify';
+        
+        const slipPanel = new bootstrap.Offcanvas(document.getElementById('slipPanel'));
+
+        // --- Helper Function: ดึงค่าจาก Object ---
+        function getProp(item, keys, fallback = '-') {
+            for (let k of keys) {
+                if (item[k] !== undefined && item[k] !== null && item[k] !== '') {
+                    return item[k];
+                }
+            }
+            return fallback;
+        }
+
+        // --- Formatter สำหรับ อาหาร ---
+        function formatFood(fCode) {
+            if(!fCode || fCode === '-') return '-';
+            const f = fCode.toUpperCase();
+            if(f === 'BUDDHIST') return 'ไทยพุทธ';
+            if(f === 'HALAL') return 'ไทยมุสลิม';
+            return fCode; // คืนค่าเดิมถ้าไม่ตรงเงื่อนไข
+        }
+
+        // --- Formatter สำหรับการแสดงผลรุ่น (Format Batch Display) ---
+        function formatBatchDisplay(b) {
+            if (!b || b === '-') return '-';
+            // กรณีขึ้นต้นด้วย HS
+            if (b.toString().toUpperCase().startsWith('HS')) {
+                return 'ม.ปลาย รุ่น ' + b.toString().substring(2);
+            }
+            // กรณีมี / (เช่น 7/10)
+            if (b.toString().includes('/')) {
+                let parts = b.toString().split('/');
+                return `ม.ต้น รุ่น ${parts[0]} / ม.ปลาย รุ่น ${parts[1]}`;
+            }
+            return 'รุ่น ' + b;
+        }
+
+        // --- Formatter สำหรับประเภทบัตร ---
+        function formatEventType(typeCode) {
+            if (!typeCode || typeCode === '-') return '-';
+            if (typeCode === 'DAY_ONLY') return 'เฉพาะกลางวัน';
+            if (typeCode === 'NIGHT_ONLY') return 'เฉพาะกลางคืน';
+            if (typeCode === 'DAY_NIGHT') return 'กลางวันและกลางคืน';
+            return typeCode; 
+        }
+
+        // จัด Format ข้อมูลทั้งหมดให้เป็นมาตรฐานเดียวกัน
+        function standardizeData(dataArray) {
+            return dataArray.map(item => {
+                
+                let fullName = getProp(item, ['name', 'Name', 'FirstName', 'ชื่อ'], '');
+                const lastName = getProp(item, ['LastName', 'นามสกุล'], '');
+                if(lastName !== '-') fullName += " " + lastName;
+                fullName = fullName.trim() || '-';
+
+                let batchStr = getProp(item, ['batch', 'Batch', 'รุ่น', 'generation'], '-');
+                
+                let slipStr = getProp(item, ['slipUrl', 'SlipURL', 'slip', 'สลิป'], '');
+                const slipsArray = slipStr ? String(slipStr).split(',').map(u => u.trim()).filter(u => u !== '') : [];
+
+                return {
+                    ticketId: getProp(item, ['ticketId', 'TicketID', 'id', 'รหัส'], Utilities_getUuidFallback()),
+                    name: fullName,
+                    phone: getProp(item, ['phone', 'Phone', 'tel', 'เบอร์โทร'], '-'),
+                    batchRaw: batchStr, 
+                    batchDisplay: formatBatchDisplay(batchStr), 
+                    eventTypeRaw: getProp(item, ['eventType', 'EventType', 'ticketType', 'ประเภทบัตร'], '-'),
+                    eventTypeDisplay: formatEventType(getProp(item, ['eventType', 'EventType', 'ticketType', 'ประเภทบัตร'], '-')),
+                    
+                    // 🆕 รับค่าผู้ติดตาม (รองรับหลายชื่อ key จาก Backend)
+                    adult: Number(getProp(item, ['adult', 'AdultCount', 'Adult', 'ผู้ใหญ่'], 0)) || 0,
+                    childO12: Number(getProp(item, ['childO12', 'ChildOver12Count', 'ChildO12', 'เด็กโต'], 0)) || 0,
+                    childU12: Number(getProp(item, ['childU12', 'ChildUnder12Count', 'ChildU12', 'เด็กเล็ก'], 0)) || 0,
+
+                    total: Number(getProp(item, ['total', 'TotalAmount', 'amount', 'ยอดชำระ'], 0)) || 0,
+                    foodTypeRaw: getProp(item, ['food', 'Food', 'foodType', 'อาหาร'], '-'),
+                    foodTypeDisplay: formatFood(getProp(item, ['food', 'Food', 'foodType', 'อาหาร'], '-')),
+                    paymentStatus: String(getProp(item, ['paymentStatus', 'PaymentStatus', 'status', 'สถานะ'], 'PENDING')).toUpperCase(),
+                    slipUrls: slipsArray,
+                    adminNote: getProp(item, ['adminNote', 'AdminNote', 'note', 'หมายเหตุ'], ''),
+                    timestamp: getProp(item, ['timestamp', 'CreatedAt', 'bookingDate', 'เวลา'], '')
+                };
+            });
+        }
+        
+        function Utilities_getUuidFallback() { return Math.random().toString(36).substring(2) + Date.now().toString(36); }
+
+        // --- เรียงลำดับตัวกรอง "รุ่น" ---
+        function sortBatches(batches) {
+            return batches.sort((a, b) => {
+                let isHsA = a.toUpperCase().startsWith('HS');
+                let isHsB = b.toUpperCase().startsWith('HS');
+                
+                // 1. HS ขึ้นก่อนรุ่นตัวเลขปกติ
+                if (isHsA && !isHsB) return -1;
+                if (!isHsA && isHsB) return 1;
+                
+                // 2. ถ้าเป็น HS ทั้งคู่ ให้ดูเลขข้างหลัง
+                if (isHsA && isHsB) {
+                    let numA = parseInt(a.substring(2)) || 0;
+                    let numB = parseInt(b.substring(2)) || 0;
+                    return numA - numB;
+                }
+                
+                // 3. ถ้าเป็นรุ่นปกติ (เช่น 7/10 หรือ 30/33) ดึงเลขตัวหน้ามาเทียบ
+                let numA = parseInt(a.split('/')[0]) || 0;
+                let numB = parseInt(b.split('/')[0]) || 0;
+                return numA - numB;
+            });
+        }
+
+        // --- เริ่มต้นการทำงาน ---
+        window.onload = () => {
+            fetchData();
+        };
+
+        // --- ระบบสลับ Tab ---
+        function switchTab(tabId) {
+            currentTab = tabId;
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+
+            if (tabId === 'verify') renderVerifyTable();
+            else if (tabId === 'all') renderAllTable();
+            else if (tabId === 'report') renderReport();
+        }
+
+        function viewDetailedList(status) {
+            document.getElementById('filterStatus').value = status;
+            document.getElementById('filterType').value = 'ALL';
+            document.getElementById('filterBatch').value = 'ALL';
+            document.getElementById('searchInput').value = '';
+            switchTab('all');
+        }
+
+        // --- ฟังก์ชันส่งข้อมูล ---
+        async function fetchGAS(payload) {
+            const res = await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) });
+            return await res.json();
+        }
+
+        function showLoading(msg) {
+            Swal.fire({ 
+                title: msg, allowOutsideClick: false, 
+                background: '#161b22', color: '#c9d1d9', 
+                didOpen: () => { Swal.showLoading() } 
+            });
+        }
+
+        // --- ดึงข้อมูลจาก Google Apps Script ---
+        async function fetchData() {
+            showLoading("กำลังโหลดข้อมูล...");
+            try {
+                const res = await fetchGAS({ action: "getAdminData", pin: ADMIN_PIN });
+                Swal.close();
+
+                if (res.success) {
+                    rawData = res.data;
+                    formattedData = standardizeData(rawData); 
+                    updateFilterOptions(); 
+                } else {
+                    Swal.fire({ icon: 'error', title: 'ข้อผิดพลาด', text: res.message || 'รหัส PIN ไม่ถูกต้อง', background: '#161b22', color: '#e6edf3' });
+                }
+            } catch (err) {
+                Swal.close();
+                Swal.fire({ icon: 'error', title: 'เชื่อมต่อล้มเหลว', text: 'ไม่สามารถดึงข้อมูลจาก Server ได้', background: '#161b22', color: '#e6edf3' });
+            }
+            switchTab(currentTab);
+        }
+
+        function updateFilterOptions() {
+            const typeSet = new Set();
+            const batchSet = new Set();
+
+            formattedData.forEach(item => {
+                typeSet.add(item.eventTypeRaw);
+                batchSet.add(item.batchRaw);
+            });
+
+            // อัปเดต ประเภทบัตร
+            const typeFilter = document.getElementById('filterType');
+            typeFilter.innerHTML = '<option value="ALL">ประเภท: ทั้งหมด</option>';
+            typeSet.forEach(type => {
+                if(type !== '-') {
+                    const opt = document.createElement('option');
+                    opt.value = type;
+                    opt.textContent = formatEventType(type);
+                    typeFilter.appendChild(opt);
+                }
+            });
+
+            // อัปเดต รุ่น (พร้อมเรียกฟังก์ชันเรียงลำดับ)
+            const batchFilter = document.getElementById('filterBatch');
+            batchFilter.innerHTML = '<option value="ALL">รุ่น: ทั้งหมด</option>';
+            
+            let batchArray = Array.from(batchSet).filter(b => b !== '-');
+            batchArray = sortBatches(batchArray);
+
+            batchArray.forEach(batch => {
+                const opt = document.createElement('option');
+                opt.value = batch; // ค่า value ที่ซ่อนไว้ค้นหายังเป็นตัวดิบ
+                opt.textContent = formatBatchDisplay(batch); // ค่าแสดงผลเป็นตัวที่แปลงแล้ว
+                batchFilter.appendChild(opt);
+            });
+        }
+
+        // --- Render Tab 1: ตรวจสอบการชำระ (เฉพาะ PENDING) ---
+        function renderVerifyTable() {
+            const tbody = document.getElementById('tableBodyVerify');
+            tbody.innerHTML = "";
+
+            const pendingData = formattedData.filter(item => item.paymentStatus === 'PENDING');
+
+            if (pendingData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-muted-custom">🎉 ไม่มีรายการรอดำเนินการ</td></tr>`;
+                return;
+            }
+
+            pendingData.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.onclick = () => openPanel(item.ticketId);
+                
+                tr.innerHTML = `
+                    <td class="text-white fw-medium">${item.name}</td>
+                    <td class="text-white">${item.batchDisplay}</td>
+                    <td class="text-white">${item.eventTypeDisplay}</td>
+                    <td class="text-end fw-bold text-highlight">${item.total.toLocaleString()}</td>
+                    <td class="text-center"><span class="custom-badge badge-pending"><i class="bi bi-clock"></i> รอดำเนินการ</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- Render Tab 2: รายการทั้งหมด (พร้อม Filters) ---
+        function renderAllTable() {
+            const statusFilter = document.getElementById('filterStatus').value;
+            const typeFilter = document.getElementById('filterType').value;
+            const batchFilter = document.getElementById('filterBatch').value;
+            const searchQ = document.getElementById('searchInput').value.toLowerCase();
+            const tbody = document.getElementById('tableBodyAll');
+            
+            tbody.innerHTML = "";
+
+            const filteredData = formattedData.filter(item => {
+                if (statusFilter !== 'ALL' && item.paymentStatus !== statusFilter) return false;
+                if (typeFilter !== 'ALL' && item.eventTypeRaw !== typeFilter) return false;
+                if (batchFilter !== 'ALL' && item.batchRaw !== batchFilter) return false;
+                if (searchQ) {
+                    const matchName = item.name.toLowerCase().includes(searchQ);
+                    const matchPhone = item.phone.includes(searchQ);
+                    if (!matchName && !matchPhone) return false;
+                }
+                return true;
+            });
+
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted-custom">ไม่พบข้อมูลที่ค้นหา</td></tr>`;
+                return;
+            }
+
+            filteredData.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.onclick = () => openPanel(item.ticketId);
+                
+                let badgeClass = "badge-pending";
+                let statusTxt = "รอดำเนินการ";
+                if (item.paymentStatus === 'PAID') { badgeClass = "badge-paid"; statusTxt = "อนุมัติแล้ว"; }
+                else if (item.paymentStatus === 'REJECTED') { badgeClass = "badge-rejected"; statusTxt = "ปฏิเสธ"; }
+
+                let timeStr = "-";
+                if(item.timestamp) {
+                    const d = new Date(item.timestamp);
+                    timeStr = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear().toString().substr(-2)} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+                }
+
+                tr.innerHTML = `
+                    <td class="text-white fw-medium">${item.name}</td>
+                    <td class="text-white">${item.phone}</td>
+                    <td class="text-white">${item.batchDisplay}</td>
+                    <td class="text-white">${item.eventTypeDisplay}</td>
+                    <td class="text-end fw-bold text-highlight">${item.total.toLocaleString()}</td>
+                    <td class="text-center"><span class="custom-badge ${badgeClass}">${statusTxt}</span></td>
+                    <td class="text-muted-custom">${timeStr}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- Render Tab 3: รายงานสถิติ (พร้อมข้อมูลเชิงลึก) ---
+        function renderReport() {
+            // ภาพรวม
+            const total = formattedData.length;
+            const pending = formattedData.filter(d => d.paymentStatus === 'PENDING').length;
+            const paid = formattedData.filter(d => d.paymentStatus === 'PAID').length;
+            const revenue = formattedData.filter(d => d.paymentStatus === 'PAID').reduce((sum, d) => sum + d.total, 0);
+
+            document.getElementById('statTotal').innerText = total.toLocaleString();
+            document.getElementById('statPending').innerText = pending.toLocaleString();
+            document.getElementById('statPaid').innerText = paid.toLocaleString();
+            document.getElementById('statRevenue').innerText = revenue.toLocaleString();
+
+            // คำนวณข้อมูลย่อย (เฉพาะ PAID เท่านั้น)
+            const batchStats = {};
+            const typeStats = {};
+            const foodDay = {};
+            const foodNight = {};
+
+            formattedData.forEach(item => {
+                if (item.paymentStatus !== 'PAID') return; // ข้ามถ้าไม่ใช่ PAID
+
+                const money = item.total;
+                
+                // Group by Batch
+                if(!batchStats[item.batchRaw]) batchStats[item.batchRaw] = { count: 0, revenue: 0 };
+                batchStats[item.batchRaw].count++;
+                batchStats[item.batchRaw].revenue += money;
+
+                // Group by Type
+                const tCode = item.eventTypeDisplay;
+                if(!typeStats[tCode]) typeStats[tCode] = { count: 0, revenue: 0 };
+                typeStats[tCode].count++;
+                typeStats[tCode].revenue += money;
+
+                // Food Stats
+                const fType = item.foodTypeDisplay;
+                if (fType !== '-') {
+                    if (item.eventTypeRaw === 'DAY_ONLY' || item.eventTypeRaw === 'DAY_NIGHT') {
+                        foodDay[fType] = (foodDay[fType] || 0) + 1;
+                    }
+                    if (item.eventTypeRaw === 'NIGHT_ONLY' || item.eventTypeRaw === 'DAY_NIGHT') {
+                        foodNight[fType] = (foodNight[fType] || 0) + 1;
+                    }
+                }
+            });
+
+            // เรียงลำดับ Batch ก่อนแสดงผล
+            let sortedBatchKeys = sortBatches(Object.keys(batchStats));
+
+            // วาดตาราง รุ่น
+            const tBodyBatch = document.getElementById('reportBatchTable');
+            tBodyBatch.innerHTML = "";
+            sortedBatchKeys.forEach(key => {
+                tBodyBatch.innerHTML += `
+                    <tr>
+                        <td class="text-white align-middle">${formatBatchDisplay(key)}</td>
+                        <td class="text-center align-middle"><span class="count-badge">${batchStats[key].count}</span></td>
+                        <td class="text-end align-middle fw-bold" style="color: #4ade80; font-size:15px;">${batchStats[key].revenue.toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+
+            // วาดตาราง ประเภท
+            const tBodyType = document.getElementById('reportTypeTable');
+            tBodyType.innerHTML = "";
+            Object.keys(typeStats).sort().forEach(key => {
+                tBodyType.innerHTML += `
+                    <tr>
+                        <td class="text-white align-middle">${key}</td>
+                        <td class="text-center align-middle"><span class="count-badge">${typeStats[key].count}</span></td>
+                        <td class="text-end align-middle fw-bold" style="color: #4ade80; font-size:15px;">${typeStats[key].revenue.toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+
+            // วาดตาราง อาหารกลางวัน
+            const tBodyFoodDay = document.getElementById('reportFoodDayTable');
+            tBodyFoodDay.innerHTML = "";
+            let sumFoodDay = 0;
+            Object.keys(foodDay).sort().forEach(key => {
+                sumFoodDay += foodDay[key];
+                tBodyFoodDay.innerHTML += `
+                    <tr>
+                        <td class="text-white align-middle">${key}</td>
+                        <td class="text-end align-middle"><span class="count-badge text-warning bg-warning bg-opacity-10">${foodDay[key].toLocaleString()}</span></td>
+                    </tr>
+                `;
+            });
+            if(sumFoodDay === 0) tBodyFoodDay.innerHTML = `<tr><td colspan="2" class="text-muted-custom text-center">ไม่มีข้อมูล</td></tr>`;
+
+            // วาดตาราง อาหารกลางคืน
+            const tBodyFoodNight = document.getElementById('reportFoodNightTable');
+            tBodyFoodNight.innerHTML = "";
+            let sumFoodNight = 0;
+            Object.keys(foodNight).sort().forEach(key => {
+                sumFoodNight += foodNight[key];
+                tBodyFoodNight.innerHTML += `
+                    <tr>
+                        <td class="text-white align-middle">${key}</td>
+                        <td class="text-end align-middle"><span class="count-badge text-info bg-info bg-opacity-10">${foodNight[key].toLocaleString()}</span></td>
+                    </tr>
+                `;
+            });
+            if(sumFoodNight === 0) tBodyFoodNight.innerHTML = `<tr><td colspan="2" class="text-muted-custom text-center">ไม่มีข้อมูล</td></tr>`;
+        }
+
+        // --- ระบบเปิดหน้าต่าง Offcanvas ---
+        function openPanel(tId) {
+            selectedRecord = formattedData.find(x => x.ticketId === tId);
+            if (!selectedRecord) return;
+
+            document.getElementById('panelName').innerText = selectedRecord.name;
+            document.getElementById('panelPhone').innerText = selectedRecord.phone;
+            document.getElementById('panelBatch').innerText = selectedRecord.batchDisplay;
+            document.getElementById('panelType').innerText = selectedRecord.eventTypeDisplay;
+            document.getElementById('panelFood').innerText = selectedRecord.foodTypeDisplay;
+            document.getElementById('panelTotalDue').innerText = selectedRecord.total.toLocaleString() + " บาท";
+            document.getElementById('panelAdminNote').value = selectedRecord.adminNote; 
+            
+            // 🆕 จัดการแสดงผลส่วน "ผู้ติดตาม"
+            const adult = selectedRecord.adult;
+            const childO12 = selectedRecord.childO12;
+            const childU12 = selectedRecord.childU12;
+            const totalFollowers = adult + childO12 + childU12;
+            
+            const panelFollowers = document.getElementById('panelFollowers');
+            if (totalFollowers === 0) {
+                panelFollowers.innerHTML = `<span class="text-muted-custom">ไม่มีผู้ติดตาม</span>`;
+            } else {
+                let breakdownHtml = '';
+                if (adult > 0) breakdownHtml += `<span class="badge bg-secondary bg-opacity-25 text-light border border-secondary fw-normal">ผู้ใหญ่: ${adult}</span>`;
+                if (childO12 > 0) breakdownHtml += `<span class="badge bg-secondary bg-opacity-25 text-light border border-secondary fw-normal">เด็กโต(>12): ${childO12}</span>`;
+                if (childU12 > 0) breakdownHtml += `<span class="badge bg-secondary bg-opacity-25 text-light border border-secondary fw-normal">เด็กเล็ก(<12): ${childU12}</span>`;
+
+                panelFollowers.innerHTML = `
+                    <div class="fw-bold mb-1 text-white">รวม ${totalFollowers} คน</div>
+                    <div class="d-flex flex-wrap gap-1 justify-content-end">${breakdownHtml}</div>
+                `;
+            }
+
+            // จัดการรูปสลิป
+            const slipContainer = document.getElementById('slipContainer');
+            const zoomHint = document.getElementById('zoomHint');
+            slipContainer.innerHTML = ''; 
+            
+            if (selectedRecord.slipUrls.length > 0) {
+                selectedRecord.slipUrls.forEach(url => {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.className = 'slip-real-img mb-2 border border-secondary';
+                    img.onerror = function() {
+                        this.onerror = null;
+                        this.src = "https://via.placeholder.com/400x200/161b22/ff7b72?text=ไม่สามารถโหลดรูปภาพได้";
+                        this.style.cursor = 'default';
+                        this.onclick = null;
+                    };
+                    img.onclick = () => { if(!img.src.includes('via.placeholder')) window.open(img.src, '_blank'); };
+                    slipContainer.appendChild(img);
+                });
+                zoomHint.style.display = 'block';
+            } else {
+                // UI กรณีไม่มีรูปสลิป 
+                slipContainer.innerHTML = `
+                    <div class="no-slip-box">
+                        <i class="bi bi-images text-secondary" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-2 mb-0 fw-medium">ไม่มีหลักฐานการโอนเงิน (สลิป)</p>
+                        <small class="text-secondary">ลูกค้ารายนี้ไม่ได้แนบสลิปผ่านระบบ</small>
+                    </div>
+                `;
+                zoomHint.style.display = 'none';
+            }
+
+            slipPanel.show();
+        }
+
+        // --- ฟังก์ชันอัปเดตสถานะ (พร้อมส่ง Admin Note) ---
+        async function updateStatus(newStatus) {
+            if (!selectedRecord) return;
+            
+            const updatedNote = document.getElementById('panelAdminNote').value;
+            showLoading("กำลังบันทึกข้อมูล...");
+
+            try {
+                const res = await fetchGAS({ 
+                    action: "updateStatus", 
+                    pin: ADMIN_PIN, 
+                    ticketId: selectedRecord.ticketId, 
+                    newStatus: newStatus,
+                    adminNote: updatedNote
+                });
+
+                if (res.success) {
+                    Swal.close();
+                    Swal.fire({
+                        icon: 'success', title: 'อัปเดตสถานะเรียบร้อย',
+                        timer: 1500, showConfirmButton: false,
+                        background: '#161b22', color: '#e6edf3'
+                    });
+                    
+                    // ปรับค่าใน Array ตัวหลักเพื่อไม่ให้ต้องโหลดหน้าใหม่ทั้งหมด
+                    const index = rawData.findIndex(x => getProp(x, ['ticketId', 'TicketID', 'id']) === selectedRecord.ticketId);
+                    if(index !== -1) {
+                        if(rawData[index].PaymentStatus !== undefined) rawData[index].PaymentStatus = newStatus;
+                        else if(rawData[index].paymentStatus !== undefined) rawData[index].paymentStatus = newStatus;
+                        
+                        if(rawData[index].AdminNote !== undefined) rawData[index].AdminNote = updatedNote;
+                        else if(rawData[index].adminNote !== undefined) rawData[index].adminNote = updatedNote;
+                    }
+                    
+                    // แปลงใหม่
+                    formattedData = standardizeData(rawData);
+                    
+                    slipPanel.hide();
+                    switchTab(currentTab); // รีเฟรชตาราง/กราฟ
+                } else {
+                    Swal.fire({ icon: 'error', title: 'ข้อผิดพลาด', text: res.message || 'บันทึกไม่สำเร็จ', background: '#161b22', color: '#e6edf3' });
+                }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'ข้อผิดพลาด', text: 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', background: '#161b22', color: '#e6edf3' });
+            }
+        }
+    </script>
+</body>
+</html>
