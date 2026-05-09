@@ -948,18 +948,23 @@
                 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
                 if (isLine || isMobile) {
-                    // 🚀 [วิธีแก้สำหรับ LINE/มือถือ] โชว์รูปให้ผู้ใช้กดค้างเพื่อบันทึก
+                    // 🚀 [วิธีแก้ปัญหา กดค้างไม่ได้] ใช้ html แทรก img และบังคับ CSS ให้กดค้างได้
                     Swal.fire({
                         title: 'บันทึกบัตรเข้างาน',
-                        text: '👆 แตะค้างที่รูปภาพด้านล่าง แล้วเลือก "บันทึกรูปภาพ" (Save Image)',
-                        imageUrl: imgData,
-                        imageWidth: '100%',
-                        imageAlt: 'Ticket Image',
+                        html: `
+                            <p style="font-size: 0.95rem; margin-bottom: 15px; color: #555;">
+                                👆 แตะค้างที่รูปภาพด้านล่าง<br>แล้วเลือก <b>"บันทึกรูปภาพ" (Save Image)</b>
+                            </p>
+                            <img src="${imgData}" 
+                                 style="width: 100%; border: 2px solid #333; border-radius: 8px; 
+                                        -webkit-touch-callout: default !important; 
+                                        pointer-events: auto !important; 
+                                        user-select: all !important;" 
+                                 alt="Ticket Image">
+                        `,
                         confirmButtonText: 'ปิดหน้าต่าง',
                         confirmButtonColor: '#003366',
-                        customClass: {
-                            image: 'border border-2 border-dark rounded' // ใส่กรอบให้รูปดูชัดขึ้น
-                        }
+                        allowOutsideClick: false // บังคับให้กดปิดที่ปุ่มเท่านั้น จะได้ไม่เผลอปิดตอนกดค้าง
                     });
                 } else {
                     // 💻 [วิธีแก้สำหรับ PC] โหลดลงเครื่องปกติ
