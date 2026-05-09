@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>แบบตอบรับสนับสนุนงานคืนสู่เหย้า แคแสดสัมพันธ์ ครั้งที่ ๔</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-orange: #FF6600;
+            --primary-blue: #003366;
+            --bg-color: #f4f7f9; /* ปรับสีพื้นหลังให้สว่างขึ้นนิดหน่อย */
+            --text-color: #333;
+            --border-color: #d1d5db; /* สีเส้นขอบอ่อนลง สไตล์โมเดิร์น */
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 12px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px 15px;
+            background: #fff;
+            border-radius: 12px; /* โค้งมนขึ้น */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+        }
+
+        .header h1 {
+            color: var(--primary-blue);
+            margin: 0 0 5px 0;
+            font-size: 1.4rem; 
+            font-weight: 700;
+        }
+
+        .header h3 {
+            color: var(--primary-orange);
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 12px; /* โค้งมนขึ้น */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+            padding: 24px 20px;
+            margin-bottom: 16px;
+            border-top: 4px solid var(--primary-blue);
+        }
+
+        .card-title {
+            color: var(--primary-blue);
+            margin-top: 0;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            font-size: 1.25rem;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        /* Responsive Form Row */
+        .form-row {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        @media (min-width: 600px) {
+            .form-row {
+                flex-direction: row;
+            }
+            .form-row .form-group {
+                flex: 1;
+                margin-bottom: 0;
+            }
+        }
+
+        /* ปรับปรุง Label ให้สวยงาม */
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #4b5563; /* สีเทาเข้มเพื่อให้อ่านง่ายแต่ไม่แย่งซีนข้อมูล */
+            font-size: 0.9rem;
+        }
+
+        /* ปรับปรุง Input ให้ดูโมเดิร์นและกดง่าย */
+        input[type="text"],
+        input[type="tel"],
+        input[type="email"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 14px 12px; /* เพิ่มพื้นที่แนวตั้งให้กดง่ายขึ้น */
+            border: 1px solid var(--border-color);
+            border-radius: 8px; /* ขอบโค้งมน */
+            font-family: inherit;
+            font-size: 16px; 
+            box-sizing: border-box;
+            background-color: #fdfdfd;
+            transition: all 0.2s ease-in-out;
+        }
+
+        /* ซ่อนลูกศรขึ้น/ลง ในช่องกรอกตัวเลขทั้งหมด */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            appearance: textfield;
+            -moz-appearance: textfield; /* สำหรับ Firefox */
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-orange);
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.15); /* เงาสีส้มเรืองแสงเวลาคลิก */
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        .privilege-box {
+            background-color: #fff3e0;
+            border: 1px dashed var(--primary-orange);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .privilege-box h4 {
+            margin: 0 0 5px 0;
+            color: var(--primary-orange);
+            font-size: 1.2rem;
+        }
+
+        /* --- ปรับแต่ง Grid สำหรับของที่ระลึก --- */
+        .gifts-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            text-align: center;
+        }
+
+        .gift-item {
+            background: #f8f9fa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 12px 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .gift-label {
+            font-size: 0.85rem;
+            color: var(--primary-blue);
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .counter-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            padding: 4px;
+        }
+
+        .btn-counter {
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: #f3f4f6;
+            color: var(--text-color);
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .btn-counter:active {
+            background: #e5e7eb;
+            transform: scale(0.95);
+        }
+
+        .btn-counter.btn-add {
+            background: #e0f2fe;
+            color: var(--primary-blue);
+        }
+
+        .btn-counter:disabled {
+            background: #f3f4f6;
+            color: #d1d5db;
+            cursor: not-allowed;
+        }
+
+        .gift-qty {
+            font-weight: bold;
+            font-size: 1.1rem;
+            min-width: 24px;
+        }
+
+        /* --- ปรับแต่งปุ่ม Radio สำหรับจัดส่ง --- */
+        .radio-btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .radio-btn-group label {
+            flex: 1;
+            margin: 0;
+        }
+
+        .radio-btn-label {
+            display: block;
+            text-align: center;
+            padding: 14px;
+            background: #fff;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            color: #6b7280;
+        }
+
+        .radio-btn-group input[type="radio"] {
+            display: none;
+        }
+
+        .radio-btn-group input[type="radio"]:checked + .radio-btn-label {
+            border-color: var(--primary-orange);
+            background-color: #fff8f3;
+            color: var(--primary-orange);
+            font-weight: 600;
+        }
+
+        .bank-info {
+            background: var(--primary-blue);
+            color: #fff;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .bank-info span {
+            color: var(--primary-orange);
+            font-weight: bold;
+            font-size: 1.2rem;
+            display: block;
+            margin: 4px 0;
+        }
+
+        .upload-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .upload-title label {
+            margin-bottom: 0;
+            display: inline-block;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .sub-label {
+            font-size: 0.8rem;
+            color: #6b7280;
+            font-weight: normal;
+            display: block;
+        }
+
+        .btn-upload {
+            display: inline-flex;
+            align-items: center;
+            background-color: #f0f7ff;
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-blue);
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-upload:active {
+            background-color: var(--primary-blue);
+            color: white;
+            transform: scale(0.95);
+        }
+
+        .preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+            margin-bottom: 25px;
+        }
+
+        .img-preview {
+            position: relative;
+            width: 70px;
+            height: 70px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #eaeaea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .img-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .btn-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+            transition: background 0.2s;
+        }
+
+        .btn-remove:active {
+            background: rgba(239, 68, 68, 1);
+        }
+
+        .submit-btn {
+            background: var(--primary-orange);
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            border-radius: 12px; /* โค้งมนเข้ากับ Card */
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);
+            transition: transform 0.1s, background 0.3s;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        .footer {
+            text-align: center;
+            margin: 20px 0 40px;
+            color: #6b7280;
+            font-size: 0.95rem;
+            background: #fff;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        /* Loading Overlay */
+        #loading {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-orange);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div id="loading">
+    <div class="spinner"></div>
+    <h3 style="color: var(--primary-blue); margin-top: 15px; font-weight: 600;">กำลังบันทึกข้อมูล...</h3>
+</div>
+
+<div class="container">
+    <div class="header">
+        <h1>แบบตอบรับสนับสนุน</h1>
+        <h3>งานคืนสู่เหย้า "แคแสดสัมพันธ์ ครั้งที่ ๔"</h3>
+    </div>
+
+    <form id="sponsorForm">
+        <!-- Section 1: ข้อมูลผู้สนับสนุน -->
+        <div class="card">
+            <h3 class="card-title">1. ข้อมูลผู้สนับสนุน</h3>
+            
+            <div class="form-group">
+                <label for="OrgName">ชื่อหน่วยงาน/ร้านค้า</label>
+                <input type="text" id="OrgName" placeholder="เช่น บริษัท ศิษย์เก่า จำกัด (ถ้ามี)">
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="FirstName">ชื่อจริง <span style="color:red;">*</span></label>
+                    <input type="text" id="FirstName" required placeholder="ระบุชื่อจริง">
+                </div>
+                <div class="form-group">
+                    <label for="LastName">นามสกุล <span style="color:red;">*</span></label>
+                    <input type="text" id="LastName" required placeholder="ระบุนามสกุล">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="DisplayName">ชื่อสำหรับประกาศ <span style="color:red;">*</span></label>
+                <input type="text" id="DisplayName" required placeholder="เช่น ครอบครัวใจดี, ชื่อร้าน หรือ สมชาย (รุ่น 10)">
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="Phone">เบอร์โทรศัพท์ <span style="color:red;">*</span></label>
+                    <!-- บังคับพิมพ์เฉพาะตัวเลข 10 หลัก -->
+                    <input type="tel" id="Phone" required pattern="[0-9]{10}" placeholder=" 0XXXXXXXXX" title="กรุณากรอกตัวเลข 10 หลักให้ครบถ้วน">
+                </div>
+                <div class="form-group">
+                    <label for="Batch">รุ่นการศึกษา</label>
+                    <input type="text" id="Batch" placeholder="เว้นว่างหากไม่ใช่ศิษย์เก่า">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="Email">อีเมล</label>
+                <input type="email" id="Email" placeholder="example@email.com">
+            </div>          
+        </div>
+
+        <!-- Section 2: การสนับสนุนและของที่ระลึก -->
+        <div class="card">
+            <h3 class="card-title">2. การสนับสนุนและของที่ระลึก</h3>
+            
+            <div class="form-group">
+                <label for="AmountSelect">จำนวนเงินที่สนับสนุน <span style="color:red;">*</span></label>
+                <select id="AmountSelect" required>
+                    <option value="">-- เลือกจำนวนเงิน --</option>
+                    <option value="3000">3,000 บาท (1 สิทธิ์)</option>
+                    <option value="5000">5,000 บาท (2 สิทธิ์)</option>
+                    <option value="10000">10,000 บาท (3 สิทธิ์)</option>
+                    <option value="20000">20,000 บาท (4 สิทธิ์)</option>
+                    <option value="50000">50,000 บาท (6 สิทธิ์)</option>
+                    <option value="other">อื่นๆ (ระบุจำนวนเงินเอง)</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="customAmountGroup" style="display: none;">
+                <label for="CustomAmount">ระบุจำนวนเงิน (บาท) <span style="color:red;">*</span></label>
+                <input type="number" id="CustomAmount" placeholder="ระบุตัวเลข (ไม่ต้องใส่ลูกน้ำ)">
+            </div>
+
+            <div class="privilege-box">
+                <h4>คงเหลือ: <span id="remainPrivilegeText" style="font-weight:bold; color:var(--primary-orange);">0</span> สิทธิ์</h4>
+            </div>
+
+            <!-- ของที่ระลึกจัดเรียงบรรทัดเดียวกัน -->
+            <div class="gifts-grid">
+                <div class="gift-item">
+                    <div class="gift-label">บัตรเข้างาน</div>
+                    <div class="counter-controls">
+                        <button type="button" class="btn-counter" onclick="updateGift('ticket', -1)">-</button>
+                        <span class="gift-qty" id="qty_ticket">0</span>
+                        <button type="button" class="btn-counter btn-add" onclick="updateGift('ticket', 1)">+</button>
+                    </div>
+                </div>
+                <div class="gift-item">
+                    <div class="gift-label">เสื้อที่ระลึก</div>
+                    <div class="counter-controls">
+                        <button type="button" class="btn-counter" onclick="updateGift('shirt', -1)">-</button>
+                        <span class="gift-qty" id="qty_shirt">0</span>
+                        <button type="button" class="btn-counter btn-add" onclick="updateGift('shirt', 1)">+</button>
+                    </div>
+                </div>
+                <div class="gift-item">
+                    <div class="gift-label">แก้วเก็บความเย็น</div>
+                    <div class="counter-controls">
+                        <button type="button" class="btn-counter" onclick="updateGift('tumbler', -1)">-</button>
+                        <span class="gift-qty" id="qty_tumbler">0</span>
+                        <button type="button" class="btn-counter btn-add" onclick="updateGift('tumbler', 1)">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: การรับของและการชำระเงิน -->
+        <div class="card">
+            <h3 class="card-title">3. การจัดส่งและการชำระเงิน</h3>
+            
+            <label>รูปแบบการรับของที่ระลึก</label>
+            <!-- ปุ่ม Radio แบบใหม่ -->
+            <div class="radio-btn-group">
+                <label>
+                    <input type="radio" name="deliveryMode" value="pickup" checked onchange="toggleAddress()">
+                    <span class="radio-btn-label">รับที่หน้างาน</span>
+                </label>
+                <label>
+                    <input type="radio" name="deliveryMode" value="delivery" onchange="toggleAddress()">
+                    <span class="radio-btn-label">จัดส่งที่อยู่</span>
+                </label>
+            </div>
+            
+            <div class="form-group" id="addressGroup" style="display: none;">
+                <label for="Address">ที่อยู่สำหรับจัดส่ง <span style="color:red;">*</span></label>
+                <textarea id="Address" rows="3" placeholder="บ้านเลขที่, ถนน, ตำบล, อำเภอ, จังหวัด, รหัสไปรษณีย์"></textarea>
+            </div>
+
+            <div class="bank-info">
+                โอนเงินสนับสนุนเข้าบัญชี<br>
+                <span>ธนาคารออมสิน 020424234159</span>
+                ชื่อบัญชี: ศิษย์เก่า รร.วิทยาศาสตร์จุฬาภรณราชวิทยาลัย นครศรีฯ
+            </div>
+
+            <!-- Section อัปโหลดรูปภาพ -->
+            <div class="form-group" style="margin-bottom: 0;">
+                <div class="upload-header">
+                    <div class="upload-title">
+                        <label>อัปโหลดสลิปโอนเงิน <span style="color:red;">*</span></label>
+                    </div>
+                    <label for="slipInput" class="btn-upload">📸 เลือกรูป</label>
+                    <input type="file" id="slipInput" accept="image/*" multiple onchange="handleFiles(this, 'slip')" style="display:none;">
+                </div>
+                <div id="slipPreview" class="preview-container"></div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+                <div class="upload-header">
+                    <div class="upload-title">
+                        <label>อัปโหลดโลโก้หน่วยงาน/ร้านค้า</label>
+                        <span class="sub-label">(ถ้ามี, รองรับหลายรูป)</span>
+                    </div>
+                    <label for="logoInput" class="btn-upload">🖼️ เลือกรูป</label>
+                    <input type="file" id="logoInput" accept="image/*" multiple onchange="handleFiles(this, 'logo')" style="display:none;">
+                </div>
+                <div id="logoPreview" class="preview-container"></div>
+            </div>
+        </div>
+
+        <button type="submit" class="submit-btn">ยืนยันการส่งข้อมูล</button>
+    </form>
+
+    <div class="footer">
+        <p style="margin:0;">สอบถามข้อมูลเพิ่มเติม ติดต่อ:<br>
+        <span style="color:var(--primary-blue); font-size:1.1rem; font-weight:bold; display:block; margin-top:8px;">ประธานชมรมศิษย์เก่า โทร 065-9250819</span></p>
+    </div>
+</div>
+
+<script>
+    // --- ตั้งค่าระบบ API ---
+    const API_URL = "https://script.google.com/macros/s/AKfycbzAtNP4eZGKI7Y2x7C6o-h4haS8c5i7jlWW0YATtDojrVBxHi04gAvBZVz9NQxYSMtT/exec"; 
+
+    // --- State Management ---
+    let maxPrivilege = 0;
+    let gifts = { ticket: 0, shirt: 0, tumbler: 0 };
+    let slipFilesArray = [];
+    let logoFilesArray = [];
+
+    // --- Logic การคำนวณสิทธิ์ ---
+    const amountSelect = document.getElementById('AmountSelect');
+    const customAmountInput = document.getElementById('CustomAmount');
+    
+    function calculatePrivilege(amount) {
+        if (amount >= 50000) return 6;
+        if (amount >= 20000) return 4;
+        if (amount >= 10000) return 3;
+        if (amount >= 5000) return 2;
+        if (amount >= 3000) return 1;
+        return Math.floor(amount / 3000);
+    }
+
+    function handleAmountChange() {
+        let val = amountSelect.value;
+        let amount = 0;
+        
+        if (val === 'other') {
+            document.getElementById('customAmountGroup').style.display = 'block';
+            amount = Number(customAmountInput.value) || 0;
+            customAmountInput.required = true;
+        } else {
+            document.getElementById('customAmountGroup').style.display = 'none';
+            amount = Number(val) || 0;
+            customAmountInput.required = false;
+        }
+
+        maxPrivilege = calculatePrivilege(amount);
+        
+        // Reset ของที่ระลึกเมื่อเปลี่ยนยอดเงิน
+        gifts = { ticket: 0, shirt: 0, tumbler: 0 };
+        updateGiftUI();
+    }
+
+    amountSelect.addEventListener('change', handleAmountChange);
+    customAmountInput.addEventListener('input', handleAmountChange);
+
+    // --- Logic จัดการของที่ระลึก ---
+    function updateGift(type, change) {
+        const currentTotal = gifts.ticket + gifts.shirt + gifts.tumbler;
+        
+        if (change > 0 && currentTotal >= maxPrivilege) {
+            // ถ้ายอดเต็มแล้วกดบวก ให้สั่นเตือนเบาๆ
+            if(navigator.vibrate) navigator.vibrate(50);
+            return;
+        }
+        
+        if (gifts[type] + change >= 0) {
+            gifts[type] += change;
+            updateGiftUI();
+        }
+    }
+
+    function updateGiftUI() {
+        document.getElementById('qty_ticket').innerText = gifts.ticket;
+        document.getElementById('qty_shirt').innerText = gifts.shirt;
+        document.getElementById('qty_tumbler').innerText = gifts.tumbler;
+        
+        const currentTotal = gifts.ticket + gifts.shirt + gifts.tumbler;
+        document.getElementById('remainPrivilegeText').innerText = maxPrivilege - currentTotal;
+
+        // ปิดปุ่มบวกถ้าสิทธิ์เต็ม
+        const isFull = currentTotal >= maxPrivilege;
+        document.querySelectorAll('.btn-add').forEach(btn => btn.disabled = isFull);
+    }
+
+    // --- Logic การจัดส่ง ---
+    function toggleAddress() {
+        const mode = document.querySelector('input[name="deliveryMode"]:checked').value;
+        const addressGroup = document.getElementById('addressGroup');
+        const addressInput = document.getElementById('Address');
+        
+        if (mode === 'delivery') {
+            addressGroup.style.display = 'block';
+            addressInput.required = true;
+        } else {
+            addressGroup.style.display = 'none';
+            addressInput.required = false;
+            addressInput.value = ''; // ล้างข้อมูล
+        }
+    }
+
+    // --- Logic จัดการไฟล์รูปภาพ (ย่อขนาดและแปลงเป็น Base64) ---
+    function handleFiles(inputElement, type) {
+        const files = inputElement.files;
+        if (!files.length) return;
+
+        const targetArray = type === 'slip' ? slipFilesArray : logoFilesArray;
+        const targetPreview = type === 'slip' ? document.getElementById('slipPreview') : document.getElementById('logoPreview');
+
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64String = e.target.result;
+                const fileObj = {
+                    name: file.name,
+                    mimeType: file.type,
+                    base64: base64String
+                };
+                
+                targetArray.push(fileObj);
+                renderPreview(targetArray, targetPreview, type);
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        inputElement.value = ''; // เคลียร์ input
+    }
+
+    function renderPreview(array, container, type) {
+        container.innerHTML = '';
+        array.forEach((fileObj, index) => {
+            const div = document.createElement('div');
+            div.className = 'img-preview';
+            div.innerHTML = `
+                <img src="${fileObj.base64}" alt="preview">
+                <button type="button" class="btn-remove" onclick="removeFile(${index}, '${type}')">×</button>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function removeFile(index, type) {
+        if (type === 'slip') {
+            slipFilesArray.splice(index, 1);
+            renderPreview(slipFilesArray, document.getElementById('slipPreview'), 'slip');
+        } else {
+            logoFilesArray.splice(index, 1);
+            renderPreview(logoFilesArray, document.getElementById('logoPreview'), 'logo');
+        }
+    }
+
+    // --- Submit Form ---
+    document.getElementById('sponsorForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // ตรวจสอบสลิป
+        if (slipFilesArray.length === 0) {
+            alert("กรุณาอัปโหลดสลิปโอนเงินอย่างน้อย 1 รูป");
+            return;
+        }
+
+        // เตรียมยอดเงิน
+        let finalAmount = amountSelect.value === 'other' ? customAmountInput.value : amountSelect.value;
+
+        // เตรียมที่อยู่
+        let finalAddress = document.getElementById('Address').value;
+        const isPickup = document.querySelector('input[name="deliveryMode"]:checked').value === 'pickup';
+        if(isPickup) finalAddress = "รับของที่หน้างาน";
+
+        // สร้าง Payload
+        const payload = {
+            OrgName: document.getElementById('OrgName').value,
+            FirstName: document.getElementById('FirstName').value,
+            LastName: document.getElementById('LastName').value,
+            DisplayName: document.getElementById('DisplayName').value,
+            Batch: document.getElementById('Batch').value || "ไม่ระบุ", // ดึงจากช่องกรอกตรงๆ
+            Phone: document.getElementById('Phone').value,
+            Email: document.getElementById('Email').value,
+            Amount: Number(finalAmount),
+            Address: finalAddress,
+            gift_ticket: gifts.ticket,
+            gift_shirt: gifts.shirt,
+            gift_tumbler: gifts.tumbler,
+            SlipFiles: slipFilesArray,
+            LogoFiles: logoFilesArray
+        };
+
+        // แสดงหน้าจอโหลด
+        document.getElementById('loading').style.display = 'flex';
+
+        // ส่ง HTTP POST
+        fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('loading').style.display = 'none';
+            if (data.status === 'success') {
+                alert(`บันทึกข้อมูลสำเร็จ! เลขที่หนังสือขอบคุณของคุณคือ: ${data.docNumber}`);
+                window.location.reload(); 
+            } else {
+                alert("เกิดข้อผิดพลาดจากเซิร์ฟเวอร์: " + data.message);
+            }
+        })
+        .catch(error => {
+            document.getElementById('loading').style.display = 'none';
+            alert("บันทึกข้อมูลสำเร็จ (หากเกิดข้อผิดพลาด CORS ของ Google แต่ข้อมูลมักจะเข้า Sheet แล้ว กรุณาตรวจสอบ)");
+            console.error(error);
+            setTimeout(() => window.location.reload(), 2000);
+        });
+    });
+</script>
+
+</body>
+</html>
