@@ -122,7 +122,7 @@
 </head>
 <body>
 
-<div class="container pb-5" style="max-width: 600px;">
+<div class="container pb-5" style="max-width: 500px;">
     <div class="header-banner">
         <h2 class="title-thai">แคแสดสัมพันธ์ ครั้งที่ 4</h2>
         <p class="title-eng mb-0">The 4th PCSHS NST Alumni Reunion</p>
@@ -320,25 +320,36 @@
 
     </div>
 
-    <div id="ticketResult" class="mt-4" style="display: none;">
-        <div class="ticket-box" id="ticketContent">
-            <h4 class="text-center mb-3" style="color: var(--primary-orange);">บัตรเข้างาน</h4>
+    <div id="ticketResult" class="mt-4" style="display: none; text-align: center;">
+        
+        <div class="ticket-box mx-auto shadow-sm" id="ticketContent" style="max-width: 360px; padding: 25px; text-align: left;">
+            <h4 class="text-center mb-3" style="color: var(--primary-orange); font-weight: bold;">บัตรเข้างาน</h4>
             <hr>
             <p class="mb-1" style="display: none;"><strong>รหัสบัตร:</strong> <span id="t_id" class="text-primary fs-5"></span></p>
             
-            <p class="mb-1"><strong>ชื่อ:</strong> <span id="t_name"></span> <span id="t_batch" class="text-muted"></span></p>
-            <p class="mb-1"><strong>สิทธิ์เข้างาน:</strong> <span id="t_event"></span></p>
-            <p class="mb-1"><strong>อาหาร:</strong> <span id="t_food" ></span></p> <p class="mb-1"><strong>ผู้ติดตาม:</strong> <span id="t_followers"></span></p>
+            <div style="font-size: 0.95rem; line-height: 1.6;">
+                <p class="mb-1"><strong>ชื่อ:</strong> <span id="t_name"></span></p>
+                <p class="mb-1"><strong>รุ่น:</strong> <span id="t_batch"></span></p>
+                <p class="mb-1"><strong>สิทธิ์:</strong> <span id="t_event"></span></p>
+                <p class="mb-1"><strong>อาหาร:</strong> <span id="t_food"></span></p> 
+                <p class="mb-0"><strong>ผู้ติดตาม:</strong> <span id="t_followers"></span></p>
+            </div>
             
             <p class="mb-3" style="display: none;"><strong>สถานะ:</strong> <span id="t_status" class="badge bg-warning text-dark"></span></p>
             
-            <div class="text-center bg-light p-3 rounded mt-3">
+            <div class="text-center bg-light p-3 rounded mt-3 border">
                 <div id="qrcode" class="d-inline-block"></div>
-                <p class="text-danger mt-2 mb-0" style="font-size: 0.85rem;">กรุณาบันทึกหน้าจอใว้เป็นหลักฐานเข้างาน</p>
+                <p class="text-danger mt-2 mb-0" style="font-size: 0.8rem;">กรุณาบันทึกหน้าจอไว้เป็นหลักฐานเข้างาน</p>
             </div>
         </div>
-        <button class="btn btn-secondary w-100 mt-2" onclick="backToHome()">กลับหน้าหลัก</button>
-               
+
+        <div class="mx-auto mt-3" style="max-width: 360px;">
+            <button class="btn btn-success w-100 py-2 fw-bold shadow-sm" onclick="downloadTicket()">
+                <i class="bi bi-download"></i> ดาวน์โหลดบัตรเข้างาน
+            </button>
+            <button class="btn btn-secondary w-100 mt-2" onclick="backToHome()">กลับหน้าหลัก</button>
+        </div>
+
     </div>
 
 </div>
@@ -802,7 +813,12 @@
 
         showLoading();
         try {
-            const res = await fetchGAS({ action: "search", Phone: phone, FirstName: name });
+            const res = await fetchGAS({ 
+                action: "search", 
+                Phone: phone, 
+                FirstName: name,
+                mode: "ALUMNI" // 👈 เพิ่มบรรทัดนี้
+            });
             
             Swal.close();
             if (res.success && res.ticketId) {
@@ -905,13 +921,55 @@
     }
 
     function downloadTicket() {
-        const node = document.getElementById('ticketContent');
-        html2canvas(node, { scale: 2 }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = `Ticket_${document.getElementById('t_id').innerText}.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        });
+        // 1. แก้ปัญหา QR Code กลายเป็นกล่องสีขาว (แปลง Canvas เป็น Img ก่อนแคปจอ)
+        const qrcodeDiv = document.getElementById('qrcode');
+        const qrCanvas = qrcodeDiv.querySelector('canvas');
+        if (qrCanvas) {
+            const img = document.createElement('img');
+            img.src = qrCanvas.toDataURL('image/png');
+            img.style.width = "150px";
+            img.style.height = "150px";
+            qrcodeDiv.innerHTML = '';
+            qrcodeDiv.appendChild(img);
+        }
+
+        // 2. หน่วงเวลาเล็กน้อยให้เบราว์เซอร์ Render เสร็จ แล้วทำการแคปจอ
+        setTimeout(() => {
+            const node = document.getElementById('ticketContent');
+            html2canvas(node, { 
+                scale: 2, 
+                useCORS: true, 
+                backgroundColor: "#ffffff" 
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+
+                // 3. ตรวจสอบว่าเป็น LINE In-App Browser หรือ มือถือ หรือไม่
+                const isLine = navigator.userAgent.indexOf("Line") > -1;
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+                if (isLine || isMobile) {
+                    // 🚀 [วิธีแก้สำหรับ LINE/มือถือ] โชว์รูปให้ผู้ใช้กดค้างเพื่อบันทึก
+                    Swal.fire({
+                        title: 'บันทึกบัตรเข้างาน',
+                        text: '👆 แตะค้างที่รูปภาพด้านล่าง แล้วเลือก "บันทึกรูปภาพ" (Save Image)',
+                        imageUrl: imgData,
+                        imageWidth: '100%',
+                        imageAlt: 'Ticket Image',
+                        confirmButtonText: 'ปิดหน้าต่าง',
+                        confirmButtonColor: '#003366',
+                        customClass: {
+                            image: 'border border-2 border-dark rounded' // ใส่กรอบให้รูปดูชัดขึ้น
+                        }
+                    });
+                } else {
+                    // 💻 [วิธีแก้สำหรับ PC] โหลดลงเครื่องปกติ
+                    const link = document.createElement('a');
+                    link.download = `Ticket_${document.getElementById('t_id').innerText}.png`;
+                    link.href = imgData;
+                    link.click();
+                }
+            });
+        }, 200);
     }
     
     // ฟังก์ชันสำหรับส่ง Base64 ไปฝากที่ ImgBB
