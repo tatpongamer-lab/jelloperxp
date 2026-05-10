@@ -344,9 +344,6 @@
         </div>
 
         <div class="mx-auto mt-3" style="max-width: 360px;">
-            <button class="btn btn-success w-100 py-2 fw-bold shadow-sm" onclick="downloadTicket()">
-                <i class="bi bi-download"></i> ดาวน์โหลดบัตรเข้างาน
-            </button>
             <button class="btn btn-secondary w-100 mt-2" onclick="backToHome()">กลับหน้าหลัก</button>
         </div>
 
@@ -919,52 +916,7 @@
         });
         window.scrollTo(0, 0);
     }
-
-    function downloadTicket() {
-        // 1. แปลง QR Canvas เป็น Img เพื่อป้องกัน QR ขาวตอนแคปจอ
-        const qrcodeDiv = document.getElementById('qrcode');
-        const qrCanvas = qrcodeDiv.querySelector('canvas');
-        if (qrCanvas) {
-            const img = document.createElement('img');
-            img.src = qrCanvas.toDataURL('image/png');
-            img.style.width = "150px";
-            img.style.height = "150px";
-            qrcodeDiv.innerHTML = '';
-            qrcodeDiv.appendChild(img);
-        }
-
-        Swal.fire({ title: 'กำลังสร้างรูปภาพ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-        // 2. แคปจอ
-        setTimeout(() => {
-            const node = document.getElementById('ticketContent');
-            html2canvas(node, { 
-                scale: 2, 
-                useCORS: true, 
-                backgroundColor: "#ffffff" 
-            }).then(canvas => {
-                Swal.close();
-                const imgData = canvas.toDataURL('image/png');
-
-                // 3. ตรวจสอบเบราว์เซอร์
-                const isLine = navigator.userAgent.indexOf("Line") > -1;
-                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-                if (isLine || isMobile) {
-                    // 🚀 โชว์กล่อง Overlay ของเราเอง (หลุดพ้นจากข้อจำกัดของ SweetAlert2 แน่นอน 100%)
-                    document.getElementById('mobileSaveImg').src = imgData;
-                    document.getElementById('mobileSaveOverlay').style.display = 'flex';
-                } else {
-                    // 💻 ถ้าเป็น PC โหลดไฟล์ลงเครื่องปกติ
-                    const link = document.createElement('a');
-                    link.download = `Ticket_${document.getElementById('t_id').innerText}.png`;
-                    link.href = imgData;
-                    link.click();
-                }
-            });
-        }, 300); // เผื่อเวลา Render เพิ่มนิดนึงให้ภาพคมชัด
-    }
-    
+   
     // ฟังก์ชันสำหรับส่ง Base64 ไปฝากที่ ImgBB
     async function uploadToImgBB(base64Full) {
         const base64Data = base64Full.split(',')[1]; 
@@ -984,48 +936,8 @@
         }
     }
     
-    // ฟังก์ชันไม้ตาย: เปิดรูปภาพในแท็บใหม่เพื่อหลบข้อจำกัดของ LINE
-    function openImageDirectly() {
-        const imgSrc = document.getElementById('mobileSaveImg').src;
-        // พยายามเปิดแท็บใหม่
-        const newWindow = window.open();
-        if (newWindow) {
-            newWindow.document.write(`<body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh;"><img src="${imgSrc}" style="max-width:100%; max-height:100vh;"></body>`);
-            newWindow.document.close();
-        } else {
-            // ถ้าโดนบล็อก Pop-up ให้บังคับเปลี่ยนหน้าไปที่รูปเลย
-            window.location.href = imgSrc;
-        }
-    }
-
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<div id="mobileSaveOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 99999; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
-    <h4 class="text-white mb-2" style="font-weight: bold;">📥 บันทึกบัตรเข้างาน</h4>
-    <p class="text-white text-center mb-4" style="font-size: 0.95rem;">
-        👆 <b>แตะค้างที่รูปภาพด้านล่าง</b><br>แล้วเลือกเมนู "บันทึกรูปภาพ" (Save Image)
-    </p>
-    
-    <img id="mobileSaveImg" src="" style="max-width: 100%; max-height: 55vh; border: 3px solid #fff; border-radius: 12px; 
-        -webkit-touch-callout: default !important; 
-        -webkit-user-select: auto !important; 
-        user-select: auto !important; 
-        pointer-events: auto !important;
-        touch-action: auto !important;">
-    
-    <div class="d-flex gap-2 mt-4">
-        <button class="btn btn-primary px-3 py-2 fw-bold" style="border-radius: 30px; font-size: 0.9rem;" onclick="openImageDirectly()">
-            🔍 เปิดรูปขนาดเต็ม
-        </button>
-        <button class="btn btn-light px-4 py-2 fw-bold" style="border-radius: 30px; font-size: 0.9rem;" onclick="document.getElementById('mobileSaveOverlay').style.display='none'">
-            ❌ ปิด
-        </button>
-    </div>
-
-    <p class="text-warning text-center mt-3" style="font-size: 0.8rem;">
-        *หากกดค้างไม่ได้ ให้กดเปิดรูปขนาดเต็ม<br>หรือกดปุ่ม ⠇ มุมขวาบน เลือก "เปิดด้วยเบราว์เซอร์อื่น"
-    </p>
-</div>
 </body>
 </html>
