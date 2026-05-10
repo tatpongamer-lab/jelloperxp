@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>แบบตอบรับสนับสนุนงานคืนสู่เหย้า แคแสดสัมพันธ์ ครั้งที่ ๔</title>
+    <title>แบบตอบรับผู้สนับสนุน แคแสดสัมพันธ์ ครั้งที่ ๔</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         :root {
             --primary-orange: #FF6600;
@@ -12,6 +13,11 @@
             --bg-color: #f4f7f9; /* ปรับสีพื้นหลังให้สว่างขึ้นนิดหน่อย */
             --text-color: #333;
             --border-color: #d1d5db; /* สีเส้นขอบอ่อนลง สไตล์โมเดิร์น */
+        }
+
+        /* กฏเหล็กป้องกันกล่องทะลุขอบ (Enterprise Standard) */
+        *, *::before, *::after {
+            box-sizing: border-box;
         }
 
         body {
@@ -23,7 +29,7 @@
         }
 
         .container {
-            max-width: 500px;
+            max-width: 400px;
             margin: 0 auto;
         }
 
@@ -68,24 +74,27 @@
             font-size: 1.25rem;
         }
 
-        .form-group {
+        /* 1. กำหนดให้ทั้งกล่องเดี่ยวและกล่องแถวคู่ มีระยะห่างด้านล่างเท่ากัน */
+        .form-group, .form-row {
             margin-bottom: 16px;
         }
 
-        /* Responsive Form Row */
+        /* 2. ตั้งค่าแถวคู่ให้เรียงลงมาบนมือถือ และเว้นช่องว่างระหว่างกัน 16px */
         .form-row {
             display: flex;
             flex-direction: column;
             gap: 16px;
         }
 
+        /* 3. ลบระยะห่างด้านล่างของช่องที่อยู่ "ข้างใน" แถวคู่ เพื่อไม่ให้ระยะห่างมันบวกเบิ้ลกัน (gap + margin) */
+        .form-row .form-group {
+            margin-bottom: 0;
+        }
+
+        /* 4. เมื่อเปิดบนจอใหญ่ (แท็บเล็ต/คอม) ให้แถวคู่เรียงซ้าย-ขวาแทน */
         @media (min-width: 600px) {
             .form-row {
                 flex-direction: row;
-            }
-            .form-row .form-group {
-                flex: 1;
-                margin-bottom: 0;
             }
         }
 
@@ -153,57 +162,65 @@
             font-size: 1.2rem;
         }
 
-        /* --- ปรับแต่ง Grid สำหรับของที่ระลึก --- */
+        /* --- ปรับแต่ง Grid สำหรับของที่ระลึกให้พอดีกับจอ 400px --- */
         .gifts-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+            gap: 6px; /* ลดช่องว่างระหว่างกล่องลง */
             text-align: center;
+            width: 100%;
         }
 
         .gift-item {
             background: #f8f9fa;
             border: 1px solid #eee;
             border-radius: 8px;
-            padding: 12px 5px;
+            padding: 10px 4px; /* ลด padding ซ้าย-ขวา ให้มีพื้นที่เพิ่ม */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
+            width: 100%;
         }
 
         .gift-label {
-            font-size: 0.85rem;
+            font-size: 0.75rem; /* ปรับฟอนต์ให้เล็กลงนิดนึง */
             color: var(--primary-blue);
-            margin-bottom: 12px;
-            font-weight: 500;
+            margin-bottom: 8px;
+            font-weight: 600;
+            line-height: 1.2;
+            word-break: break-word; /* สั่งให้ตัดคำถ้ายาวเกินไป */
+            width: 100%;
         }
 
         .counter-controls {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
+            justify-content: space-between; /* ดันปุ่มไปชิดขอบซ้ายขวาของตัวมันเอง */
+            gap: 2px; /* ลดช่องว่างตรงกลาง */
             background: #fff;
             border-radius: 20px;
             border: 1px solid var(--border-color);
-            padding: 4px;
+            padding: 3px;
+            width: 100%;
+            max-width: 90px; /* คุมความกว้างสูงสุดไม่ให้กล่องบวม */
         }
 
         .btn-counter {
-            width: 30px;
-            height: 30px;
+            width: 26px; /* ย่อขนาดปุ่มบวกลบลง 4px */
+            height: 26px;
             border: none;
             background: #f3f4f6;
             color: var(--text-color);
             border-radius: 50%;
             cursor: pointer;
             font-weight: bold;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
+            padding: 0;
         }
         
         .btn-counter:active {
@@ -224,8 +241,9 @@
 
         .gift-qty {
             font-weight: bold;
-            font-size: 1.1rem;
-            min-width: 24px;
+            font-size: 1rem;
+            min-width: 16px; /* ลด min-width ลง */
+            text-align: center;
         }
 
         /* --- ปรับแต่งปุ่ม Radio สำหรับจัดส่ง --- */
@@ -421,6 +439,97 @@
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* สไตล์ปุ่ม (i) Info Icon */
+        .info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            background-color: var(--primary-blue);
+            color: #fff;
+            border-radius: 50%;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: Arial, sans-serif; /* ให้ตัว i ดูเป็นทางการ */
+            transition: transform 0.2s, background 0.2s;
+        }
+        .info-icon:active {
+            transform: scale(0.9);
+            background-color: var(--primary-orange);
+        }
+
+        /* สไตล์ Dropdown เลือกไซส์เสื้อ */
+        .size-select {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: var(--primary-blue);
+            background-color: #fff;
+            outline: none;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+        .size-select:focus {
+            border-color: var(--primary-orange);
+        }
+
+        /* สไตล์ Modal (Popup) */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            backdrop-filter: blur(3px); /* ทำฉากหลังเบลอแบบ Apple/Enterprise */
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-content {
+            background: #fff;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .btn-close-modal {
+            background: #f3f4f6;
+            border: none;
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            color: #6b7280;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .btn-close-modal:active {
+            background: #e5e7eb;
+        }
+        
     </style>
 </head>
 <body>
@@ -432,62 +541,50 @@
 
 <div class="container">
     <div class="header">
-        <h1>แบบตอบรับสนับสนุน</h1>
-        <h3>งานคืนสู่เหย้า "แคแสดสัมพันธ์ ครั้งที่ ๔"</h3>
+        <h3>แบบตอบรับผู้สนับสนุน</h3>
+        <h1>"แคแสดสัมพันธ์ ครั้งที่ ๔"</h1>
     </div>
 
     <form id="sponsorForm">
         <!-- Section 1: ข้อมูลผู้สนับสนุน -->
         <div class="card">
-            <h3 class="card-title">1. ข้อมูลผู้สนับสนุน</h3>
+            <h3 class="card-title">ข้อมูลผู้สนับสนุน</h3>
             
             <div class="form-group">
-                <label for="OrgName">ชื่อหน่วยงาน/ร้านค้า</label>
-                <input type="text" id="OrgName" placeholder="เช่น บริษัท ศิษย์เก่า จำกัด (ถ้ามี)">
+                <input type="text" id="OrgName" placeholder="หน่วยงาน/องค์กร/กิจการ">
             </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="FirstName">ชื่อจริง <span style="color:red;">*</span></label>
-                    <input type="text" id="FirstName" required placeholder="ระบุชื่อจริง">
-                </div>
-                <div class="form-group">
-                    <label for="LastName">นามสกุล <span style="color:red;">*</span></label>
-                    <input type="text" id="LastName" required placeholder="ระบุนามสกุล">
-                </div>
-            </div>
-            
+
             <div class="form-group">
-                <label for="DisplayName">ชื่อสำหรับประกาศ <span style="color:red;">*</span></label>
-                <input type="text" id="DisplayName" required placeholder="เช่น ครอบครัวใจดี, ชื่อร้าน หรือ สมชาย (รุ่น 10)">
+                <input type="text" id="FirstName" required placeholder="ชื่อจริง">
             </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="Phone">เบอร์โทรศัพท์ <span style="color:red;">*</span></label>
-                    <!-- บังคับพิมพ์เฉพาะตัวเลข 10 หลัก -->
-                    <input type="tel" id="Phone" required pattern="[0-9]{10}" placeholder=" 0XXXXXXXXX" title="กรุณากรอกตัวเลข 10 หลักให้ครบถ้วน">
-                </div>
-                <div class="form-group">
-                    <label for="Batch">รุ่นการศึกษา</label>
-                    <input type="text" id="Batch" placeholder="เว้นว่างหากไม่ใช่ศิษย์เก่า">
-                </div>
+
+            <div class="form-group">
+                <input type="text" id="LastName" required placeholder="นามสกุล">
+            </div>
+                       
+            <div class="form-group">
+                <input type="text" id="DisplayName" required placeholder="ชื่อเล่น">
+            </div>
+
+            <div class="form-group">
+                <input type="tel" id="Phone" required pattern="[0-9]{10}" placeholder="เบอร์โทรศัพท์ 10 หลัก" title="กรุณากรอกตัวเลข 10 หลักให้ครบถ้วน">
+            </div>
+            <div class="form-group">
+                <input type="text" id="Batch" placeholder="รุ่นการศึกษา (กรณีศิษย์เก่า)">
             </div>
             
             <div class="form-group">
-                <label for="Email">อีเมล</label>
-                <input type="email" id="Email" placeholder="example@email.com">
+                <input type="email" id="Email" placeholder="อีเมล (เช่น example@email.com)">
             </div>          
         </div>
 
         <!-- Section 2: การสนับสนุนและของที่ระลึก -->
         <div class="card">
-            <h3 class="card-title">2. การสนับสนุนและของที่ระลึก</h3>
+            <h3 class="card-title">การสนับสนุนและของที่ระลึก</h3>
             
             <div class="form-group">
-                <label for="AmountSelect">จำนวนเงินที่สนับสนุน <span style="color:red;">*</span></label>
                 <select id="AmountSelect" required>
-                    <option value="">-- เลือกจำนวนเงิน --</option>
+                    <option value="">-- จำนวนเงินที่สนับสนุน --</option>
                     <option value="3000">3,000 บาท (1 สิทธิ์)</option>
                     <option value="5000">5,000 บาท (2 สิทธิ์)</option>
                     <option value="10000">10,000 บาท (3 สิทธิ์)</option>
@@ -498,7 +595,7 @@
             </div>
             
             <div class="form-group" id="customAmountGroup" style="display: none;">
-                <label for="CustomAmount">ระบุจำนวนเงิน (บาท) <span style="color:red;">*</span></label>
+                <label for="CustomAmount">ระบุจำนวนเงิน (บาท) </span></label>
                 <input type="number" id="CustomAmount" placeholder="ระบุตัวเลข (ไม่ต้องใส่ลูกน้ำ)">
             </div>
 
@@ -517,7 +614,10 @@
                     </div>
                 </div>
                 <div class="gift-item">
-                    <div class="gift-label">เสื้อที่ระลึก</div>
+                    <div class="gift-label" style="display: flex; align-items: center; justify-content: center; gap: 2px;">
+                        เสื้อที่ระลึก
+                        <span class="info-icon" onclick="openSizeModal()">!</span>
+                    </div>
                     <div class="counter-controls">
                         <button type="button" class="btn-counter" onclick="updateGift('shirt', -1)">-</button>
                         <span class="gift-qty" id="qty_shirt">0</span>
@@ -533,11 +633,17 @@
                     </div>
                 </div>
             </div>
+
+            <div id="size-wrapper" style="display: none; margin-top: 15px; padding: 15px; background: #f8f9fa; border: 1px solid #eee; border-radius: 8px;">
+                <p style="margin: 0 0 10px 0; font-size: 0.9rem; color: var(--primary-blue); font-weight: 500;">ระบุไซส์</p>
+                <div id="size-container" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                </div>
+            </div>
         </div>
 
         <!-- Section 3: การรับของและการชำระเงิน -->
         <div class="card">
-            <h3 class="card-title">3. การจัดส่งและการชำระเงิน</h3>
+            <h3 class="card-title">การจัดส่งและการชำระเงิน</h3>
             
             <label>รูปแบบการรับของที่ระลึก</label>
             <!-- ปุ่ม Radio แบบใหม่ -->
@@ -553,7 +659,7 @@
             </div>
             
             <div class="form-group" id="addressGroup" style="display: none;">
-                <label for="Address">ที่อยู่สำหรับจัดส่ง <span style="color:red;">*</span></label>
+                <label for="Address">ที่อยู่สำหรับจัดส่ง </label>
                 <textarea id="Address" rows="3" placeholder="บ้านเลขที่, ถนน, ตำบล, อำเภอ, จังหวัด, รหัสไปรษณีย์"></textarea>
             </div>
 
@@ -567,9 +673,9 @@
             <div class="form-group" style="margin-bottom: 0;">
                 <div class="upload-header">
                     <div class="upload-title">
-                        <label>อัปโหลดสลิปโอนเงิน <span style="color:red;">*</span></label>
+                        <label>สลิปโอนเงิน </label>
                     </div>
-                    <label for="slipInput" class="btn-upload">📸 เลือกรูป</label>
+                    <label for="slipInput" class="btn-upload">เลือกรูป</label>
                     <input type="file" id="slipInput" accept="image/*" multiple onchange="handleFiles(this, 'slip')" style="display:none;">
                 </div>
                 <div id="slipPreview" class="preview-container"></div>
@@ -578,10 +684,9 @@
             <div class="form-group" style="margin-bottom: 0;">
                 <div class="upload-header">
                     <div class="upload-title">
-                        <label>อัปโหลดโลโก้หน่วยงาน/ร้านค้า</label>
-                        <span class="sub-label">(ถ้ามี, รองรับหลายรูป)</span>
+                        <label>โลโก้หน่วยงาน/องค์กร/กิจการ</label>
                     </div>
-                    <label for="logoInput" class="btn-upload">🖼️ เลือกรูป</label>
+                    <label for="logoInput" class="btn-upload">เลือกรูป</label>
                     <input type="file" id="logoInput" accept="image/*" multiple onchange="handleFiles(this, 'logo')" style="display:none;">
                 </div>
                 <div id="logoPreview" class="preview-container"></div>
@@ -592,8 +697,61 @@
     </form>
 
     <div class="footer">
-        <p style="margin:0;">สอบถามข้อมูลเพิ่มเติม ติดต่อ:<br>
-        <span style="color:var(--primary-blue); font-size:1.1rem; font-weight:bold; display:block; margin-top:8px;">ประธานชมรมศิษย์เก่า โทร 065-9250819</span></p>
+        <p style="margin:0; padding-bottom: 16px; border-bottom: 1px dashed #d1d5db;">
+            สอบถามข้อมูลเพิ่มเติม ติดต่อ:<br>
+            <span style="color:var(--primary-blue); font-size:1.15rem; font-weight:bold; display:block; margin-top:8px;">
+                ประธานชมรมศิษย์เก่า โทร 065-925-0819
+            </span>
+        </p>
+
+        <a href="https://www.facebook.com/KhaesadNST" target="_blank" style="
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px; 
+            padding-top: 16px; 
+            margin: 0 auto; 
+            text-decoration: none; 
+            width: 100%; 
+            -webkit-tap-highlight-color: transparent;
+        ">
+            <span style="color: var(--primary-orange); font-weight: 600; font-size: 1.1rem; white-space: nowrap;">
+                เพจ :
+            </span>
+            
+            <i class="bi bi-facebook" style="font-size: 1.4rem; color: #1877F2; flex-shrink: 0;"></i> 
+            
+            <span style="color: var(--primary-blue); font-weight: 600; font-size: 1.05rem; line-height: 1.4;">
+                แคแสดสัมพันธ์ ครั้งที่ 4 ปี 2569
+            </span>
+        </a>
+    </div>
+</div>
+
+<div id="sizeModal" class="modal-overlay" onclick="closeSizeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h4 style="margin: 0; color: var(--primary-blue);">ตารางไซส์เสื้อ (Size Chart)</h4>
+            <button type="button" class="btn-close-modal" onclick="closeSizeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <img src="\image\size-chart.jpg" alt="Size Chart" style="width: 100%; height: auto; border-radius: 8px;">
+        </div>
+    </div>
+</div>
+
+<div id="successModal" class="modal-overlay">
+    <div class="modal-content" style="text-align: center; padding: 40px 20px;">
+        <div style="width: 60px; height: 60px; background: #e8f5e9; color: #4caf50; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 15px;">
+            <i class="bi bi-check-lg"></i>
+        </div>
+        <h2 style="color: var(--primary-blue); margin: 0 0 10px;">บันทึกข้อมูลสำเร็จ</h2>
+        <p style="color: #4b5563; font-size: 1.1rem; margin: 0 0 15px;">ขอบคุณสำหรับการสนับสนุน</p>
+        <div style="background: #f3f4f6; padding: 10px; border-radius: 8px; margin-bottom: 25px;">
+            <span style="font-size: 0.85rem; color: #6b7280;">เลขที่หนังสือขอบคุณ</span><br>
+            <strong id="successDocNumber" style="color: var(--primary-orange); font-size: 1.1rem;"></strong>
+        </div>
+        <button type="button" class="submit-btn" style="width: 100%; max-width: 200px; padding: 12px;" onclick="window.location.reload()">ตกลง</button>
     </div>
 </div>
 
@@ -668,9 +826,51 @@
         const currentTotal = gifts.ticket + gifts.shirt + gifts.tumbler;
         document.getElementById('remainPrivilegeText').innerText = maxPrivilege - currentTotal;
 
-        // ปิดปุ่มบวกถ้าสิทธิ์เต็ม
         const isFull = currentTotal >= maxPrivilege;
         document.querySelectorAll('.btn-add').forEach(btn => btn.disabled = isFull);
+
+        // **เพิ่มบรรทัดนี้เพื่ออัปเดตช่องเลือกไซส์เสื้อ**
+        renderShirtSizes();
+    }
+
+    function renderShirtSizes() {
+        const wrapper = document.getElementById('size-wrapper'); // ควบคุมกล่องใหญ่
+        const container = document.getElementById('size-container'); // กล่องใส่ dropdown
+        const qty = gifts.shirt;
+        
+        // ถ้าไม่มีเสื้อ ซ่อนกล่องใหญ่ไปเลย
+        if (qty === 0) {
+            wrapper.style.display = 'none';
+            container.innerHTML = '';
+            return;
+        }
+
+        wrapper.style.display = 'block'; // โชว์กล่องใหญ่
+        
+        const existingSelects = container.querySelectorAll('.size-select');
+        const currentSizes = Array.from(existingSelects).map(select => select.value);
+
+        container.innerHTML = ''; 
+        
+        for (let i = 0; i < qty; i++) {
+            const select = document.createElement('select');
+            select.className = 'size-select';
+            select.required = true;
+            // ปรับ padding ให้ Dropdown เล็กลงนิดนึงจะได้ดูมินิมอล
+            select.style.padding = "8px"; 
+            select.innerHTML = `
+                <option value="">ตัวที่ ${i + 1}</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="2XL">2XL</option>
+            `;
+            if (currentSizes[i]) {
+                select.value = currentSizes[i];
+            }
+            container.appendChild(select);
+        }
     }
 
     // --- Logic การจัดส่ง ---
@@ -739,14 +939,39 @@
         }
     }
 
+    function openSizeModal() {
+        const modal = document.getElementById('sizeModal');
+        modal.classList.add('show');
+    }
+
+    function closeSizeModal(event) {
+        // ปิดเมื่อกดปุ่ม X หรือคลิกพื้นที่ฉากหลัง
+        if (!event || event.target.id === 'sizeModal') {
+            document.getElementById('sizeModal').classList.remove('show');
+        }
+    }
+
     // --- Submit Form ---
     document.getElementById('sponsorForm').addEventListener('submit', function(e) {
         e.preventDefault();
 
-        // ตรวจสอบสลิป
+        // 1. ตรวจสอบสลิป
         if (slipFilesArray.length === 0) {
             alert("กรุณาอัปโหลดสลิปโอนเงินอย่างน้อย 1 รูป");
-            return;
+            return; // หยุดการทำงาน
+        }
+
+        // 2. ตรวจสอบว่าถ้าเลือกเสื้อ ต้องระบุไซส์ให้ครบทุกตัว (Frontend Validation)
+        if (gifts.shirt > 0) {
+            const sizeSelects = document.querySelectorAll('.size-select');
+            for (let i = 0; i < sizeSelects.length; i++) {
+                if (sizeSelects[i].value === "") {
+                    // ถัาพบว่ามีช่องไหนไม่ได้เลือก (ค่าเป็นว่าง) ให้แจ้งเตือนและหยุดการทำงาน
+                    alert(`กรุณาระบุไซส์เสื้อตัวที่ ${i + 1} ให้ครบถ้วน`);
+                    sizeSelects[i].focus(); // เด้งไปโฟกัสที่ช่องนั้นให้ผู้ใช้ทันที
+                    return; 
+                }
+            }
         }
 
         // เตรียมยอดเงิน
@@ -757,19 +982,25 @@
         const isPickup = document.querySelector('input[name="deliveryMode"]:checked').value === 'pickup';
         if(isPickup) finalAddress = "รับของที่หน้างาน";
 
+        // อ่านค่าไซส์เสื้อที่เลือกทั้งหมด นำมาต่อกันด้วยคอมม่า เช่น "M,L,XL"
+        const sizeSelects = document.querySelectorAll('.size-select');
+        const shirtSizesArr = Array.from(sizeSelects).map(select => select.value);
+        const shirtSizesStr = shirtSizesArr.join(',');
+
         // สร้าง Payload
         const payload = {
             OrgName: document.getElementById('OrgName').value,
             FirstName: document.getElementById('FirstName').value,
             LastName: document.getElementById('LastName').value,
             DisplayName: document.getElementById('DisplayName').value,
-            Batch: document.getElementById('Batch').value || "ไม่ระบุ", // ดึงจากช่องกรอกตรงๆ
-            Phone: document.getElementById('Phone').value,
+            Batch: document.getElementById('Batch').value || "ไม่ระบุ",
+            Phone: document.getElementById('Phone').value, // ไม่ต้องใส่ ' ตรงนี้แล้ว เพราะ Backend จัดการให้
             Email: document.getElementById('Email').value,
             Amount: Number(finalAmount),
             Address: finalAddress,
             gift_ticket: gifts.ticket,
             gift_shirt: gifts.shirt,
+            shirt_sizes: shirtSizesStr,
             gift_tumbler: gifts.tumbler,
             SlipFiles: slipFilesArray,
             LogoFiles: logoFilesArray
@@ -787,15 +1018,19 @@
         .then(data => {
             document.getElementById('loading').style.display = 'none';
             if (data.status === 'success') {
-                alert(`บันทึกข้อมูลสำเร็จ! เลขที่หนังสือขอบคุณของคุณคือ: ${data.docNumber}`);
-                window.location.reload(); 
+                // แทนที่ alert ด้วยการโชว์ Modal สวยๆ
+                document.getElementById('successDocNumber').innerText = data.docNumber;
+                document.getElementById('successModal').classList.add('show');
+                // หากต้องการให้เว็บสั่นเตือนเบาๆ ว่าสำเร็จ (มือถือ)
+                if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
             } else {
+                // กรณี Error ยังคงใช้ alert หรือจะทำ Error Modal เพิ่มก็ได้ครับ
                 alert("เกิดข้อผิดพลาดจากเซิร์ฟเวอร์: " + data.message);
             }
         })
         .catch(error => {
             document.getElementById('loading').style.display = 'none';
-            alert("บันทึกข้อมูลสำเร็จ (หากเกิดข้อผิดพลาด CORS ของ Google แต่ข้อมูลมักจะเข้า Sheet แล้ว กรุณาตรวจสอบ)");
+            alert("บันทึกข้อมูลสำเร็จ (พบปัญหาการเชื่อมต่อเล็กน้อย กรุณาตรวจสอบข้อมูลอีกครั้ง)");
             console.error(error);
             setTimeout(() => window.location.reload(), 2000);
         });
