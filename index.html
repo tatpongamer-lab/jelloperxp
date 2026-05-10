@@ -921,7 +921,7 @@
     }
 
     function downloadTicket() {
-        // 1. แก้ปัญหา QR Code กลายเป็นกล่องสีขาว (แปลง Canvas เป็น Img ก่อนแคปจอ)
+        // 1. แปลง QR Canvas เป็น Img เพื่อป้องกัน QR ขาวตอนแคปจอ
         const qrcodeDiv = document.getElementById('qrcode');
         const qrCanvas = qrcodeDiv.querySelector('canvas');
         if (qrCanvas) {
@@ -933,7 +933,9 @@
             qrcodeDiv.appendChild(img);
         }
 
-        // 2. หน่วงเวลาเล็กน้อยให้เบราว์เซอร์ Render เสร็จ แล้วทำการแคปจอ
+        Swal.fire({ title: 'กำลังสร้างรูปภาพ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+        // 2. แคปจอ
         setTimeout(() => {
             const node = document.getElementById('ticketContent');
             html2canvas(node, { 
@@ -941,40 +943,26 @@
                 useCORS: true, 
                 backgroundColor: "#ffffff" 
             }).then(canvas => {
+                Swal.close();
                 const imgData = canvas.toDataURL('image/png');
 
-                // 3. ตรวจสอบว่าเป็น LINE In-App Browser หรือ มือถือ หรือไม่
+                // 3. ตรวจสอบเบราว์เซอร์
                 const isLine = navigator.userAgent.indexOf("Line") > -1;
                 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
                 if (isLine || isMobile) {
-                    // 🚀 [วิธีแก้ปัญหา กดค้างไม่ได้] ใช้ html แทรก img และบังคับ CSS ให้กดค้างได้
-                    Swal.fire({
-                        title: 'บันทึกบัตรเข้างาน',
-                        html: `
-                            <p style="font-size: 0.95rem; margin-bottom: 15px; color: #555;">
-                                👆 แตะค้างที่รูปภาพด้านล่าง<br>แล้วเลือก <b>"บันทึกรูปภาพ" (Save Image)</b>
-                            </p>
-                            <img src="${imgData}" 
-                                 style="width: 100%; border: 2px solid #333; border-radius: 8px; 
-                                        -webkit-touch-callout: default !important; 
-                                        pointer-events: auto !important; 
-                                        user-select: all !important;" 
-                                 alt="Ticket Image">
-                        `,
-                        confirmButtonText: 'ปิดหน้าต่าง',
-                        confirmButtonColor: '#003366',
-                        allowOutsideClick: false // บังคับให้กดปิดที่ปุ่มเท่านั้น จะได้ไม่เผลอปิดตอนกดค้าง
-                    });
+                    // 🚀 โชว์กล่อง Overlay ของเราเอง (หลุดพ้นจากข้อจำกัดของ SweetAlert2 แน่นอน 100%)
+                    document.getElementById('mobileSaveImg').src = imgData;
+                    document.getElementById('mobileSaveOverlay').style.display = 'flex';
                 } else {
-                    // 💻 [วิธีแก้สำหรับ PC] โหลดลงเครื่องปกติ
+                    // 💻 ถ้าเป็น PC โหลดไฟล์ลงเครื่องปกติ
                     const link = document.createElement('a');
                     link.download = `Ticket_${document.getElementById('t_id').innerText}.png`;
                     link.href = imgData;
                     link.click();
                 }
             });
-        }, 200);
+        }, 300); // เผื่อเวลา Render เพิ่มนิดนึงให้ภาพคมชัด
     }
     
     // ฟังก์ชันสำหรับส่ง Base64 ไปฝากที่ ImgBB
@@ -999,5 +987,17 @@
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<div id="mobileSaveOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 99999; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
+    <h4 class="text-white mb-2" style="font-weight: bold;">📥 บันทึกบัตรเข้างาน</h4>
+    <p class="text-white text-center mb-4" style="font-size: 0.95rem;">
+        👆 <b>แตะค้างที่รูปภาพด้านล่าง</b><br>แล้วเลือกเมนู "บันทึกรูปภาพ" (Save Image)
+    </p>
+    
+    <img id="mobileSaveImg" src="" style="max-width: 100%; max-height: 60vh; border: 3px solid #fff; border-radius: 12px; pointer-events: auto;">
+    
+    <button class="btn btn-light mt-4 px-5 py-2 fw-bold" style="border-radius: 30px;" onclick="document.getElementById('mobileSaveOverlay').style.display='none'">
+        ปิดหน้าต่าง
+    </button>
+</div>
 </body>
 </html>
