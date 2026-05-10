@@ -982,7 +982,21 @@
         } else {
           throw new Error("ระบบฝากรูปขัดข้อง กรุณาลองใหม่");
         }
-    }    
+    }
+    
+    // ฟังก์ชันไม้ตาย: เปิดรูปภาพในแท็บใหม่เพื่อหลบข้อจำกัดของ LINE
+    function openImageDirectly() {
+        const imgSrc = document.getElementById('mobileSaveImg').src;
+        // พยายามเปิดแท็บใหม่
+        const newWindow = window.open();
+        if (newWindow) {
+            newWindow.document.write(`<body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh;"><img src="${imgSrc}" style="max-width:100%; max-height:100vh;"></body>`);
+            newWindow.document.close();
+        } else {
+            // ถ้าโดนบล็อก Pop-up ให้บังคับเปลี่ยนหน้าไปที่รูปเลย
+            window.location.href = imgSrc;
+        }
+    }
 
 </script>
 
@@ -993,11 +1007,25 @@
         👆 <b>แตะค้างที่รูปภาพด้านล่าง</b><br>แล้วเลือกเมนู "บันทึกรูปภาพ" (Save Image)
     </p>
     
-    <img id="mobileSaveImg" src="" style="max-width: 100%; max-height: 60vh; border: 3px solid #fff; border-radius: 12px; pointer-events: auto;">
+    <img id="mobileSaveImg" src="" style="max-width: 100%; max-height: 55vh; border: 3px solid #fff; border-radius: 12px; 
+        -webkit-touch-callout: default !important; 
+        -webkit-user-select: auto !important; 
+        user-select: auto !important; 
+        pointer-events: auto !important;
+        touch-action: auto !important;">
     
-    <button class="btn btn-light mt-4 px-5 py-2 fw-bold" style="border-radius: 30px;" onclick="document.getElementById('mobileSaveOverlay').style.display='none'">
-        ปิดหน้าต่าง
-    </button>
+    <div class="d-flex gap-2 mt-4">
+        <button class="btn btn-primary px-3 py-2 fw-bold" style="border-radius: 30px; font-size: 0.9rem;" onclick="openImageDirectly()">
+            🔍 เปิดรูปขนาดเต็ม
+        </button>
+        <button class="btn btn-light px-4 py-2 fw-bold" style="border-radius: 30px; font-size: 0.9rem;" onclick="document.getElementById('mobileSaveOverlay').style.display='none'">
+            ❌ ปิด
+        </button>
+    </div>
+
+    <p class="text-warning text-center mt-3" style="font-size: 0.8rem;">
+        *หากกดค้างไม่ได้ ให้กดเปิดรูปขนาดเต็ม<br>หรือกดปุ่ม ⠇ มุมขวาบน เลือก "เปิดด้วยเบราว์เซอร์อื่น"
+    </p>
 </div>
 </body>
 </html>
