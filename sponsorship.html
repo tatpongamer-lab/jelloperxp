@@ -86,9 +86,26 @@
             gap: 16px;
         }
 
-        /* 3. ลบระยะห่างด้านล่างของช่องที่อยู่ "ข้างใน" แถวคู่ เพื่อไม่ให้ระยะห่างมันบวกเบิ้ลกัน (gap + margin) */
-        .form-row .form-group {
-            margin-bottom: 0;
+        /* --- เทคนิค Placeholder จำลอง --- */
+        .form-group {
+            position: relative; /* สำคัญ: เพื่อให้ Fake Placeholder อ้างอิงตำแหน่งจากกล่องนี้ */
+        }
+
+        .fake-placeholder {
+            position: absolute;
+            left: 14px; /* ระยะห่างจากขอบซ้าย ให้ตรงกับ padding ของ input */
+            top: 14px; /* ระยะห่างจากขอบบน */
+            color: #9ca3af;
+            font-size: 16px;
+            pointer-events: none; /* ทำให้คลิกทะลุตัวหนังสือไปโดนช่องกรอกได้ */
+            transition: opacity 0.2s;
+        }
+
+        /* ซ่อน Placeholder จำลอง เมื่อผู้ใช้กดคลิก (focus) หรือพิมพ์ข้อความไปแล้ว */
+        .form-group input:focus ~ .fake-placeholder,
+        .form-group input:not(:placeholder-shown) ~ .fake-placeholder {
+            opacity: 0;
+            visibility: hidden;
         }
 
         /* 4. เมื่อเปิดบนจอใหญ่ (แท็บเล็ต/คอม) ให้แถวคู่เรียงซ้าย-ขวาแทน */
@@ -604,7 +621,7 @@
         .btn-close-modal:active {
             background: #e5e7eb;
         }
-        
+                
     </style>
 </head>
 <body>
@@ -630,27 +647,31 @@
             </div>
 
             <div class="form-group">
-                <input type="text" id="FirstName" required placeholder="ชื่อจริง">
+                <input type="text" id="FirstName" required placeholder=" ">
+                <span class="fake-placeholder">ชื่อจริง <span style="color: #ef4444;">*</span></span>
             </div>
 
             <div class="form-group">
-                <input type="text" id="LastName" required placeholder="นามสกุล">
+                <input type="text" id="LastName" required placeholder=" ">
+                <span class="fake-placeholder">นามสกุล <span style="color: #ef4444;">*</span></span>
             </div>
-                       
+                        
             <div class="form-group">
-                <input type="text" id="DisplayName" required placeholder="ชื่อเล่น">
+                <input type="text" id="DisplayName" placeholder="ชื่อเล่น">
             </div>
 
             <div class="form-group">
-                <input type="tel" id="Phone" required pattern="[0-9]{10}" placeholder="เบอร์โทรศัพท์ 10 หลัก" title="กรุณากรอกตัวเลข 10 หลักให้ครบถ้วน">
+                <input type="tel" id="Phone" required pattern="[0-9]{10}" placeholder=" " title="กรุณากรอกตัวเลข 10 หลักให้ครบถ้วน">
+                <span class="fake-placeholder">เบอร์โทรศัพท์ 10 หลัก <span style="color: #ef4444;">*</span></span>
             </div>
+
             <div class="form-group">
                 <input type="text" id="Batch" placeholder="รุ่นการศึกษา (กรณีศิษย์เก่า)">
             </div>
             
             <div class="form-group">
                 <input type="email" id="Email" placeholder="อีเมล (เช่น example@email.com)">
-            </div>          
+            </div>
         </div>
 
         <!-- Section 2: การสนับสนุนและของที่ระลึก -->
@@ -671,7 +692,7 @@
             
             <div class="form-group" id="customAmountGroup" style="display: none;">
                 <label for="CustomAmount">ระบุจำนวนเงิน (บาท) </span></label>
-                <input type="number" id="CustomAmount" placeholder="ระบุตัวเลข (ไม่ต้องใส่ลูกน้ำ)">
+                <input type="number" id="CustomAmount" placeholder="ระบุจำนวนเงิน">
             </div>
 
             <div class="privilege-box">
@@ -720,16 +741,16 @@
         <div class="card">
             <h3 class="card-title">การจัดส่งและการชำระเงิน</h3>
             
-            <label>รูปแบบการรับของที่ระลึก</label>
+            <label>การรับของที่ระลึก</label>
             <!-- ปุ่ม Radio แบบใหม่ -->
             <div class="radio-btn-group">
                 <label>
                     <input type="radio" name="deliveryMode" value="pickup" checked onchange="toggleAddress()">
-                    <span class="radio-btn-label">รับที่หน้างาน</span>
+                    <span class="radio-btn-label">รับหน้างาน</span>
                 </label>
                 <label>
                     <input type="radio" name="deliveryMode" value="delivery" onchange="toggleAddress()">
-                    <span class="radio-btn-label">จัดส่งที่อยู่</span>
+                    <span class="radio-btn-label">จัดส่งตามที่อยู่</span>
                 </label>
             </div>
             
@@ -951,6 +972,7 @@
                 <option value="L">L</option>
                 <option value="XL">XL</option>
                 <option value="2XL">2XL</option>
+                <option value="3XL">3XL</option>
             `;
             if (currentSizes[i]) {
                 select.value = currentSizes[i];
