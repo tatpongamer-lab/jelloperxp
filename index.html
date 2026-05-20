@@ -81,12 +81,98 @@
         .nav-tabs .nav-link {
             color: #6c757d;
         }
-        .ticket-box {
+        .vip-ticket {
             background: #fff;
-            border: 2px dashed var(--primary-blue);
             border-radius: 15px;
-            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
             position: relative;
+            max-width: 320px;
+            margin: 0 auto;
+            text-align: left;
+            border: none;
+            overflow: hidden;
+        }
+        .vip-ticket-header {
+            background: linear-gradient(135deg, var(--primary-orange), var(--primary-blue));
+            color: white;
+            padding: 15px 15px 20px;
+            text-align: center;
+            position: relative;
+        }
+        .vip-ticket-header h4 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 1.25rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+        .vip-ticket-header .ticket-id {
+            background: rgba(255,255,255,0.25);
+            padding: 2px 12px;
+            border-radius: 15px;
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+        }
+        .vip-ticket-body {
+            padding: 20px 15px 15px;
+            background: #fff;
+            position: relative;
+        }
+        /* Cutout effect */
+        .vip-ticket-body::before, .vip-ticket-body::after {
+            content: '';
+            position: absolute;
+            top: -12px;
+            width: 24px;
+            height: 24px;
+            background: #f8f9fa; /* body background */
+            border-radius: 50%;
+            z-index: 2;
+            box-shadow: inset 0 3px 5px rgba(0,0,0,0.05);
+        }
+        .vip-ticket-body::before { left: -12px; }
+        .vip-ticket-body::after { right: -12px; }
+        
+        .ticket-detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            border-bottom: 1px dashed #e9ecef;
+            padding-bottom: 6px;
+        }
+        .ticket-detail-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .ticket-detail-label {
+            color: #6c757d;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .ticket-detail-value {
+            color: var(--primary-blue);
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-align: right;
+            max-width: 75%;
+        }
+        .ticket-qr-section {
+            background: #f8f9fa;
+            margin: 15px -15px -15px -15px;
+            padding: 15px;
+            text-align: center;
+            border-top: 2px dashed #dee2e6;
+        }
+        .ticket-qr-section p {
+            color: var(--primary-orange);
+            font-weight: 700;
+            font-size: 0.75rem;
+            margin-top: 10px;
+            margin-bottom: 0;
         }
         #imagePreview {
             max-width: 100%;
@@ -118,14 +204,82 @@
         .btn-check:checked + .btn-outline-theme:hover {
             background-color: #002244;
         }
+        .gifts-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            text-align: center;
+            width: 100%;
+        }
+        .gift-item {
+            background: #f8f9fa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 10px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .gift-label {
+            font-size: 0.75rem;
+            color: var(--primary-blue);
+            margin-bottom: 8px;
+            font-weight: 600;
+            line-height: 1.2;
+            word-break: break-word;
+            width: 100%;
+        }
+        .counter-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2px;
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid #dee2e6;
+            padding: 3px;
+            width: 100%;
+            max-width: 90px;
+        }
+        .btn-counter {
+            width: 26px;
+            height: 26px;
+            border: none;
+            background: #f3f4f6;
+            color: #333;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            padding: 0;
+        }
+        .btn-counter:active {
+            background: #e5e7eb;
+            transform: scale(0.95);
+        }
+        .btn-counter.btn-add {
+            background: #e0f2fe;
+            color: var(--primary-blue);
+        }
+        .gift-qty {
+            font-weight: bold;
+            font-size: 1rem;
+            min-width: 16px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
 <div class="container pb-5" style="max-width: 500px;">
-    <div class="header-banner">
-        <h2 class="title-thai">แคแสดสัมพันธ์ ครั้งที่ 4</h2>
-        <p class="title-eng mb-0">The 4th PCSHS NST Alumni Reunion</p>
+    <div style="text-align: center; margin-bottom: 30px;">
+        <img src="image/header.jpg" alt="แคแสดสัมพันธ์ ครั้งที่ 4" style="width: 100%; border-radius: 0 0 25px 25px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);">
     </div>
 
     <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
@@ -220,18 +374,33 @@
 
                 <div class="card p-3">
                     <h5 class="text-primary mb-3" style="color: var(--primary-blue)!important;">ผู้ติดตาม</h5>
-                    <div class="row text-center g-2">
-                        <div class="col-4">
-                            <label class="form-label mb-1" style="font-size: 0.85rem; font-weight: bold;">ผู้ใหญ่<br></label>
-                            <input type="number" id="AdultCount" name="AdultCount" class="form-control text-center" value="0" min="0" onfocus="if(this.value==='0') this.value='';" onblur="if(this.value==='') this.value='0';" onchange="calcTotal()">
+                    <div class="gifts-grid">
+                        <div class="gift-item">
+                            <div class="gift-label">ผู้ใหญ่</div>
+                            <div class="counter-controls">
+                                <button type="button" class="btn-counter" onclick="updateFollower('AdultCount', -1)">-</button>
+                                <span class="gift-qty" id="qty_AdultCount">0</span>
+                                <button type="button" class="btn-counter btn-add" onclick="updateFollower('AdultCount', 1)">+</button>
+                            </div>
+                            <input type="hidden" id="AdultCount" name="AdultCount" value="0">
                         </div>
-                        <div class="col-4">
-                            <label class="form-label mb-1" style="font-size: 0.85rem; font-weight: bold;">เด็ก ≥ 12 ปี<br></label>
-                            <input type="number" id="ChildO12" name="ChildO12" class="form-control text-center" value="0" min="0" onfocus="if(this.value==='0') this.value='';" onblur="if(this.value==='') this.value='0';" onchange="calcTotal()">
+                        <div class="gift-item">
+                            <div class="gift-label">เด็ก ≥ 12 ปี</div>
+                            <div class="counter-controls">
+                                <button type="button" class="btn-counter" onclick="updateFollower('ChildO12', -1)">-</button>
+                                <span class="gift-qty" id="qty_ChildO12">0</span>
+                                <button type="button" class="btn-counter btn-add" onclick="updateFollower('ChildO12', 1)">+</button>
+                            </div>
+                            <input type="hidden" id="ChildO12" name="ChildO12" value="0">
                         </div>
-                        <div class="col-4">
-                            <label class="form-label mb-1" style="font-size: 0.85rem; font-weight: bold;">เด็ก < 12 ปี<br></label>
-                            <input type="number" id="ChildU12" name="ChildU12" class="form-control text-center" value="0" min="0" onfocus="if(this.value==='0') this.value='';" onblur="if(this.value==='') this.value='0';">
+                        <div class="gift-item">
+                            <div class="gift-label">เด็ก &lt; 12 ปี</div>
+                            <div class="counter-controls">
+                                <button type="button" class="btn-counter" onclick="updateFollower('ChildU12', -1)">-</button>
+                                <span class="gift-qty" id="qty_ChildU12">0</span>
+                                <button type="button" class="btn-counter btn-add" onclick="updateFollower('ChildU12', 1)">+</button>
+                            </div>
+                            <input type="hidden" id="ChildU12" name="ChildU12" value="0">
                         </div>
                     </div>
                 </div>
@@ -322,24 +491,43 @@
 
     <div id="ticketResult" class="mt-4" style="display: none; text-align: center;">
         
-        <div class="ticket-box mx-auto shadow-sm" id="ticketContent" style="max-width: 360px; padding: 25px; text-align: left;">
-            <h4 class="text-center mb-3" style="color: var(--primary-orange); font-weight: bold;">บัตรเข้างาน</h4>
-            <hr>
-            <p class="mb-1" style="display: none;"><strong>รหัสบัตร:</strong> <span id="t_id" class="text-primary fs-5"></span></p>
-            
-            <div style="font-size: 0.95rem; line-height: 1.6;">
-                <p class="mb-1"><strong>ชื่อ:</strong> <span id="t_name"></span></p>
-                <p class="mb-1"><strong>รุ่น:</strong> <span id="t_batch"></span></p>
-                <p class="mb-1"><strong>สิทธิ์:</strong> <span id="t_event"></span></p>
-                <p class="mb-1"><strong>อาหาร:</strong> <span id="t_food"></span></p> 
-                <p class="mb-0"><strong>ผู้ติดตาม:</strong> <span id="t_followers"></span></p>
+        <div class="vip-ticket mx-auto" id="ticketContent">
+            <div class="vip-ticket-header">
+                <h4>แคแสดสัมพันธ์ ครั้งที่ 4</h4>
+                <div class="ticket-id">ID: <span id="t_id"></span></div>
             </div>
             
-            <p class="mb-3" style="display: none;"><strong>สถานะ:</strong> <span id="t_status" class="badge bg-warning text-dark"></span></p>
-            
-            <div class="text-center bg-light p-3 rounded mt-3 border">
-                <div id="qrcode" class="d-inline-block"></div>
-                <p class="text-danger mt-2 mb-0" style="font-size: 0.8rem;">กรุณาบันทึกหน้าจอไว้เป็นหลักฐานเข้างาน</p>
+            <div class="vip-ticket-body">
+                <div class="ticket-detail-row">
+                    <span class="ticket-detail-label">ชื่อ</span>
+                    <span class="ticket-detail-value" id="t_name"></span>
+                </div>
+                <div class="ticket-detail-row">
+                    <span class="ticket-detail-label">รุ่น</span>
+                    <span class="ticket-detail-value" id="t_batch"></span>
+                </div>
+                <div class="ticket-detail-row">
+                    <span class="ticket-detail-label">สิทธิ์</span>
+                    <span class="ticket-detail-value" id="t_event"></span>
+                </div>
+                <div class="ticket-detail-row">
+                    <span class="ticket-detail-label">อาหาร</span>
+                    <span class="ticket-detail-value" id="t_food"></span>
+                </div>
+                <div class="ticket-detail-row">
+                    <span class="ticket-detail-label">ผู้ติดตาม</span>
+                    <span class="ticket-detail-value" id="t_followers"></span>
+                </div>
+                
+                <!-- ซ่อนสถานะไว้เผื่ออนาคตตามโค้ดเดิม -->
+                <div style="display: none;">
+                    <span id="t_status"></span>
+                </div>
+
+                <div class="ticket-qr-section">
+                    <div id="qrcode" class="d-inline-block bg-white p-2 rounded shadow-sm"></div>
+                    <p><i class="bi bi-camera"></i> กรุณาแคปหน้าจอเพื่อใช้เข้างาน</p>
+                </div>
             </div>
         </div>
 
@@ -399,6 +587,34 @@
     function copyAcc() {
         navigator.clipboard.writeText("020424234159");
         Swal.fire({icon: 'success', title: 'คัดลอกเลขบัญชีแล้ว', timer: 1000, showConfirmButton: false});
+    }
+
+    // อัปเดตจำนวนผู้ติดตาม
+    function updateFollower(id, change) {
+        const input = document.getElementById(id);
+        const span = document.getElementById('qty_' + id);
+        let val = parseInt(input.value) || 0;
+        
+        if (change > 0) {
+            const adult = parseInt(document.getElementById('AdultCount').value) || 0;
+            const childO12 = parseInt(document.getElementById('ChildO12').value) || 0;
+            const childU12 = parseInt(document.getElementById('ChildU12').value) || 0;
+            if (adult + childO12 + childU12 >= 10) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'จำกัดจำนวน',
+                    text: 'สามารถระบุผู้ติดตามรวมได้สูงสุด 10 คน',
+                    confirmButtonColor: '#003366'
+                });
+                return;
+            }
+        }
+        
+        val += change;
+        if (val < 0) val = 0;
+        input.value = val;
+        span.innerText = val;
+        calcTotal();
     }
 
     // 4. คำนวณราคา (อัปเดตใหม่ทั้งหมดตามเรทใหม่ และใช้ Checkbox)
@@ -899,7 +1115,7 @@
 
         document.getElementById('t_id').innerText = t.ticketId;
         document.getElementById('t_name').innerText = t.name;
-        document.getElementById('t_batch').innerText = t.batch ? `(${t.batch})` : "";
+        document.getElementById('t_batch').innerText = t.batch ? `${t.batch}` : "";
         document.getElementById('t_event').innerText = t.event;
         document.getElementById('t_food').innerText = t.food; // แสดงข้อมูลอาหารบนบัตร
         document.getElementById('t_followers').innerText = t.followers;
