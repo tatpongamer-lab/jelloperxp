@@ -621,7 +621,29 @@
         .btn-close-modal:active {
             background: #e5e7eb;
         }
-                
+        
+        .btn-view-image {
+            background-color: #fff0e6;
+            color: var(--primary-orange);
+            border: 1px solid rgba(255,102,0,0.3);
+            border-radius: 12px;
+            padding: 3px 8px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+        .btn-view-image:hover {
+            background-color: var(--primary-orange);
+            color: white;
+        }
+        .btn-view-image:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body>
@@ -702,7 +724,10 @@
             <!-- ของที่ระลึกจัดเรียงบรรทัดเดียวกัน -->
             <div class="gifts-grid">
                 <div class="gift-item">
-                    <div class="gift-label">บัตรเข้างาน</div>
+                    <div class="gift-label" style="margin-bottom: 2px;">บัตรเข้างาน</div>
+                    <button type="button" class="btn-view-image" onclick="openImageModal('รายละเอียดงาน', 'image/header.jpg')">
+                        <i class="bi bi-image"></i> รายละเอียด
+                    </button>
                     <div class="counter-controls">
                         <button type="button" class="btn-counter" onclick="updateGift('ticket', -1)">-</button>
                         <span class="gift-qty" id="qty_ticket">0</span>
@@ -710,10 +735,10 @@
                     </div>
                 </div>
                 <div class="gift-item">
-                    <div class="gift-label" style="display: flex; align-items: center; justify-content: center; gap: 2px;">
-                        เสื้อที่ระลึก
-                        <span class="info-icon" onclick="openSizeModal()">!</span>
-                    </div>
+                    <div class="gift-label" style="margin-bottom: 2px;">เสื้อที่ระลึก</div>
+                    <button type="button" class="btn-view-image" onclick="openImageModal('รูปแบบเสื้อ', 'image/size-chart.jpg')">
+                        <i class="bi bi-image"></i> รูปแบบเสื้อ
+                    </button>
                     <div class="counter-controls">
                         <button type="button" class="btn-counter" onclick="updateGift('shirt', -1)">-</button>
                         <span class="gift-qty" id="qty_shirt">0</span>
@@ -721,7 +746,10 @@
                     </div>
                 </div>
                 <div class="gift-item">
-                    <div class="gift-label">แก้วเก็บความเย็น</div>
+                    <div class="gift-label" style="margin-bottom: 2px;">แก้วเก็บความเย็น</div>
+                    <button type="button" class="btn-view-image" onclick="openImageModal('รูปแบบแก้ว', 'image/tumbler.png')">
+                        <i class="bi bi-image"></i> รูปแบบแก้ว
+                    </button>
                     <div class="counter-controls">
                         <button type="button" class="btn-counter" onclick="updateGift('tumbler', -1)">-</button>
                         <span class="gift-qty" id="qty_tumbler">0</span>
@@ -833,14 +861,14 @@
     </div>
 </div>
 
-<div id="sizeModal" class="modal-overlay" onclick="closeSizeModal(event)">
+<div id="imageModal" class="modal-overlay" onclick="closeImageModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <h4 style="margin: 0; color: var(--primary-blue);">ตารางไซส์เสื้อ (Size Chart)</h4>
-            <button type="button" class="btn-close-modal" onclick="closeSizeModal()">×</button>
+            <h4 id="modalTitle" style="margin: 0; color: var(--primary-blue);">รายละเอียด</h4>
+            <button type="button" class="btn-close-modal" onclick="closeImageModal()">×</button>
         </div>
         <div class="modal-body">
-            <img src="\image\size-chart.jpg" alt="Size Chart" style="width: 100%; height: auto; border-radius: 8px;">
+            <img id="modalImg" src="" alt="Preview" style="width: 100%; height: auto; border-radius: 8px;">
         </div>
     </div>
 </div>
@@ -967,12 +995,12 @@
             select.style.padding = "8px"; 
             select.innerHTML = `
                 <option value="">ตัวที่ ${i + 1}</option>
-                <option value="S">S</option>
-                <option value="M">M</option>
-                <option value="L">L</option>
-                <option value="XL">XL</option>
-                <option value="2XL">2XL</option>
-                <option value="3XL">3XL</option>
+                <option value="S">S (36")</option>
+                <option value="M">M (38")</option>
+                <option value="L">L (40")</option>
+                <option value="XL">XL (42")</option>
+                <option value="2XL">2XL (44")</option>
+                <option value="3XL">3XL (46")</option>
             `;
             if (currentSizes[i]) {
                 select.value = currentSizes[i];
@@ -1047,15 +1075,17 @@
         }
     }
 
-    function openSizeModal() {
-        const modal = document.getElementById('sizeModal');
+    function openImageModal(title, src) {
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalImg').src = src;
+        const modal = document.getElementById('imageModal');
         modal.classList.add('show');
     }
 
-    function closeSizeModal(event) {
+    function closeImageModal(event) {
         // ปิดเมื่อกดปุ่ม X หรือคลิกพื้นที่ฉากหลัง
-        if (!event || event.target.id === 'sizeModal') {
-            document.getElementById('sizeModal').classList.remove('show');
+        if (!event || event.target.id === 'imageModal') {
+            document.getElementById('imageModal').classList.remove('show');
         }
     }
 
