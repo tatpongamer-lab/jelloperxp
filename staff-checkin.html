@@ -12,16 +12,16 @@
 
     <style>
         :root {
-            --primary-orange: #f0883e;
-            --primary-blue: #58a6ff;
-            --bg-dark: #0d1117;
-            --card-dark: #161b22;
-            --card-border: #30363d;
-            --text-primary: #e6edf3;
-            --text-secondary: #8b949e;
-            --success: #3fb950;
-            --warning: #d29922;
-            --danger: #f85149;
+            --primary-orange: #f59e0b;
+            --primary-blue: #3b82f6;
+            --bg-dark: #0f172a;
+            --card-dark: #1e293b;
+            --card-border: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
         }
         body { background-color: var(--bg-dark); font-family: 'Sarabun', sans-serif; color: var(--text-primary); }
         .staff-header {
@@ -146,32 +146,48 @@
 
     <div id="result-section">
         <div class="card-box">
-            <h5 class="text-center text-primary mb-3">ข้อมูล</h5>
-            <hr>
-            <div class="data-value" id="r_name">-</div>
-
-            <div class="data-value text-success" id="r_event">-</div>
-
-            <div class="alert alert-sticker p-3 mb-3 fw-bold" id="alert-sticker" style="display: none;">
-                🟢 แจกสติ๊กเกอร์: <span id="r_sticker_count" class="fs-4 text-danger">0</span> ชิ้น
+            <h5 class="text-center text-primary mb-3 fw-bold">ข้อมูลการลงทะเบียน</h5>
+            <div class="p-3 bg-light rounded border mb-3">
+                <div class="row mb-2">
+                    <div class="col-4 text-muted small">หมายเลขบัตร</div>
+                    <div class="col-8 fw-bold text-end" id="r_ticket_id">-</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-4 text-muted small">ชื่อ-สกุล</div>
+                    <div class="col-8 fw-bold text-end" id="r_name">-</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-4 text-muted small">รุ่น</div>
+                    <div class="col-8 fw-bold text-end" id="r_batch">-</div>
+                </div>
+                <div class="row">
+                    <div class="col-4 text-muted small">ประเภทงาน</div>
+                    <div class="col-8 fw-bold text-end text-success" id="r_event">-</div>
+                </div>
             </div>
 
-            <div class="alert alert-wristband p-3 mb-3 fw-bold" id="alert-wristband" style="display: none;">
-                🔵 แจกสายรัดข้อมือ: <span id="r_wristband_count" class="fs-4 text-danger">0</span> เส้น
-            </div>
-
-            <div class="alert alert-pending p-3 mb-3 fw-bold" id="alert-pending" style="display: none;">
-                ⚠️ สถานะ: PENDING (รอตรวจสอบสลิป)<br>
-                <small class="fw-normal">กรุณาตรวจสอบสลิปในมือถือผู้ร่วมงาน หรือเก็บเงินสด</small>
-            </div>
-
-            <div class="p-3 bg-light rounded border mb-4">
-                <div class="fw-bold mb-2">ผู้ติดตาม:</div>
+            <div class="p-3 bg-light rounded border mb-3">
+                <div class="fw-bold mb-2">ผู้ติดตาม (รวม <span id="r_total_pax">0</span> ท่าน):</div>
                 <div class="row text-center">
                     <div class="col-4"><small class="text-muted">ผู้ใหญ่</small><br><span id="r_adult" class="fs-5 fw-bold">0</span></div>
                     <div class="col-4"><small class="text-muted">เด็กโต</small><br><span id="r_childO12" class="fs-5 fw-bold">0</span></div>
                     <div class="col-4"><small class="text-muted">เด็กเล็ก</small><br><span id="r_childU12" class="fs-5 fw-bold">0</span></div>
                 </div>
+            </div>
+
+            <div class="alert alert-sticker p-3 mb-2 fw-bold d-flex justify-content-between align-items-center" id="alert-sticker" style="display: none;">
+                <div>🟢 สติ๊กเกอร์</div>
+                <div class="fs-4 text-danger"><span id="r_sticker_count">0</span> ชิ้น</div>
+            </div>
+
+            <div class="alert alert-wristband p-3 mb-3 fw-bold d-flex justify-content-between align-items-center" id="alert-wristband" style="display: none;">
+                <div>🔵 สายรัดข้อมือ</div>
+                <div class="fs-4 text-danger"><span id="r_wristband_count">0</span> เส้น</div>
+            </div>
+
+            <div class="alert alert-pending p-3 mb-3 fw-bold" id="alert-pending" style="display: none;">
+                ⚠️ สถานะ: PENDING (รอตรวจสอบสลิป)<br>
+                <small class="fw-normal">กรุณาตรวจสอบสลิปในมือถือผู้ร่วมงาน หรือเก็บเงินสด</small>
             </div>
 
             <button type="button" class="btn btn-success w-100 btn-huge mb-2 shadow-sm" onclick="confirmCheckIn()">✅ ยืนยัน</button>
@@ -189,7 +205,13 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p class="text-muted small">เรทราคา: กลางวัน 300.- / กลางคืน 1,000.- / เด็กโต 500.-</p>
+                <p class="text-muted small">เรทราคาผู้ใหญ่: กลางวัน 300.- / กลางคืน 1,000.- / ทั้งวัน 1,300.-<br>เด็กโต: 500.- (เฉพาะมีงานกลางคืน)</p>
+                <select id="exEvent" class="form-select mb-3" onchange="calcExtraPrice()">
+                    <option value="">-- ใช้ประเภทงานเดียวกับตั๋วหลัก --</option>
+                    <option value="DAY_ONLY">เฉพาะกลางวัน</option>
+                    <option value="NIGHT_ONLY">เฉพาะกลางคืน</option>
+                    <option value="DAY_NIGHT">กลางวันและกลางคืน</option>
+                </select>
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <label class="fw-bold">ผู้ใหญ่</label>
                     <input type="number" id="exAdult" class="form-control w-25 text-center" value="0" min="0" onchange="calcExtraPrice()">
@@ -232,7 +254,7 @@
             <div class="modal-body">
                 <div class="row g-2 mb-2">
                     <div class="col-4">
-                        <select id="wkPrefix" class="form-select" required>
+                        <select id="wkPrefix" class="form-select" onchange="var o=document.getElementById('wkPrefixOther'); if(this.value==='อื่นๆ'){o.style.display='block'; o.focus();}else{o.style.display='none'; o.value='';}" required>
                             <option value="">คำนำหน้า*</option>
                             <option value="นาย">นาย</option>
                             <option value="นาง">นาง</option>
@@ -241,31 +263,32 @@
                         </select>
                     </div>
                     <div class="col-8">
-                        <input type="text" id="wkFirst" class="form-control" placeholder="ชื่อจริง" required>
+                        <input type="text" id="wkPrefixOther" class="form-control" placeholder="ระบุคำนำหน้า" style="display: none;">
                     </div>
                 </div>
-                <div class="row g-2 mb-3">
-                    <div class="col-7">
-                        <input type="text" id="wkLast" class="form-control" placeholder="นามสกุล" required>
-                    </div>
-                    <div class="col-5">
-                        <input type="text" id="wkNick" class="form-control" placeholder="ชื่อเล่น" required>
-                    </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-6"><input type="text" id="wkFirst" class="form-control" placeholder="ชื่อจริง" required></div>
+                    <div class="col-6"><input type="text" id="wkLast" class="form-control" placeholder="นามสกุล" required></div>
                 </div>
-                <div class="row g-2 mb-3">
+                <div class="row g-2 mb-2">
                     <div class="col-6"><input type="tel" id="wkPhone" class="form-control" placeholder="เบอร์โทร" maxlength="10" required></div>
+                    <div class="col-6"><input type="text" id="wkNick" class="form-control" placeholder="ชื่อเล่น"></div>
+                </div>
+                <div class="row g-2 mb-3">
                     <div class="col-6">
                         <select id="wkBatch" class="form-select" required>
                             <option value="">-- เลือกรุ่น --</option>
                         </select>
                     </div>
+                    <div class="col-6">
+                        <select id="wkEvent" class="form-select" onchange="calcWalkinPrice()" required>
+                            <option value="">-- ประเภทงาน --</option>
+                            <option value="DAY_ONLY">เฉพาะกลางวัน</option>
+                            <option value="NIGHT_ONLY">เฉพาะกลางคืน</option>
+                            <option value="DAY_NIGHT">กลางวัน+กลางคืน</option>
+                        </select>
+                    </div>
                 </div>
-                <select id="wkEvent" class="form-select mb-3" onchange="calcWalkinPrice()" required>
-                    <option value="">-- เลือกประเภทร่วมงาน  --</option>
-                    <option value="DAY_ONLY">เฉพาะกลางวัน </option>
-                    <option value="NIGHT_ONLY">เฉพาะกลางคืน </option>
-                    <option value="DAY_NIGHT">กลางวันและกลางคืน </option>
-                </select>
                 <label class="fw-bold mb-1">ผู้ติดตาม</label>
                 <div class="row g-2 mb-3 text-center">
                     <div class="col-4"><small>ผู้ใหญ่</small><input type="number" id="wkAdult" class="form-control text-center" value="0" min="0" onchange="calcWalkinPrice()"></div>
@@ -298,7 +321,7 @@
     const IMGBB_API_KEY = "4c346c47d9368db66076ef2e49b5b285";
     const OPERATOR_NAME = "STAFF_GATE_1"; 
     
-    let html5QrcodeScanner;
+
     let currentTicket = null;
     let extraAmount = 0;
     let walkinAmount = 0;
@@ -313,6 +336,9 @@
     // --- 1. Initialization ---
     window.addEventListener('DOMContentLoaded', () => {
         const batchSelect = document.getElementById('wkBatch');
+        batchSelect.innerHTML += `<option value="HS1">ม.ปลาย รุ่น 1</option>`;
+        batchSelect.innerHTML += `<option value="HS2">ม.ปลาย รุ่น 2</option>`;
+        batchSelect.innerHTML += `<option value="HS3">ม.ปลาย รุ่น 3</option>`;
         for(let i=1; i<=30; i++) batchSelect.innerHTML += `<option value="${i}/${i+3}">รุ่น ${i}/${i+3}</option>`;
 
         // 🚀 สั่งเปิดกล้องหลังอัตโนมัติ (Auto-Start Environment Camera)
@@ -364,12 +390,25 @@
         }
 
         currentTicket = res;
-        document.getElementById('r_name').innerText = `${res.name} (รุ่น ${res.batch})`;
+        document.getElementById('r_ticket_id').innerText = res.ticketId;
+        document.getElementById('r_name').innerText = res.name;
+        
+        let batchDisplay = String(res.batch || "");
+        if(batchDisplay.startsWith("HS")) {
+            batchDisplay = "ม.ปลาย รุ่น " + batchDisplay.replace("HS", "");
+        } else if(batchDisplay !== "TEACHER" && batchDisplay !== "SPONSOR") {
+            batchDisplay = "รุ่น " + batchDisplay;
+        }
+        document.getElementById('r_batch').innerText = batchDisplay;
+        
         const eventLabels = { DAY_ONLY: "เฉพาะกลางวัน ☀️", NIGHT_ONLY: "เฉพาะกลางคืน 🌙", DAY_NIGHT: "กลางวันและกลางคืน ☀️🌙" };
         document.getElementById('r_event').innerText = eventLabels[res.eventType] || res.eventType;
         document.getElementById('r_adult').innerText = res.adult;
         document.getElementById('r_childO12').innerText = res.childO12;
         document.getElementById('r_childU12').innerText = res.childU12;
+        
+        const followersCount = parseInt(res.adult || 0) + parseInt(res.childO12 || 0) + parseInt(res.childU12 || 0);
+        document.getElementById('r_total_pax').innerText = followersCount;
 
         const totalPax = 1 + parseInt(res.adult || 0) + parseInt(res.childO12 || 0) + parseInt(res.childU12 || 0);
         const wbCount = 1 + parseInt(res.adult || 0) + parseInt(res.childO12 || 0);
@@ -378,14 +417,14 @@
         const alertSt = document.getElementById('alert-sticker');
         if (res.eventType === "DAY_ONLY" || res.eventType === "DAY_NIGHT") {
             document.getElementById('r_sticker_count').innerText = totalPax;
-            alertSt.style.display = 'block';
+            alertSt.style.display = 'flex';
         } else { alertSt.style.display = 'none'; }
 
         // 🔵 สายรัดข้อมือ = งานกลางคืน (ไม่รวมเด็กเล็ก)
         const alertWb = document.getElementById('alert-wristband');
         if (res.eventType === "NIGHT_ONLY" || res.eventType === "DAY_NIGHT") {
             document.getElementById('r_wristband_count').innerText = wbCount;
-            alertWb.style.display = 'block';
+            alertWb.style.display = 'flex';
         } else { alertWb.style.display = 'none'; }
 
         document.getElementById('alert-pending').style.display = (res.paymentStatus === 'PENDING') ? 'block' : 'none';
@@ -411,17 +450,28 @@
 
     // --- 4. Extra Pax Logic (เพิ่มคนหน้างาน) ---
     function openExtraModal() {
+        document.getElementById('exEvent').value = "";
         document.getElementById('exAdult').value = 0; document.getElementById('exChildO12').value = 0; document.getElementById('exChildU12').value = 0;
         document.getElementById('exSlipInput').value = ""; document.getElementById('exSlipPreview').style.display = 'none'; document.getElementById('exSlipBase64').value = "";
         calcExtraPrice(); getExtraModal().show();
     }
 
     function calcExtraPrice() {
-        const type = currentTicket.eventType;
+        const type = document.getElementById('exEvent').value || currentTicket.eventType;
         const adult = parseInt(document.getElementById('exAdult').value) || 0;
         const childO12 = parseInt(document.getElementById('exChildO12').value) || 0;
-        const rateAdult = type === "DAY_ONLY" ? 300 : 1000;
-        const rateChild = type === "DAY_ONLY" ? 0 : 500; 
+        
+        let rateAdult = 0;
+        let rateChild = 0;
+
+        if (type === "DAY_ONLY") {
+            rateAdult = 300; rateChild = 0;
+        } else if (type === "NIGHT_ONLY") {
+            rateAdult = 1000; rateChild = 500;
+        } else if (type === "DAY_NIGHT") {
+            rateAdult = 1300; rateChild = 500;
+        }
+        
         extraAmount = (adult * rateAdult) + (childO12 * rateChild);
         document.getElementById('exPriceDisplay').innerText = extraAmount.toLocaleString();
         document.getElementById('extraSlipSection').style.display = extraAmount > 0 ? 'block' : 'none';
@@ -443,6 +493,7 @@
 
             const res = await fetchGAS({
                 action: "checkin", ticketId: currentTicket.ticketId, eventType: currentTicket.eventType,
+                extraEventType: document.getElementById('exEvent').value || currentTicket.eventType,
                 actualCount: parseInt(currentTicket.adult||0) + parseInt(currentTicket.childO12||0) + parseInt(currentTicket.childU12||0), operator: OPERATOR_NAME,
                 addedAdult: a, addedChildO12: cO12, addedChildU12: cU12, extraAmount: extraAmount, slipUrl: slipUrl
             });
@@ -458,7 +509,8 @@
 
     // --- 5. Walk-in Logic ---
     function openWalkinModal() {
-        document.getElementById('wkFirst').value = ""; document.getElementById('wkLast').value = ""; document.getElementById('wkPhone').value = "";
+        document.getElementById('wkPrefix').value = ""; document.getElementById('wkPrefixOther').value = ""; document.getElementById('wkPrefixOther').style.display = 'none';
+        document.getElementById('wkFirst').value = ""; document.getElementById('wkLast').value = ""; document.getElementById('wkNick').value = ""; document.getElementById('wkPhone').value = "";
         document.getElementById('wkBatch').value = ""; document.getElementById('wkEvent').value = "";
         document.getElementById('wkAdult').value = 0; document.getElementById('wkChildO12').value = 0; document.getElementById('wkChildU12').value = 0;
         document.getElementById('wkSlipInput').value = ""; document.getElementById('wkSlipPreview').style.display = 'none'; document.getElementById('wkSlipBase64').value = "";
@@ -491,10 +543,14 @@
     }
 
     async function submitWalkin() {
+        const prefix = document.getElementById('wkPrefix').value;
         const fName = document.getElementById('wkFirst').value, lName = document.getElementById('wkLast').value, phone = document.getElementById('wkPhone').value;
         const batch = document.getElementById('wkBatch').value, eventType = document.getElementById('wkEvent').value, base64Slip = document.getElementById('wkSlipBase64').value;
 
+        if(!prefix) { Swal.fire('แจ้งเตือน', 'กรุณาเลือกคำนำหน้า', 'warning'); return; }
+        if(prefix === 'อื่นๆ' && !document.getElementById('wkPrefixOther').value.trim()) { Swal.fire('แจ้งเตือน', 'กรุณาระบุคำนำหน้า', 'warning'); return; }
         if(!fName || !lName || !phone || !batch || !eventType) { Swal.fire('แจ้งเตือน', 'กรุณากรอกข้อมูล * ให้ครบ', 'warning'); return; }
+        if(!/^0[0-9]{9}$/.test(phone)) { Swal.fire('แจ้งเตือน', 'เบอร์โทรไม่ถูกต้อง (ต้อง 10 หลัก)', 'warning'); return; }
         if(walkinAmount > 0 && !base64Slip) { Swal.fire('แจ้งเตือน', 'กรุณาถ่ายรูปสลิป', 'error'); return; }
 
         getWalkinModal().hide(); showLoading("สร้างตั๋วและเช็คอิน...");
@@ -505,6 +561,7 @@
             const res = await fetchGAS({
                 action: "walkin",
                 PrefixType: document.getElementById('wkPrefix').value,
+                PrefixCustom: document.getElementById('wkPrefixOther').value,
                 FirstName: fName, LastName: lName,
                 Nickname: document.getElementById('wkNick').value,
                 Phone: phone, Batch: batch, EventType: eventType,
@@ -518,7 +575,7 @@
                 const wkCU12 = parseInt(document.getElementById('wkChildU12').value||0);
                 const totalSt = 1 + wkA + wkC12 + wkCU12;
                 const totalWb = 1 + wkA + wkC12;
-                let wbMsg = buildDistributionMsg(eventType, totalSt, totalWb);
+                let wbMsg = `หมายเลขบัตร: <b>${res.ticketId}</b><br><br>` + buildDistributionMsg(eventType, totalSt, totalWb);
                 Swal.fire({icon: 'success', title: 'สำเร็จ!', html: wbMsg}).then(() => resetScanner());
             } else { Swal.fire('ข้อผิดพลาด', res.message, 'error').then(() => { isProcessing = false; }); }
         } catch(e) { Swal.fire('Error', `บันทึกไม่สำเร็จ: ${e.message}`, 'error').then(() => { isProcessing = false; }); }
@@ -592,3 +649,5 @@
         document.getElementById('scanner-section').style.display = 'block';
     }
 </script>
+</body>
+</html>
