@@ -13,50 +13,53 @@
 
     <style>
         :root { 
-            /* Friendly Dark Mode Colors */
-            --bg-dark: #111827; 
-            --bg-panel: #1f2937; 
-            --bg-elevated: #374151;
-            --border: #374151; 
-            --text-main: #f3f4f6; 
-            --text-muted: #9ca3af;
-            --accent: #38bdf8; 
-            --accent-hover: #0ea5e9;
+            /* Brand Colors & Refined Light Mode */
+            --primary-orange: #FF6600;
+            --primary-blue: #003366;
+            --accent-sky: #0284c7;
+            --bg-body: #f4f7f9; 
+            --bg-card: rgba(235, 110, 57, 0.3); /* Translucent very light orange */
+            --border-sky: #0284c7; 
+            --text-main: #1e293b; 
+            --text-muted: #64748b;
             --border-radius: 12px;
         }
-        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Prompt', sans-serif; }
-        .admin-header { background-color: var(--bg-panel); padding: 20px; border-bottom: 1px solid var(--border); text-align: center; }
-        .card-custom { background-color: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--border-radius); padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .form-control, .form-select { background-color: var(--bg-dark); border-color: var(--border); color: white; padding: 12px 15px; border-radius: 8px; transition: all 0.2s; }
-        .form-control::placeholder { color: #6b7280; opacity: 1; }
-        .form-control:focus, .form-select:focus { background-color: var(--bg-dark); color: white; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15); }
-        .btn-primary { background-color: var(--accent); border: none; font-weight: bold; color: #000; border-radius: 8px; }
-        .btn-primary:hover { background-color: var(--accent-hover); color: #000; }
-        .nav-tabs { border-bottom: 1px solid var(--border); }
-        .nav-link { color: var(--text-muted); transition: all 0.2s; border-radius: 8px 8px 0 0; }
-        .nav-link:hover { color: var(--text-main); border-color: transparent transparent var(--border) transparent; }
-        .nav-link.active { background-color: var(--bg-panel) !important; color: var(--accent) !important; border-color: var(--border) var(--border) var(--bg-panel) !important; font-weight: bold; }
-        .vip-ticket { background: #fff; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); position: relative; max-width: 320px; margin: 0 auto; text-align: left; border: none; overflow: hidden; color: #000; }
-        .vip-ticket-header { background: linear-gradient(135deg, #E65C00, #003366); color: white; padding: 15px 15px 20px; text-align: center; position: relative; }
-        .vip-ticket-header h4 { margin: 0; font-weight: 700; font-size: 1.25rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
-        .vip-ticket-header .ticket-id { background: rgba(255,255,255,0.25); padding: 2px 12px; border-radius: 15px; display: inline-block; margin-top: 8px; font-size: 0.85rem; letter-spacing: 1px; font-family: 'Courier New', Courier, monospace; font-weight: bold; color: white; }
-        .vip-ticket-body { padding: 20px 15px 15px; background: #fff; position: relative; }
-        .vip-ticket-body::before, .vip-ticket-body::after { content: ''; position: absolute; top: -12px; width: 24px; height: 24px; background: var(--bg-dark); border-radius: 50%; z-index: 2; box-shadow: inset 0 3px 5px rgba(0,0,0,0.3); }
-        .vip-ticket-body::before { left: -12px; }
-        .vip-ticket-body::after { right: -12px; }
-        .ticket-detail-row { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px dashed #e9ecef; padding-bottom: 6px; }
+        body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Prompt', sans-serif; }
+        .admin-header { background: linear-gradient(135deg, var(--primary-blue), var(--accent-sky)); padding: 30px 20px; text-align: center; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-bottom: 3px solid var(--primary-orange); }
+        .card-custom { background-color: white; background-image: linear-gradient(var(--bg-card), var(--bg-card)); border: 1px solid var(--border-sky); border-radius: var(--border-radius); padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.08); }
+        .form-control, .form-select { background-color: #ffffff; border-color: #cbd5e1; color: var(--text-main); padding: 12px 15px; border-radius: 8px; transition: all 0.2s; }
+        .form-control::placeholder { color: #94a3b8; opacity: 1; }
+        .form-control:focus, .form-select:focus { background-color: #ffffff; color: var(--text-main); border-color: var(--accent-sky); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
+        .btn-primary { background-color: var(--primary-blue); border: none; font-weight: 600; color: #fff; border-radius: 8px; transition: all 0.2s; }
+        .btn-primary:hover { background-color: var(--accent-sky); color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2); }
+        .nav-tabs { border-bottom: 2px solid #e2e8f0; gap: 5px; }
+        .nav-link { color: var(--text-muted); transition: all 0.2s; border: none; border-bottom: 3px solid transparent; font-weight: 500; padding: 10px 20px; }
+        .nav-link:hover { color: var(--primary-orange); border-color: transparent; }
+        .nav-link.active { background-color: transparent !important; color: var(--primary-blue) !important; border-bottom: 3px solid var(--primary-orange) !important; font-weight: 700; }
+        
+        .vip-ticket { background: #fff; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); position: relative; max-width: 320px; margin: 0 auto; text-align: left; border: 2px solid var(--primary-blue); overflow: hidden; color: #000; }
+        .vip-ticket-header { background: linear-gradient(135deg, var(--primary-blue), var(--accent-sky)); color: white; padding: 18px 15px 25px; text-align: center; position: relative; }
+        .vip-ticket-header h4 { margin: 0; font-weight: 700; font-size: 1.3rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
+        .vip-ticket-header .ticket-id { background: rgba(255,255,255,0.25); padding: 3px 14px; border-radius: 15px; display: inline-block; margin-top: 10px; font-size: 0.9rem; letter-spacing: 1px; font-family: 'Courier New', Courier, monospace; font-weight: bold; color: white; border: 1px solid rgba(255,255,255,0.3); }
+        .vip-ticket-body { padding: 25px 20px 20px; background: #fff; position: relative; }
+        .vip-ticket-body::before, .vip-ticket-body::after { content: ''; position: absolute; top: -14px; width: 28px; height: 28px; background: var(--bg-body); border-radius: 50%; z-index: 2; border: 2px solid var(--primary-blue); }
+        .vip-ticket-body::before { left: -16px; }
+        .vip-ticket-body::after { right: -16px; }
+        
+        .ticket-detail-row { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px dashed #cbd5e1; padding-bottom: 8px; }
         .ticket-detail-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .ticket-detail-label { color: #6c757d; font-size: 0.8rem; font-weight: 600; }
-        .ticket-detail-value { color: #003366; font-weight: 700; font-size: 0.85rem; text-align: right; max-width: 75%; }
-        .ticket-qr-section { background: #f8f9fa; margin: 15px -15px -15px -15px; padding: 15px; text-align: center; border-top: 2px dashed #dee2e6; }
-        #authSection { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .ticket-detail-label { color: #64748b; font-size: 0.85rem; font-weight: 600; }
+        .ticket-detail-value { color: var(--primary-blue); font-weight: 700; font-size: 0.95rem; text-align: right; max-width: 75%; }
+        .ticket-qr-section { background: #f8fafc; margin: 20px -20px -20px -20px; padding: 20px; text-align: center; border-top: 2px dashed #cbd5e1; }
+        
+        #authSection { min-height: 100vh; display: flex; align-items: center; justify-content: center; background-color: var(--bg-body); }
         #mainApp { display: none; }
 
         /* ================= ปุ่มกดแบบ Custom (Card Select) ================= */
         .btn-check-custom { display: none; }
         .btn-label-custom {
-            border: 2px solid var(--border);
-            background-color: var(--bg-dark);
+            border: 2px solid #e2e8f0;
+            background-color: #fff;
             color: var(--text-main);
             padding: 12px;
             border-radius: 10px;
@@ -72,15 +75,16 @@
             user-select: none;
         }
         .btn-label-custom:hover {
-            border-color: #4b5563;
-            background-color: rgba(255, 255, 255, 0.05);
+            border-color: var(--accent-sky);
+            background-color: #f0f9ff;
         }
         /* สถานะตอนถูกกด (Active) */
         .btn-check-custom:checked + .btn-label-custom {
-            background-color: rgba(56, 189, 248, 0.1);
-            border-color: var(--accent);
-            color: var(--accent);
+            background-color: #f0f9ff;
+            border-color: var(--accent-sky);
+            color: var(--accent-sky);
             font-weight: 600;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
         }
     </style>
 </head>
@@ -88,7 +92,7 @@
 
 <div id="authSection" class="container">
     <div class="card-custom text-center" style="max-width: 400px; width: 100%;">
-        <h4 class="text-white mb-3">🔐 Admin Access</h4>
+        <h4 class="text-primary mb-3"><i class="bi bi-shield-lock-fill"></i> Admin Access</h4>
         <input type="password" id="pinInput" class="form-control text-center fs-4 mb-3" placeholder="Enter PIN" maxlength="6">
         <button class="btn btn-primary w-100 py-2" onclick="login()">เข้าสู่ระบบ</button>
     </div>
@@ -96,7 +100,7 @@
 
 <div id="mainApp">
     <div class="admin-header mb-4">
-        <h3 class="text-white m-0">Registration</h3>
+        <h3 class="m-0"><i class="bi bi-person-badge-fill me-2"></i>Registration</h3>
     </div>
 
     <!-- บีบความกว้างเป็น 500px จัดให้อยู่ตรงกลาง -->
@@ -114,29 +118,30 @@
                     <div class="card-custom">
                         <div class="d-flex gap-2">
                             <input type="radio" name="vipType" id="typeTeacher" value="TEACHER" class="btn-check-custom" checked onchange="toggleForm()">
-                            <label class="btn-label-custom py-3" for="typeTeacher"><span class="fs-4"></span> อาจารย์</label>
+                            <label class="btn-label-custom py-3" for="typeTeacher"><i class="bi bi-person-workspace"></i> อาจารย์</label>
                             
                             <input type="radio" name="vipType" id="typeSponsor" value="SPONSOR" class="btn-check-custom" onchange="toggleForm()">
-                            <label class="btn-label-custom py-3" for="typeSponsor"><span class="fs-4"></span> สปอนเซอร์</label>
+                            <label class="btn-label-custom py-3" for="typeSponsor"><i class="bi bi-briefcase-fill"></i> สปอนเซอร์</label>
                         </div>
                     </div>
 
                     <div class="card-custom">
                         <div class="row g-3 mb-3">
-                            <div class="col-6"><input type="text" id="fName" class="form-control" placeholder="ชื่อจริง (เว้นคำนำหน้า)" required></div>
+                            <div class="col-6"><input type="text" id="fName" class="form-control" placeholder="ชื่อจริง" required></div>
                             <div class="col-6"><input type="text" id="lName" class="form-control" placeholder="นามสกุล" required></div>
                             <div class="col-12"><input type="tel" id="phone" class="form-control" placeholder="เบอร์โทรศัพท์ (10 หลัก)" pattern="0[0-9]{9}" required></div>
                         </div>
                         
                         <div id="sponsorFields" style="display: none;">
                             <div class="mb-3">
-                                <label class="form-label text-white small mb-1">ชื่อบริษัท / หน่วยงาน / ร้านค้า</label>
+                                <label class="form-label text-dark small mb-1 fw-bold">ชื่อบริษัท / หน่วยงาน / ร้านค้า</label>
                                 <input type="text" id="company" class="form-control" placeholder="กรอกชื่อบริษัท">
                             </div>
                         </div>
 
                         <!-- ปรับเป็นปุ่มกด Checkbox แบบเลือกได้ทั้งคู่ -->
                         <div class="mb-3">
+                            <label class="form-label text-dark small mb-1 fw-bold">ช่วงเวลาที่เข้าร่วม</label>
                             <div class="d-flex gap-2">
                                 <input type="checkbox" id="eventDay" class="btn-check-custom">
                                 <label class="btn-label-custom" for="eventDay">งานกลางวัน</label>
@@ -148,6 +153,7 @@
 
                         <!-- ปรับเป็นปุ่มกด Radio -->
                         <div class="mb-2">
+                            <label class="form-label text-dark small mb-1 fw-bold">ประเภทอาหาร</label>
                             <div class="d-flex gap-2">
                                 <input type="radio" name="foodMode" id="foodBuddhist" value="BUDDHIST" class="btn-check-custom" checked>
                                 <label class="btn-label-custom" for="foodBuddhist">ไทยพุทธ</label>
@@ -159,33 +165,34 @@
                     </div>
 
                     <div class="card-custom" id="followerCard" style="display: none;">
+                        <label class="form-label text-dark small mb-2 fw-bold d-block text-center">จำนวนผู้ติดตาม</label>
                         <div class="row g-2 text-center">
                             <div class="col-4">
-                                <label class="text-white small mb-1">ผู้ใหญ่</label>
+                                <label class="text-muted small mb-1">ผู้ใหญ่</label>
                                 <input type="number" id="fAdult" class="form-control text-center fs-5" value="0" min="0">
                             </div>
                             <div class="col-4">
-                                <label class="text-white small mb-1">เด็ก ≥ 12 ปี</label>
+                                <label class="text-muted small mb-1">เด็ก ≥ 12 ปี</label>
                                 <input type="number" id="fChildO12" class="form-control text-center fs-5" value="0" min="0">
                             </div>
                             <div class="col-4">
-                                <label class="text-white small mb-1">เด็ก < 12 ปี</label>
+                                <label class="text-muted small mb-1">เด็ก < 12 ปี</label>
                                 <input type="number" id="fChildU12" class="form-control text-center fs-5" value="0" min="0">
                             </div>
                         </div>
                     </div>
 
-                    <button type="submit" id="btnSubmitVIP" class="btn btn-primary w-100 py-3 fs-5 mb-5 shadow"> ออกบัตร </button>
+                    <button type="submit" id="btnSubmitVIP" class="btn btn-primary w-100 py-3 fs-5 mb-5 shadow-sm"> <i class="bi bi-qr-code"></i> ออกบัตร </button>
                 </form>
             </div>
 
             <!-- ================= TAB 2: ค้นหาตั๋ว ================= -->
             <div class="tab-pane fade" id="searchQR">
                 <div class="card-custom">
-                    <h5 class="text-white mb-3">ค้นหาบัตร</h5>
+                    <h5 class="text-dark mb-3 fw-bold"><i class="bi bi-search me-2"></i>ค้นหาบัตร</h5>
                     <form onsubmit="searchVIP(event)">
                         <input type="tel" id="sPhone" class="form-control mb-3" placeholder="เบอร์โทรศัพท์" required>
-                        <input type="text" id="sName" class="form-control mb-3" placeholder="ชื่อจริง (เว้นคำนำหน้า)" required>
+                        <input type="text" id="sName" class="form-control mb-3" placeholder="ชื่อจริง (ไม่ต้องมีคำนำหน้า)" required>
                         <button type="submit" class="btn btn-primary w-100 py-2">ค้นหา</button>
                     </form>
                 </div>
@@ -235,7 +242,7 @@
             <button class="btn btn-success w-100 py-2 fw-bold shadow-sm" onclick="downloadTicket()">
                 <i class="bi bi-download"></i> ดาวน์โหลด QR Code
             </button>
-            <button class="btn btn-secondary w-100 mt-2 py-2" onclick="closeTicket()">ปิดหน้าต่าง</button>
+            <button class="btn btn-outline-secondary w-100 mt-2 py-2" onclick="closeTicket()">ปิดหน้าต่าง</button>
         </div>
     </div>
 </div>
@@ -247,11 +254,11 @@
     async function login() {
         const pin = document.getElementById('pinInput').value;
         if (!pin) {
-            Swal.fire({ icon: 'warning', title: 'กรุณากรอก PIN', background: '#161b22', color: 'white' });
+            Swal.fire({ icon: 'warning', title: 'กรุณากรอก PIN' });
             return;
         }
 
-        Swal.fire({ title: 'กำลังตรวจสอบ...', allowOutsideClick: false, background: '#161b22', color: 'white', didOpen: () => Swal.showLoading() });
+        Swal.fire({ title: 'กำลังตรวจสอบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
         
         try {
             const res = await fetchGAS({ action: "verifyAdmin", pin: pin });
@@ -261,10 +268,10 @@
                 document.getElementById('authSection').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
             } else {
-                Swal.fire({ icon: 'error', title: 'PIN ไม่ถูกต้อง', text: 'กรุณาลองใหม่อีกครั้ง', background: '#161b22', color: 'white' });
+                Swal.fire({ icon: 'error', title: 'PIN ไม่ถูกต้อง', text: 'กรุณาลองใหม่อีกครั้ง' });
             }
         } catch (err) {
-            Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message, background: '#161b22', color: 'white' });
+            Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message });
         }
     }
 
@@ -313,7 +320,7 @@
         else if (isNight) eventMode = "NIGHT_ONLY";
         
         if (!eventMode) {
-            Swal.fire({icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณาเลือกช่วงเวลางานอย่างน้อย 1 ช่วงเวลา', background: '#161b22', color: 'white'}); 
+            Swal.fire({icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณาเลือกช่วงเวลางานอย่างน้อย 1 ช่วงเวลา'}); 
             return;
         }
 
@@ -334,12 +341,12 @@
         };
 
         if(type === "SPONSOR" && !payload.Nickname) {
-            Swal.fire({icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณากรอกชื่อบริษัท/หน่วยงาน', background: '#161b22', color: 'white'}); return;
+            Swal.fire({icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณากรอกชื่อบริษัท/หน่วยงาน'}); return;
         }
 
         const btnSubmit = document.getElementById('btnSubmitVIP');
         btnSubmit.disabled = true;
-        Swal.fire({ title: 'กำลังออกตั๋ว...', allowOutsideClick: false, background: '#161b22', color: 'white', didOpen: () => Swal.showLoading() });
+        Swal.fire({ title: 'กำลังออกตั๋ว...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
         try {
             const res = await fetchGAS(payload);
@@ -356,10 +363,10 @@
                 
                 renderTicket(res.ticketId, `${payload.PrefixType} ${payload.FirstName} ${payload.LastName}`, batchTxt, eventTxt, foodTxt, `ผู้ใหญ่ ${payload.AdultCount}, เด็กโต ${payload.ChildOver12Count}, เด็กเล็ก ${payload.ChildUnder12Count}`, companyVal);
             } else {
-                Swal.fire({ icon: 'error', title: 'การบันทึกล้มเหลว', text: res.message, background: '#161b22', color: 'white' });
+                Swal.fire({ icon: 'error', title: 'การบันทึกล้มเหลว', text: res.message });
             }
         } catch (err) {
-            Swal.fire({ icon: 'error', title: 'การเชื่อมต่อผิดพลาด', text: err.message, background: '#161b22', color: 'white' });
+            Swal.fire({ icon: 'error', title: 'การเชื่อมต่อผิดพลาด', text: err.message });
         } finally {
             btnSubmit.disabled = false;
         }
@@ -368,7 +375,7 @@
     // --- 🔍 ฟังก์ชันค้นหาตั๋ว ---
     async function searchVIP(e) {
         e.preventDefault();
-        Swal.fire({ title: 'กำลังค้นหา...', allowOutsideClick: false, background: '#161b22', color: 'white', didOpen: () => Swal.showLoading() });
+        Swal.fire({ title: 'กำลังค้นหา...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
         
         try {
             const res = await fetchGAS({ 
@@ -403,10 +410,10 @@
 
                 renderTicket(res.ticketId, displayName, batchTxt, eventTxt, foodTxt, `ผู้ใหญ่ ${res.adult || 0}, เด็กโต ${res.childO12 || 0}, เด็กเล็ก ${res.childU12 || 0}`, companyVal);
             } else {
-                Swal.fire({ icon: 'warning', title: 'ไม่พบข้อมูล', text: res.message, background: '#161b22', color: 'white' });
+                Swal.fire({ icon: 'warning', title: 'ไม่พบข้อมูล', text: res.message });
             }
         } catch (err) {
-            Swal.fire({ icon: 'error', title: 'การเชื่อมต่อผิดพลาด', text: err.message, background: '#161b22', color: 'white' });
+            Swal.fire({ icon: 'error', title: 'การเชื่อมต่อผิดพลาด', text: err.message });
         }
     }
 
