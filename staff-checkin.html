@@ -569,7 +569,8 @@
         getExtraModal().hide(); showLoading("กำลังอัปโหลดสลิปและบันทึก...");
         try {
             let slipUrl = "";
-            if (extraAmount > 0) slipUrl = await uploadToImgBB(base64Slip);
+            // 🚀 ตั้งชื่อรูปสำหรับ Extra Pax เป็น TicketID-02
+            if (extraAmount > 0) slipUrl = await uploadToImgBB(base64Slip, currentTicket.ticketId + "-02");
 
             const res = await fetchGAS({
                 action: "checkin", ticketId: currentTicket.ticketId, eventType: currentTicket.eventType,
@@ -580,10 +581,37 @@
             });
 
             if(res.success) {
-                const totalSt = 1 + parseInt(currentTicket.adult||0) + parseInt(currentTicket.childO12||0) + parseInt(currentTicket.childU12||0) + a + cO12 + cU12;
-                const totalWb = 1 + parseInt(currentTicket.adult||0) + parseInt(currentTicket.childO12||0) + a + cO12;
-                const usedEventType = document.getElementById('exEvent').value || currentTicket.eventType;
-                let wbMsg = buildDistributionMsg(usedEventType, totalSt, totalWb);
+                // 🚀 ปรับปรุง Logic การคำนวณของที่ต้องแจก (Merged Logic)
+                const origType = currentTicket.eventType;
+                const addedType = document.getElementById('exEvent').value || origType;
+                
+                const origHasDay = origType.includes("DAY");
+                const origHasNight = origType.includes("NIGHT");
+                const addedHasDay = addedType.includes("DAY");
+                const addedHasNight = addedType.includes("NIGHT");
+
+                const origTotal = 1 + parseInt(currentTicket.adult||0) + parseInt(currentTicket.childO12||0) + parseInt(currentTicket.childU12||0);
+                const origAdults = 1 + parseInt(currentTicket.adult||0) + parseInt(currentTicket.childO12||0);
+                const addedTotal = a + cO12 + cU12;
+                const addedAdults = a + cO12;
+
+                let finalSt = 0;
+                if (origHasDay) finalSt += origTotal;
+                if (addedHasDay) finalSt += addedTotal;
+
+                let finalWb = 0;
+                if (origHasNight) finalWb += origAdults;
+                if (addedHasNight) finalWb += addedAdults;
+
+                // กำหนดประเภทงานรวมเพื่อส่งเข้า buildDistributionMsg
+                let mergedType = "NONE";
+                if (origHasDay || addedHasDay) {
+                    mergedType = (origHasNight || addedHasNight) ? "DAY_NIGHT" : "DAY_ONLY";
+                } else if (origHasNight || addedHasNight) {
+                    mergedType = "NIGHT_ONLY";
+                }
+
+                let wbMsg = buildDistributionMsg(mergedType, finalSt, finalWb);
                 Swal.fire({icon:'success', title:'สำเร็จ!', html: wbMsg}).then(() => resetScanner());
             } else { Swal.fire('ข้อผิดพลาด', res.message, 'error').then(() => { isProcessing = false; }); }
         } catch(e) { Swal.fire('Error', `บันทึกไม่สำเร็จ: ${e.message}`, 'error').then(() => { isProcessing = false; }); }
@@ -637,9 +665,6 @@
 
         getWalkinModal().hide(); showLoading("สร้างตั๋วและเช็คอิน...");
         try {
-            let slipUrl = "";
-            if (walkinAmount > 0) slipUrl = await uploadToImgBB(base64Slip);
-
             const res = await fetchGAS({
                 action: "walkin",
                 PrefixType: document.getElementById('wkPrefix').value,
@@ -649,7 +674,9 @@
                 Phone: phone, Batch: batch, EventType: eventType,
                 Food: document.getElementById('wkFood').value,
                 AdultCount: document.getElementById('wkAdult').value, ChildOver12Count: document.getElementById('wkChildO12').value,
-                ChildUnder12Count: document.getElementById('wkChildU12').value, SlipURL: slipUrl, operator: OPERATOR_NAME,
+                ChildUnder12Count: document.getElementById('wkChildU12').value, 
+                SlipBase64: base64Slip ? base64Slip.split(',')[1] : "", // 🚀 ส่ง Base64 ไปตั้งชื่อตาม TicketID ใน GAS
+                operator: OPERATOR_NAME,
                 pin: ADMIN_PIN
             });
 
@@ -699,11 +726,12 @@
         }
     }
 
-    async function uploadToImgBB(base64Full) {
+    async function uploadToImgBB(base64Full, ticketId) {
         // อัปโหลดผ่าน Google Apps Script เพื่อความปลอดภัย (ไม่ต้องโชว์ API Key ในหน้าเว็บ)
         const res = await fetchGAS({ 
             action: "uploadImage", 
-            base64: base64Full.split(',')[1] 
+            base64: base64Full.split(',')[1],
+            ticketId: ticketId
         });
         
         if(res.success) return res.url;

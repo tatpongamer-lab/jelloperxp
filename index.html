@@ -988,18 +988,9 @@
         showLoading(); 
 
         try {
-            let finalSlipUrls = [];
-
-            // 🚀 อัปโหลดรูปทั้งหมดไป ImgBB ทีละรูป
-            if (currentTotal > 0 && uploadedSlips.length > 0) {
-                for (let slip of uploadedSlips) {
-                    const url = await uploadToImgBB(slip.base64);
-                    finalSlipUrls.push(url);
-                }
-            }
-
-            // นำลิงก์ทั้งหมดมาต่อกันด้วยลูกน้ำ
-            data.SlipURL = finalSlipUrls.join(',');
+            // 🚀 [ใหม่] เตรียม Base64 รูปภาพส่งไปให้ Server ตั้งชื่อตาม TicketID
+            const slipBase64s = uploadedSlips.map(s => s.base64.split(',')[1]);
+            data.SlipBase64s = slipBase64s;
 
             const regRes = await fetchGAS(data);
             
@@ -1184,10 +1175,11 @@
     }
    
     // ฟังก์ชันสำหรับส่ง Base64 ไปฝากที่ ImgBB ผ่าน GAS
-    async function uploadToImgBB(base64Full) {
+    async function uploadToImgBB(base64Full, ticketId) {
         const response = await fetchGAS({
             action: "uploadImage",
-            base64: base64Full.split(',')[1]
+            base64: base64Full.split(',')[1],
+            ticketId: ticketId
         });
     
         if (response.success) {
