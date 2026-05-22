@@ -668,14 +668,23 @@
     // --- 6. Helper & Bulletproof Functions ---
     function buildDistributionMsg(eventType, stickerCount, wristbandCount) {
         let lines = [];
-        if (eventType === "DAY_ONLY" || eventType === "DAY_NIGHT") {
-            lines.push(`<span class="fs-5" style="color:var(--success)">🟢 แจกสติ๊กเกอร์: <b>${stickerCount} ชิ้น</b></span>`);
+        // ตรวจสอบทั้งแบบมี _ONLY และไม่มีเพื่อความชัวร์
+        const hasDay = (eventType === "DAY_ONLY" || eventType === "DAY_NIGHT" || eventType === "DAY");
+        const hasNight = (eventType === "NIGHT_ONLY" || eventType === "DAY_NIGHT" || eventType === "NIGHT");
+
+        if (hasDay) {
+            lines.push(`<div class="p-2 mb-2 rounded" style="background: rgba(16, 185, 129, 0.1); border-left: 5px solid #10b981; color: #10b981;">
+                <span class="fs-5 fw-bold">🟢 แจกสติ๊กเกอร์: ${stickerCount} ชิ้น</span>
+            </div>`);
         }
-        if (eventType === "NIGHT_ONLY" || eventType === "DAY_NIGHT") {
-            lines.push(`<span class="fs-5 text-primary">🔵 แจกสายรัดข้อมือ: <b>${wristbandCount} เส้น</b></span>`);
+        if (hasNight) {
+            lines.push(`<div class="p-2 mb-2 rounded" style="background: rgba(59, 130, 246, 0.1); border-left: 5px solid #3b82f6; color: #3b82f6;">
+                <span class="fs-5 fw-bold">🔵 แจกสายรัดข้อมือ: ${wristbandCount} เส้น</span>
+            </div>`);
         }
+        
         if (lines.length === 0) return "เช็คอินเรียบร้อย ให้เข้างานได้";
-        return "เช็คอินสำเร็จ<br><br>" + lines.join("<br>");
+        return `<div class="text-start mt-3">${lines.join("")}</div>`;
     }
 
     async function fetchGAS(payload) {
