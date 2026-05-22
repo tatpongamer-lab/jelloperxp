@@ -289,7 +289,10 @@
         }
 
         .radio-btn-group input[type="radio"] {
-            display: none;
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
         }
 
         .radio-btn-group input[type="radio"]:checked + .radio-btn-label {
@@ -682,7 +685,7 @@
             </div>
 
             <div class="form-group">
-                <input type="tel" id="Phone" required pattern="[0-9]{10}" placeholder=" " title="กรุณากรอกตัวเลข 10 หลักให้ครบถ้วน">
+                <input type="tel" id="Phone" required pattern="0[0-9]{9}" placeholder=" " title="กรุณากรอกตัวเลข 10 หลักให้ครบถ้วน">
                 <span class="fake-placeholder">เบอร์โทรศัพท์ 10 หลัก <span style="color: #ef4444;">*</span></span>
             </div>
 
@@ -712,8 +715,8 @@
             </div>
             
             <div class="form-group" id="customAmountGroup" style="display: none;">
-                <label for="CustomAmount">ระบุจำนวนเงิน (บาท) </span></label>
-                <input type="number" id="CustomAmount" placeholder="ระบุจำนวนเงิน">
+                <label for="CustomAmount">ระบุจำนวนเงิน (บาท)</label>
+                <input type="number" id="CustomAmount" placeholder="ระบุจำนวนเงิน" min="1">
             </div>
 
             <div class="privilege-box">
@@ -835,7 +838,7 @@
     <div class="footer">
         <p style="margin:0; padding-bottom: 10px; border-bottom: 1px dashed #d1d5db;">
             สอบถามข้อมูลเพิ่มเติม :<br>
-            <span style="color:var(--primary-blue); font-size:1.rem; font-weight:bold; display:block; margin-top:4px;">
+            <span style="color:var(--primary-blue); font-size:1rem; font-weight:bold; display:block; margin-top:4px;">
                 ประธานชมรมศิษย์เก่า <span style="color:var(--primary-orange); ">065-925-0819</span>
             </span>
         </p>
@@ -1032,6 +1035,12 @@
         const targetArray = type === 'slip' ? slipFilesArray : logoFilesArray;
         const targetPreview = type === 'slip' ? document.getElementById('slipPreview') : document.getElementById('logoPreview');
 
+        if (targetArray.length + files.length > 3) {
+            alert("อัปโหลดได้สูงสุด 3 ไฟล์ต่อประเภท");
+            inputElement.value = '';
+            return;
+        }
+
         Array.from(files).forEach(file => {
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -1174,7 +1183,7 @@
         })
         .catch(error => {
             document.getElementById('loading').style.display = 'none';
-            alert("บันทึกข้อมูลสำเร็จ (พบปัญหาการเชื่อมต่อเล็กน้อย กรุณาตรวจสอบข้อมูลอีกครั้ง)");
+            alert("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง");
             console.error(error);
             setTimeout(() => window.location.reload(), 2000);
         });

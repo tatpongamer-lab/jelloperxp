@@ -8,6 +8,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
         :root { 
@@ -173,7 +175,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100 py-3 fs-5 mb-5 shadow"> ออกบัตร </button>
+                    <button type="submit" id="btnSubmitVIP" class="btn btn-primary w-100 py-3 fs-5 mb-5 shadow"> ออกบัตร </button>
                 </form>
             </div>
 
@@ -239,18 +241,30 @@
 </div>
 
 <script>
-    // ⚠️ นำ URL Web App มาใส่ตรงนี้
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwzYxbwKueYVTr-ZGqzU6pgieySxS08pX6NgTtPTtQsxYOqDsGuvQ0xgZYQHfCuVk116Q/exec";
-    let ADMIN_PIN = "123456";
+    let ADMIN_PIN = "";
 
-    function login() {
+    async function login() {
         const pin = document.getElementById('pinInput').value;
-        if (pin === "123456") { 
-            ADMIN_PIN = pin;
-            document.getElementById('authSection').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-        } else {
-            Swal.fire({ icon: 'error', title: 'ปฏิเสธการเข้าถึง', text: 'PIN ไม่ถูกต้อง', background: '#161b22', color: 'white' });
+        if (!pin) {
+            Swal.fire({ icon: 'warning', title: 'กรุณากรอก PIN', background: '#161b22', color: 'white' });
+            return;
+        }
+
+        Swal.fire({ title: 'กำลังตรวจสอบ...', allowOutsideClick: false, background: '#161b22', color: 'white', didOpen: () => Swal.showLoading() });
+        
+        try {
+            const res = await fetchGAS({ action: "verifyAdmin", pin: pin });
+            if (res.success) {
+                Swal.close();
+                ADMIN_PIN = pin;
+                document.getElementById('authSection').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+            } else {
+                Swal.fire({ icon: 'error', title: 'PIN ไม่ถูกต้อง', text: 'กรุณาลองใหม่อีกครั้ง', background: '#161b22', color: 'white' });
+            }
+        } catch (err) {
+            Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message, background: '#161b22', color: 'white' });
         }
     }
 
@@ -273,6 +287,7 @@
     async function fetchGAS(payload) {
         const response = await fetch(WEB_APP_URL, {
             method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify(payload)
         });
         const text = await response.text();
@@ -313,15 +328,17 @@
             Food: document.querySelector('input[name="foodMode"]:checked').value,
             Batch: type,
             Nickname: type === "TEACHER" ? "" : document.getElementById('company').value.trim(),
-            AdultCount: document.getElementById('fAdult').value || 0,
-            ChildOver12Count: document.getElementById('fChildO12').value || 0,
-            ChildUnder12Count: document.getElementById('fChildU12').value || 0
+            AdultCount: Number(document.getElementById('fAdult').value) || 0,
+            ChildOver12Count: Number(document.getElementById('fChildO12').value) || 0,
+            ChildUnder12Count: Number(document.getElementById('fChildU12').value) || 0
         };
 
         if(type === "SPONSOR" && !payload.Nickname) {
             Swal.fire({icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณากรอกชื่อบริษัท/หน่วยงาน', background: '#161b22', color: 'white'}); return;
         }
 
+        const btnSubmit = document.getElementById('btnSubmitVIP');
+        btnSubmit.disabled = true;
         Swal.fire({ title: 'กำลังออกตั๋ว...', allowOutsideClick: false, background: '#161b22', color: 'white', didOpen: () => Swal.showLoading() });
 
         try {
@@ -337,12 +354,14 @@
                 const companyVal = type === "SPONSOR" ? payload.Nickname : "";
                 const batchTxt = type === "TEACHER" ? "อาจารย์" : "สปอนเซอร์";
                 
-                renderTicket(res.ticketId, `${payload.PrefixType}${payload.FirstName} ${payload.LastName}`, batchTxt, eventTxt, foodTxt, `ผู้ใหญ่ ${payload.AdultCount}, เด็กโต ${payload.ChildOver12Count}, เด็กเล็ก ${payload.ChildUnder12Count}`, companyVal);
+                renderTicket(res.ticketId, `${payload.PrefixType} ${payload.FirstName} ${payload.LastName}`, batchTxt, eventTxt, foodTxt, `ผู้ใหญ่ ${payload.AdultCount}, เด็กโต ${payload.ChildOver12Count}, เด็กเล็ก ${payload.ChildUnder12Count}`, companyVal);
             } else {
                 Swal.fire({ icon: 'error', title: 'การบันทึกล้มเหลว', text: res.message, background: '#161b22', color: 'white' });
             }
         } catch (err) {
             Swal.fire({ icon: 'error', title: 'การเชื่อมต่อผิดพลาด', text: err.message, background: '#161b22', color: 'white' });
+        } finally {
+            btnSubmit.disabled = false;
         }
     }
 
@@ -353,7 +372,8 @@
         
         try {
             const res = await fetchGAS({ 
-                action: "search", 
+                action: "search",
+                pin: ADMIN_PIN,
                 Phone: document.getElementById('sPhone').value.trim(), 
                 FirstName: document.getElementById('sName').value.trim(),
                 mode: "VIP" 
@@ -381,7 +401,7 @@
                     batchTxt = "สปอนเซอร์";
                 }
 
-                renderTicket(res.ticketId, displayName, batchTxt, eventTxt, foodTxt, `ผู้ใหญ่ ${res.adult}, เด็กโต ${res.childO12}, เด็กเล็ก ${res.childU12}`, companyVal);
+                renderTicket(res.ticketId, displayName, batchTxt, eventTxt, foodTxt, `ผู้ใหญ่ ${res.adult || 0}, เด็กโต ${res.childO12 || 0}, เด็กเล็ก ${res.childU12 || 0}`, companyVal);
             } else {
                 Swal.fire({ icon: 'warning', title: 'ไม่พบข้อมูล', text: res.message, background: '#161b22', color: 'white' });
             }
@@ -430,6 +450,7 @@
     function downloadTicket() {
         const qrcodeDiv = document.getElementById('qrcode');
         const qrCanvas = qrcodeDiv.querySelector('canvas');
+        let imgReplaced = false;
         
         if (qrCanvas) {
             const img = document.createElement('img');
@@ -437,7 +458,8 @@
             img.style.width = "150px"; 
             img.style.height = "150px";
             qrcodeDiv.innerHTML = ''; 
-            qrcodeDiv.appendChild(img); 
+            qrcodeDiv.appendChild(img);
+            imgReplaced = true;
         }
 
         setTimeout(() => {
@@ -451,6 +473,13 @@
                 link.download = `VIP_Ticket_${document.getElementById('t_id').innerText}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
+                
+                if (imgReplaced) {
+                    qrcodeDiv.innerHTML = '';
+                    new QRCode(qrcodeDiv, {
+                        text: document.getElementById('t_id').innerText, width: 150, height: 150, colorDark : "#003366", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
+                    });
+                }
             });
         }, 200);
     }

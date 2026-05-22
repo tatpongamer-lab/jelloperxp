@@ -121,11 +121,20 @@
 </head>
 <body>
 
-<div class="staff-header">STAFF </div>
+<div id="authSection" class="container" style="height: 100vh; display: flex; align-items: center; justify-content: center;">
+    <div class="card-box text-center" style="max-width: 400px; width: 100%;">
+        <h4 class="text-white mb-3">🔐 Staff Login</h4>
+        <input type="password" id="pinInput" class="form-control text-center fs-4 mb-3" placeholder="Enter PIN" maxlength="6" onkeypress="if(event.key==='Enter') login()">
+        <button class="btn btn-primary w-100 py-2" onclick="login()">เข้าสู่ระบบ</button>
+    </div>
+</div>
 
-<div class="container mt-3 pb-5" style="max-width: 500px;">
+<div id="mainApp" style="display: none;">
+    <div class="staff-header">STAFF </div>
 
-    <div id="scanner-section">
+    <div class="container mt-3 pb-5" style="max-width: 500px;">
+
+        <div id="scanner-section">
         <div class="card-box text-center p-2">
             <div id="reader"></div>
         </div>
@@ -175,12 +184,12 @@
                 </div>
             </div>
 
-            <div class="alert alert-sticker p-3 mb-2 fw-bold d-flex justify-content-between align-items-center" id="alert-sticker" style="display: none;">
+            <div class="alert alert-sticker p-3 mb-2 fw-bold justify-content-between align-items-center d-none" id="alert-sticker">
                 <div>🟢 สติ๊กเกอร์</div>
                 <div class="fs-4 text-danger"><span id="r_sticker_count">0</span> ชิ้น</div>
             </div>
 
-            <div class="alert alert-wristband p-3 mb-3 fw-bold d-flex justify-content-between align-items-center" id="alert-wristband" style="display: none;">
+            <div class="alert alert-wristband p-3 mb-3 fw-bold justify-content-between align-items-center d-none" id="alert-wristband">
                 <div>🔵 สายรัดข้อมือ</div>
                 <div class="fs-4 text-danger"><span id="r_wristband_count">0</span> เส้น</div>
             </div>
@@ -214,15 +223,15 @@
                 </select>
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <label class="fw-bold">ผู้ใหญ่</label>
-                    <input type="number" id="exAdult" class="form-control w-25 text-center" value="0" min="0" onchange="calcExtraPrice()">
+                    <input type="number" id="exAdult" class="form-control w-25 text-center" value="0" min="0" oninput="if(this.value<0)this.value=0; calcExtraPrice()">
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <label class="fw-bold">เด็กโต (>12 ปี)</label>
-                    <input type="number" id="exChildO12" class="form-control w-25 text-center" value="0" min="0" onchange="calcExtraPrice()">
+                    <input type="number" id="exChildO12" class="form-control w-25 text-center" value="0" min="0" oninput="if(this.value<0)this.value=0; calcExtraPrice()">
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <label class="fw-bold">เด็กเล็ก (<12 ปี)</label>
-                    <input type="number" id="exChildU12" class="form-control w-25 text-center" value="0" min="0">
+                    <input type="number" id="exChildU12" class="form-control w-25 text-center" value="0" min="0" oninput="if(this.value<0)this.value=0;">
                 </div>
                 <hr>
                 <div class="text-center mb-3">
@@ -288,12 +297,19 @@
                             <option value="DAY_NIGHT">กลางวัน+กลางคืน</option>
                         </select>
                     </div>
+                    <div class="col-12 mt-2">
+                        <select id="wkFood" class="form-select" required>
+                            <option value="">-- ประเภทอาหาร --</option>
+                            <option value="BUDDHIST">ไทยพุทธ</option>
+                            <option value="HALAL">ไทยมุสลิม</option>
+                        </select>
+                    </div>
                 </div>
                 <label class="fw-bold mb-1">ผู้ติดตาม</label>
                 <div class="row g-2 mb-3 text-center">
-                    <div class="col-4"><small>ผู้ใหญ่</small><input type="number" id="wkAdult" class="form-control text-center" value="0" min="0" onchange="calcWalkinPrice()"></div>
-                    <div class="col-4"><small>เด็กโต</small><input type="number" id="wkChildO12" class="form-control text-center" value="0" min="0" onchange="calcWalkinPrice()"></div>
-                    <div class="col-4"><small>เด็กเล็ก</small><input type="number" id="wkChildU12" class="form-control text-center" value="0" min="0"></div>
+                    <div class="col-4"><small>ผู้ใหญ่</small><input type="number" id="wkAdult" class="form-control text-center" value="0" min="0" oninput="if(this.value<0)this.value=0; calcWalkinPrice()"></div>
+                    <div class="col-4"><small>เด็กโต</small><input type="number" id="wkChildO12" class="form-control text-center" value="0" min="0" oninput="if(this.value<0)this.value=0; calcWalkinPrice()"></div>
+                    <div class="col-4"><small>เด็กเล็ก</small><input type="number" id="wkChildU12" class="form-control text-center" value="0" min="0" oninput="if(this.value<0)this.value=0;"></div>
                 </div>
                 <hr>
                 <div class="text-center mb-3">
@@ -318,14 +334,38 @@
 <script>
     // ⚠️ CONFIGURATION ⚠️ (กรุณาเปลี่ยนให้เป็นของจริงก่อนใช้งาน)
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwzYxbwKueYVTr-ZGqzU6pgieySxS08pX6NgTtPTtQsxYOqDsGuvQ0xgZYQHfCuVk116Q/exec"; 
-    const IMGBB_API_KEY = "4c346c47d9368db66076ef2e49b5b285";
     const OPERATOR_NAME = "STAFF_GATE_1"; 
-    
+    let ADMIN_PIN = "";
+
+    async function login() {
+        const pin = document.getElementById('pinInput').value;
+        if (!pin) {
+            Swal.fire({ icon: 'warning', title: 'กรุณากรอก PIN', background: '#161b22', color: 'white' });
+            return;
+        }
+
+        showLoading("กำลังตรวจสอบสิทธิ์...");
+        try {
+            const res = await fetchGAS({ action: "verifyAdmin", pin: pin });
+            if (res.success) {
+                Swal.close();
+                ADMIN_PIN = pin;
+                document.getElementById('authSection').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                startCamera();
+            } else {
+                Swal.fire({ icon: 'error', title: 'PIN ไม่ถูกต้อง', background: '#161b22', color: 'white' });
+            }
+        } catch (err) {
+            Swal.fire({ icon: 'error', title: 'ขัดข้อง', text: err.message, background: '#161b22', color: 'white' });
+        }
+    }
 
     let currentTicket = null;
     let extraAmount = 0;
     let walkinAmount = 0;
     let isProcessing = false; 
+    let html5QrCode = null;
 
     // Lazy Load Modals
     let extraModalInstance = null;
@@ -340,18 +380,31 @@
         batchSelect.innerHTML += `<option value="HS2">ม.ปลาย รุ่น 2</option>`;
         batchSelect.innerHTML += `<option value="HS3">ม.ปลาย รุ่น 3</option>`;
         for(let i=1; i<=30; i++) batchSelect.innerHTML += `<option value="${i}/${i+3}">รุ่น ${i}/${i+3}</option>`;
+    });
 
-        // 🚀 สั่งเปิดกล้องหลังอัตโนมัติ (Auto-Start Environment Camera)
-        html5QrCode = new Html5Qrcode("reader");
+    // Helper to start camera
+    function startCamera() {
+        if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
         html5QrCode.start(
-            { facingMode: "environment" }, // บังคับใช้กล้องหลังเสมอ
+            { facingMode: "environment" }, 
             { fps: 10, qrbox: { width: 250, height: 250 } },
             onScanSuccess,
-            (errorMessage) => { /* ซ่อน Error จุกจิกเวลามันหากรอบ QR ไม่เจอ */ }
+            (errorMessage) => { }
         ).catch(err => {
             console.error("Camera Error:", err);
             document.getElementById('reader').innerHTML = `<div class="p-4 text-danger fw-bold">กรุณาอนุญาตให้เว็บเข้าถึงกล้องถ่ายรูป<br><small>(${err})</small></div>`;
         });
+    }
+
+    // 📸 Smart Camera Management: ปิดกล้องอัตโนมัติเมื่อสลับหน้าหรือปิดหน้าจอ
+    document.addEventListener("visibilitychange", () => {
+        if (!html5QrCode || document.getElementById('mainApp').style.display === 'none') return;
+
+        if (document.hidden) {
+            html5QrCode.stop().catch(err => console.error("Error stopping camera:", err));
+        } else {
+            startCamera();
+        }
     });
 
     // --- 2. Actions (Scanner & Search) ---
@@ -361,7 +414,7 @@
         
         showLoading("กำลังตรวจสอบตั๋ว...");
         try {
-            const res = await fetchGAS({ action: "getTicket", ticketId: decodedText });
+            const res = await fetchGAS({ action: "getTicket", ticketId: decodedText, pin: ADMIN_PIN });
             processTicketData(res);
         } catch(e) { Swal.fire('Error', `ขัดข้อง: ${e.message}`, 'error').then(() => { isProcessing = false; }); }
     }
@@ -373,7 +426,7 @@
         
         showLoading("กำลังค้นหาข้อมูล...");
         try {
-            const res = await fetchGAS({ action: "search", Phone: document.getElementById('searchPhone').value, FirstName: document.getElementById('searchName').value, mode: "ALL" });
+            const res = await fetchGAS({ action: "search", Phone: document.getElementById('searchPhone').value, FirstName: document.getElementById('searchName').value, mode: "ALL", pin: ADMIN_PIN });
             processTicketData(res);
         } catch(e) { Swal.fire('Error', `ขัดข้อง: ${e.message}`, 'error').then(() => { isProcessing = false; }); }
     }
@@ -417,27 +470,54 @@
         const alertSt = document.getElementById('alert-sticker');
         if (res.eventType === "DAY_ONLY" || res.eventType === "DAY_NIGHT") {
             document.getElementById('r_sticker_count').innerText = totalPax;
-            alertSt.style.display = 'flex';
-        } else { alertSt.style.display = 'none'; }
+            alertSt.classList.remove('d-none');
+            alertSt.classList.add('d-flex');
+        } else { 
+            alertSt.classList.add('d-none');
+            alertSt.classList.remove('d-flex'); 
+        }
 
         // 🔵 สายรัดข้อมือ = งานกลางคืน (ไม่รวมเด็กเล็ก)
         const alertWb = document.getElementById('alert-wristband');
         if (res.eventType === "NIGHT_ONLY" || res.eventType === "DAY_NIGHT") {
             document.getElementById('r_wristband_count').innerText = wbCount;
-            alertWb.style.display = 'flex';
-        } else { alertWb.style.display = 'none'; }
+            alertWb.classList.remove('d-none');
+            alertWb.classList.add('d-flex');
+        } else { 
+            alertWb.classList.add('d-none');
+            alertWb.classList.remove('d-flex');
+        }
 
         document.getElementById('alert-pending').style.display = (res.paymentStatus === 'PENDING') ? 'block' : 'none';
         document.getElementById('scanner-section').style.display = 'none';
         document.getElementById('result-section').style.display = 'block';
+
+        if (html5QrCode) {
+            try { html5QrCode.pause(true); } catch (e) {}
+        }
     }
 
     async function confirmCheckIn() {
+        if (currentTicket.paymentStatus === 'PENDING') {
+            const result = await Swal.fire({
+                title: 'ยืนยันการรับเงิน?',
+                text: "ตั๋วนี้สถานะ PENDING กรุณายืนยันว่าตรวจสอบสลิปหรือรับเงินสดแล้ว",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'ยืนยัน (รับเงินแล้ว)',
+                cancelButtonText: 'ยกเลิก'
+            });
+            if (!result.isConfirmed) return;
+        }
+
         showLoading("กำลังประทับตราเช็คอิน...");
         try {
             const res = await fetchGAS({
                 action: "checkin", ticketId: currentTicket.ticketId, eventType: currentTicket.eventType,
-                actualCount: parseInt(currentTicket.adult||0) + parseInt(currentTicket.childO12||0) + parseInt(currentTicket.childU12||0), operator: OPERATOR_NAME
+                actualCount: parseInt(currentTicket.adult||0) + parseInt(currentTicket.childO12||0) + parseInt(currentTicket.childU12||0), operator: OPERATOR_NAME,
+                pin: ADMIN_PIN
             });
             if(res.success) {
                 const tp = 1 + parseInt(currentTicket.adult||0) + parseInt(currentTicket.childO12||0) + parseInt(currentTicket.childU12||0);
@@ -495,13 +575,15 @@
                 action: "checkin", ticketId: currentTicket.ticketId, eventType: currentTicket.eventType,
                 extraEventType: document.getElementById('exEvent').value || currentTicket.eventType,
                 actualCount: parseInt(currentTicket.adult||0) + parseInt(currentTicket.childO12||0) + parseInt(currentTicket.childU12||0), operator: OPERATOR_NAME,
-                addedAdult: a, addedChildO12: cO12, addedChildU12: cU12, extraAmount: extraAmount, slipUrl: slipUrl
+                addedAdult: a, addedChildO12: cO12, addedChildU12: cU12, extraAmount: extraAmount, slipUrl: slipUrl,
+                pin: ADMIN_PIN
             });
 
             if(res.success) {
                 const totalSt = 1 + parseInt(currentTicket.adult||0) + parseInt(currentTicket.childO12||0) + parseInt(currentTicket.childU12||0) + a + cO12 + cU12;
                 const totalWb = 1 + parseInt(currentTicket.adult||0) + parseInt(currentTicket.childO12||0) + a + cO12;
-                let wbMsg = buildDistributionMsg(currentTicket.eventType, totalSt, totalWb);
+                const usedEventType = document.getElementById('exEvent').value || currentTicket.eventType;
+                let wbMsg = buildDistributionMsg(usedEventType, totalSt, totalWb);
                 Swal.fire({icon:'success', title:'สำเร็จ!', html: wbMsg}).then(() => resetScanner());
             } else { Swal.fire('ข้อผิดพลาด', res.message, 'error').then(() => { isProcessing = false; }); }
         } catch(e) { Swal.fire('Error', `บันทึกไม่สำเร็จ: ${e.message}`, 'error').then(() => { isProcessing = false; }); }
@@ -511,7 +593,7 @@
     function openWalkinModal() {
         document.getElementById('wkPrefix').value = ""; document.getElementById('wkPrefixOther').value = ""; document.getElementById('wkPrefixOther').style.display = 'none';
         document.getElementById('wkFirst').value = ""; document.getElementById('wkLast').value = ""; document.getElementById('wkNick').value = ""; document.getElementById('wkPhone').value = "";
-        document.getElementById('wkBatch').value = ""; document.getElementById('wkEvent').value = "";
+        document.getElementById('wkBatch').value = ""; document.getElementById('wkEvent').value = ""; document.getElementById('wkFood').value = "";
         document.getElementById('wkAdult').value = 0; document.getElementById('wkChildO12').value = 0; document.getElementById('wkChildU12').value = 0;
         document.getElementById('wkSlipInput').value = ""; document.getElementById('wkSlipPreview').style.display = 'none'; document.getElementById('wkSlipBase64').value = "";
         calcWalkinPrice(); getWalkinModal().show();
@@ -549,7 +631,7 @@
 
         if(!prefix) { Swal.fire('แจ้งเตือน', 'กรุณาเลือกคำนำหน้า', 'warning'); return; }
         if(prefix === 'อื่นๆ' && !document.getElementById('wkPrefixOther').value.trim()) { Swal.fire('แจ้งเตือน', 'กรุณาระบุคำนำหน้า', 'warning'); return; }
-        if(!fName || !lName || !phone || !batch || !eventType) { Swal.fire('แจ้งเตือน', 'กรุณากรอกข้อมูล * ให้ครบ', 'warning'); return; }
+        if(!fName || !lName || !phone || !batch || !eventType || !document.getElementById('wkFood').value) { Swal.fire('แจ้งเตือน', 'กรุณากรอกข้อมูล * ให้ครบ', 'warning'); return; }
         if(!/^0[0-9]{9}$/.test(phone)) { Swal.fire('แจ้งเตือน', 'เบอร์โทรไม่ถูกต้อง (ต้อง 10 หลัก)', 'warning'); return; }
         if(walkinAmount > 0 && !base64Slip) { Swal.fire('แจ้งเตือน', 'กรุณาถ่ายรูปสลิป', 'error'); return; }
 
@@ -565,8 +647,10 @@
                 FirstName: fName, LastName: lName,
                 Nickname: document.getElementById('wkNick').value,
                 Phone: phone, Batch: batch, EventType: eventType,
+                Food: document.getElementById('wkFood').value,
                 AdultCount: document.getElementById('wkAdult').value, ChildOver12Count: document.getElementById('wkChildO12').value,
-                ChildUnder12Count: document.getElementById('wkChildU12').value, SlipURL: slipUrl, operator: OPERATOR_NAME
+                ChildUnder12Count: document.getElementById('wkChildU12').value, SlipURL: slipUrl, operator: OPERATOR_NAME,
+                pin: ADMIN_PIN
             });
 
             if(res.success) {
@@ -607,16 +691,14 @@
     }
 
     async function uploadToImgBB(base64Full) {
-        if (IMGBB_API_KEY.includes("YOUR_IMGBB_API_KEY")) throw new Error("นักพัฒนายังไม่ได้ใส่ API Key ของ ImgBB");
+        // อัปโหลดผ่าน Google Apps Script เพื่อความปลอดภัย (ไม่ต้องโชว์ API Key ในหน้าเว็บ)
+        const res = await fetchGAS({ 
+            action: "uploadImage", 
+            base64: base64Full.split(',')[1] 
+        });
         
-        const formData = new FormData();
-        formData.append("image", base64Full.split(',')[1]);
-        
-        const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
-        const res = await response.json();
-        
-        if(res.success) return res.data.url;
-        throw new Error(res.error ? res.error.message : "อัปโหลดรูปล้มเหลว");
+        if(res.success) return res.url;
+        throw new Error(res.message || "อัปโหลดรูปล้มเหลวผ่าน Server");
     }
 
     function compressImage(event, previewId, base64Id) {
@@ -647,6 +729,10 @@
         document.getElementById('manualSearchForm').reset();
         document.getElementById('result-section').style.display = 'none';
         document.getElementById('scanner-section').style.display = 'block';
+
+        if (html5QrCode) {
+            try { html5QrCode.resume(); } catch (e) {}
+        }
     }
 </script>
 </body>
