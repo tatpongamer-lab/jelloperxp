@@ -124,11 +124,11 @@
                     
                     <div class="card-custom">
                         <div class="d-flex gap-2">
-                            <input type="radio" name="vipType" id="typeTeacher" value="TEACHER" class="btn-check-custom" checked onchange="toggleForm()">
-                            <label class="btn-label-custom py-3" for="typeTeacher"><i class="bi bi-person-workspace"></i> อาจารย์</label>
-                            
-                            <input type="radio" name="vipType" id="typeSponsor" value="SPONSOR" class="btn-check-custom" onchange="toggleForm()">
+                            <input type="radio" name="vipType" id="typeSponsor" value="SPONSOR" class="btn-check-custom" checked onchange="toggleForm()">
                             <label class="btn-label-custom py-3" for="typeSponsor"><i class="bi bi-briefcase-fill"></i> สปอนเซอร์</label>
+                            
+                            <input type="radio" name="vipType" id="typeTeacher" value="TEACHER" class="btn-check-custom" onchange="toggleForm()">
+                            <label class="btn-label-custom py-3" for="typeTeacher"><i class="bi bi-person-workspace"></i> อาจารย์</label>
                         </div>
                     </div>
 
@@ -139,7 +139,7 @@
                             <div class="col-12"><input type="tel" id="phone" class="form-control" placeholder="เบอร์โทรศัพท์ (10 หลัก)" pattern="0[0-9]{9}" required></div>
                         </div>
                         
-                        <div id="sponsorFields" style="display: none;">
+                        <div id="sponsorFields">
                             <div class="mb-3">
                                 <label class="form-label text-dark small mb-1 fw-bold">ชื่อบริษัท / หน่วยงาน / ร้านค้า</label>
                                 <input type="text" id="company" class="form-control" placeholder="กรอกชื่อบริษัท">
@@ -171,7 +171,7 @@
                         </div>
                     </div>
 
-                    <div class="card-custom" id="followerCard" style="display: none;">
+                    <div class="card-custom" id="followerCard">
                         <label class="form-label text-dark small mb-2 fw-bold d-block text-center">จำนวนผู้ติดตาม</label>
                         <div class="row g-2 text-center">
                             <div class="col-4">
