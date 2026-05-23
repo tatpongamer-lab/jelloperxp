@@ -117,6 +117,13 @@
         div.swal2-popup { background: var(--card-dark) !important; color: var(--text-primary) !important; }
         .swal2-title { color: var(--text-primary) !important; }
         .swal2-html-container { color: var(--text-secondary) !important; }
+
+        /* แก้ปัญหา In-app Browser ไม่สามารถเลือก Dropdown ได้ */
+        select.form-select, select {
+            -webkit-appearance: auto !important;
+            appearance: auto !important;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
