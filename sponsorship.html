@@ -756,7 +756,7 @@
                 </div>
                 <div class="gift-item">
                     <div class="gift-label" style="margin-bottom: 2px;">แก้วเก็บความเย็น</div>
-                    <button type="button" class="btn-view-image" onclick="openImageModal('รูปแบบแก้ว', 'image/tumbler.png')">
+                    <button type="button" class="btn-view-image" onclick="openImageModal('รูปแบบแก้ว', 'image/tumbler.jpg')">
                         <i class="bi bi-image"></i> รูปแบบแก้ว
                     </button>
                     <div class="counter-controls">
@@ -845,12 +845,7 @@
     <div class="footer">
         <p style="margin:0; padding-bottom: 10px; border-bottom: 1px dashed #d1d5db;">
             สอบถามข้อมูลเพิ่มเติม :<br>
-            <span style="color:var(--primary-blue); font-size:1rem; font-weight:bold; display:block; margin-top:4px;">
-                ประธานชมรมศิษย์เก่า <span style="color:var(--primary-orange); ">065-925-0819</span>
-            </span>
-        </p>
-
-        <a href="https://www.facebook.com/KhaesadNST" target="_blank" style="
+             <a href="https://www.facebook.com/KhaesadNST" target="_blank" style="
             display: flex; 
             align-items: center; 
             justify-content: center; 
@@ -867,6 +862,14 @@
                 แคแสดสัมพันธ์ ครั้งที่ 4 ปี 2569
             </span>
         </a>
+        </p>
+        <div style="display: grid; grid-template-columns: auto auto; gap: 8px 15px; justify-content: center; margin-top: 15px; text-align: left; padding-bottom: 5px;">
+            <div style="color:var(--primary-blue); font-size:1rem; font-weight:bold; text-align: right; white-space: nowrap;">ประธานชมรมศิษย์เก่า</div>
+            <div style="color:var(--primary-orange); font-size:1rem; font-weight:bold;">065-925-0819</div>
+            
+            <div style="color:var(--primary-blue); font-size:1rem; font-weight:bold; text-align: right; white-space: nowrap;">เลขานุการ</div>
+            <div style="color:var(--primary-orange); font-size:1rem; font-weight:bold;">064-423-6966</div>
+        </div>
     </div>
 </div>
 
@@ -1004,12 +1007,16 @@
             select.style.padding = "8px"; 
             select.innerHTML = `
                 <option value="">ตัวที่ ${i + 1}</option>
+                <option value="SS">SS (34")</option>
                 <option value="S">S (36")</option>
                 <option value="M">M (38")</option>
                 <option value="L">L (40")</option>
                 <option value="XL">XL (42")</option>
                 <option value="2XL">2XL (44")</option>
                 <option value="3XL">3XL (46")</option>
+                <option value="4XL">4XL (48")</option>
+                <option value="5XL">5XL (50")</option>
+                <option value="6XL">6XL (52")</option>
             `;
             if (currentSizes[i]) {
                 select.value = currentSizes[i];
