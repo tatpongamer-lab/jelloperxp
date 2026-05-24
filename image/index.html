@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แคแสดสัมพันธ์ ครั้งที่ 4 | PCSHS NST</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        :root {
+            --primary-orange: #FF6600;
+            --primary-blue: #003366;
+        }
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Sarabun', sans-serif; /* แนะนำให้ใช้ Font Sarabun ถ้ามี */
+        }
+        .header-banner {
+            background: linear-gradient(135deg, var(--primary-orange), var(--primary-blue));
+            color: white;
+            /* ขยายความสูงของแบนเนอร์ให้ใหญ่ขึ้น */
+            padding: 50px 20px; 
+            text-align: center;
+            border-radius: 0 0 25px 25px; 
+            margin-bottom: 30px;
+            /* Box Shadow: ปรับเงาให้กว้างและเข้มขึ้นเพื่อให้กล่องดูลอยออกมา */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+        }
+
+        .header-banner .title-thai {
+            /* ขยายขนาดตัวอักษรภาษาไทยและทำให้หนา */
+            font-size: 2.5rem; 
+            font-weight: 700;
+            margin-bottom: 10px;
+            /* Text Shadow: เพิ่มเงาให้ตัวอักษรอ่านง่ายและเด้งออกมาจากสีพื้นหลัง */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-banner .title-eng {
+            /* ขยายขนาดภาษาอังกฤษให้อ่านง่ายขึ้น */
+            font-size: 1.25rem; 
+            font-weight: 500;
+            /* Letter Spacing: เพิ่มช่องไฟให้ภาษาอังกฤษดูทันสมัยและพรีเมียม */
+            letter-spacing: 2px; 
+            text-transform: uppercase; /* (ตัวเลือกเสริม) ทำให้เป็นพิมพ์ใหญ่ทั้งหมดเพื่อความเท่ */
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+            opacity: 0.95; /* ลดความทึบลงเล็กน้อยเพื่อให้หัวข้อภาษาไทยดูเด่นที่สุด */
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .btn-primary {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+        .btn-primary:hover {
+            background-color: #002244;
+            border-color: #002244;
+        }
+        .btn-outline-orange {
+            color: var(--primary-orange);
+            border-color: var(--primary-orange);
+        }
+        .btn-outline-orange:hover {
+            background-color: var(--primary-orange);
+            color: white;
+        }
+        .nav-tabs .nav-link.active {
+            color: var(--primary-orange);
+            border-bottom: 3px solid var(--primary-orange);
+            font-weight: bold;
+        }
+        .nav-tabs .nav-link {
+            color: #6c757d;
+        }
+        .vip-ticket {
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            position: relative;
+            max-width: 320px;
+            margin: 0 auto;
+            text-align: left;
+            border: none;
+            overflow: hidden;
+        }
+        .vip-ticket-header {
+            background: linear-gradient(135deg, var(--primary-orange), var(--primary-blue));
+            color: white;
+            padding: 15px 15px 20px;
+            text-align: center;
+            position: relative;
+        }
+        .vip-ticket-header h4 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 1.25rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+        .vip-ticket-header .ticket-id {
+            background: rgba(255,255,255,0.25);
+            padding: 2px 12px;
+            border-radius: 15px;
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+        }
+        .vip-ticket-body {
+            padding: 20px 15px 15px;
+            background: #fff;
+            position: relative;
+        }
+        /* Cutout effect */
+        .vip-ticket-body::before, .vip-ticket-body::after {
+            content: '';
+            position: absolute;
+            top: -12px;
+            width: 24px;
+            height: 24px;
+            background: #f8f9fa; /* body background */
+            border-radius: 50%;
+            z-index: 2;
+            box-shadow: inset 0 3px 5px rgba(0,0,0,0.05);
+        }
+        .vip-ticket-body::before { left: -12px; }
+        .vip-ticket-body::after { right: -12px; }
+        
+        .ticket-detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            border-bottom: 1px dashed #e9ecef;
+            padding-bottom: 6px;
+        }
+        .ticket-detail-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .ticket-detail-label {
+            color: #6c757d;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .ticket-detail-value {
+            color: var(--primary-blue);
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-align: right;
+            max-width: 75%;
+        }
+        .ticket-qr-section {
+            background: #f8f9fa;
+            margin: 15px -15px -15px -15px;
+            padding: 15px;
+            text-align: center;
+            border-top: 2px dashed #dee2e6;
+        }
+        .ticket-qr-section p {
+            color: var(--primary-orange);
+            font-weight: 700;
+            font-size: 0.75rem;
+            margin-top: 10px;
+            margin-bottom: 0;
+        }
+        #imagePreview {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            display: none;
+            margin-top: 15px;
+        }
+        .total-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-orange);
+        }
+        /* สไตล์สำหรับปุ่มเลือกร่วมงานและอาหาร */
+        .btn-outline-theme {
+            color: var(--primary-blue);
+            border-color: var(--primary-blue);
+            background-color: white;
+            transition: all 0.3s;
+        }
+        .btn-check:checked + .btn-outline-theme {
+            background-color: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+        }
+        .btn-outline-theme:hover {
+            background-color: #f0f8ff;
+        }
+        .btn-check:checked + .btn-outline-theme:hover {
+            background-color: #002244;
+        }
+        .gifts-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            text-align: center;
+            width: 100%;
+        }
+        .gift-item {
+            background: #f8f9fa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 10px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .gift-label {
+            font-size: 0.75rem;
+            color: var(--primary-blue);
+            margin-bottom: 8px;
+            font-weight: 600;
+            line-height: 1.2;
+            word-break: break-word;
+            width: 100%;
+        }
+        .counter-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2px;
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid #dee2e6;
+            padding: 3px;
+            width: 100%;
+            max-width: 90px;
+        }
+        .btn-counter {
+            width: 26px;
+            height: 26px;
+            border: none;
+            background: #f3f4f6;
+            color: #333;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            padding: 0;
+        }
+        .btn-counter:active {
+            background: #e5e7eb;
+            transform: scale(0.95);
+        }
+        .btn-counter.btn-add {
+            background: #e0f2fe;
+            color: var(--primary-blue);
+        }
+        .gift-qty {
+            font-weight: bold;
+            font-size: 1rem;
+            min-width: 16px;
+            text-align: center;
+        }
+        /* แก้ปัญหา In-App Browser กด Dropdown ไม่ได้ */
+        select.form-select {
+            -webkit-appearance: auto !important;
+            appearance: auto !important;
+            background-image: none !important;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container pb-5" style="max-width: 400px;">
+    <div id="headerImage" style="text-align: center; margin-bottom: 30px;">
+        <img src="image/header.jpg" alt="แคแสดสัมพันธ์ ครั้งที่ 4" style="width: 100%; border-radius: 0 0 25px 25px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);">
+    </div>
+
+    <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab">ลงทะเบียนร่วมงาน</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="status-tab" data-bs-toggle="tab" data-bs-target="#status" type="button" role="tab">ตรวจสอบสถานะ</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="register" role="tabpanel">
+            <form id="regForm" onsubmit="handleFormSubmit(event)">
+                
+                <div class="card p-3">
+                    <h5 class="text-primary mb-3" style="color: var(--primary-blue)!important;">
+                        ข้อมูลส่วนตัว <span style="font-size: 0.75em; color: var(--primary-orange);">(ภาษาไทย)</span>
+                    </h5>
+                    
+                    <div class="mb-3">
+                        <select class="form-select" id="PrefixType" required onchange="toggleCustomPrefix()">
+                            <option value="">-- คำนำหน้า --</option>
+                            <option value="นาย">นาย</option>
+                            <option value="นาง">นาง</option>
+                            <option value="น.ส.">น.ส.</option>
+                            <option value="อื่นๆ">อื่นๆ (ระบุเอง)</option>
+                        </select>
+                        <input type="text" class="form-control mt-2" id="PrefixCustom" placeholder="โปรดระบุยศ/คำนำหน้า" style="display: none;">
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <input type="text" class="form-control" id="FirstName" placeholder="ชื่อจริง" pattern="^[ก-๙\s]+$" title="กรุณากรอกเป็นภาษาไทยเท่านั้น" required>
+                        </div>
+                        <div class="col-6">
+                            <input type="text" class="form-control" id="LastName" placeholder="นามสกุล" pattern="^[ก-๙\s]+$" title="กรุณากรอกเป็นภาษาไทยเท่านั้น" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="Nickname" placeholder="ชื่อเล่น" pattern="^[ก-๙\s]+$" title="กรุณากรอกเป็นภาษาไทยเท่านั้น" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <input type="tel" class="form-control" id="Phone" pattern="0[0-9]{9}" placeholder="0XXXXXXXXX" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <select class="form-select" id="Batch" required onchange="calcTotal()">
+                            <option value="">-- เลือกรุ่น --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="card p-3">
+                    <h5 class="text-primary mb-3" style="color: var(--primary-blue)!important;">ประเภทอาหาร</h5>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="FoodType" id="foodBuddhist" value="BUDDHIST" required>
+                            <label class="btn btn-outline-theme w-100 h-100 d-flex align-items-center justify-content-center p-2 rounded shadow-sm" for="foodBuddhist">
+                                <span class="fs-6 fw-bold">ไทยพุทธ</span>
+                            </label>
+                        </div>
+
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="FoodType" id="foodHalal" value="HALAL" required>
+                            <label class="btn btn-outline-theme w-100 h-100 d-flex align-items-center justify-content-center p-2 rounded shadow-sm text-wrap" for="foodHalal">
+                                <span class="fs-6 fw-bold">ไทยมุสลิม</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-3">
+                    <h5 class="text-primary mb-3" style="color: var(--primary-blue)!important;">ประเภทการร่วมงาน </small></h5>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <input type="checkbox" class="btn-check" id="eventDay" value="DAY" onchange="calcTotal()">
+                            <label class="btn btn-outline-theme w-100 h-100 d-flex align-items-center justify-content-center p-2 rounded shadow-sm" for="eventDay">
+                                <span class="fs-6 fw-bold">งานกลางวัน</span>
+                            </label>
+                        </div>
+
+                        <div class="col-6">
+                            <input type="checkbox" class="btn-check" id="eventNight" value="NIGHT" onchange="calcTotal()">
+                            <label class="btn btn-outline-theme w-100 h-100 d-flex align-items-center justify-content-center p-2 rounded shadow-sm text-wrap" for="eventNight">
+                                <span class="fs-6 fw-bold">งานกลางคืน</span>
+                            </label>
+                        </div>
+                        <div style="text-align: center; color: var(--primary-orange);font-size: 1rem;">------- สามารถเลือกร่วมงานได้ทั้ง 2 ช่วง -------</div>
+                    </div>
+                </div>
+
+                <div class="card p-3">
+                    <h5 class="text-primary mb-3" style="color: var(--primary-blue)!important;">ผู้ติดตาม</h5>
+                    <div class="gifts-grid">
+                        <div class="gift-item">
+                            <div class="gift-label">ผู้ใหญ่</div>
+                            <div class="counter-controls">
+                                <button type="button" class="btn-counter" onclick="updateFollower('AdultCount', -1)">-</button>
+                                <span class="gift-qty" id="qty_AdultCount">0</span>
+                                <button type="button" class="btn-counter btn-add" onclick="updateFollower('AdultCount', 1)">+</button>
+                            </div>
+                            <input type="hidden" id="AdultCount" name="AdultCount" value="0">
+                        </div>
+                        <div class="gift-item">
+                            <div class="gift-label">เด็ก ≥ 12 ปี</div>
+                            <div class="counter-controls">
+                                <button type="button" class="btn-counter" onclick="updateFollower('ChildO12', -1)">-</button>
+                                <span class="gift-qty" id="qty_ChildO12">0</span>
+                                <button type="button" class="btn-counter btn-add" onclick="updateFollower('ChildO12', 1)">+</button>
+                            </div>
+                            <input type="hidden" id="ChildO12" name="ChildO12" value="0">
+                        </div>
+                        <div class="gift-item">
+                            <div class="gift-label">เด็ก &lt; 12 ปี</div>
+                            <div class="counter-controls">
+                                <button type="button" class="btn-counter" onclick="updateFollower('ChildU12', -1)">-</button>
+                                <span class="gift-qty" id="qty_ChildU12">0</span>
+                                <button type="button" class="btn-counter btn-add" onclick="updateFollower('ChildU12', 1)">+</button>
+                            </div>
+                            <input type="hidden" id="ChildU12" name="ChildU12" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-3 text-center bg-light">
+                    <h3 style="color: var(--primary-blue);"><strong>ยอดชำระเงิน</strong><br></h3>
+                    <div class="total-price mb-3" id="totalDisplay">0 บาท</div>
+
+                    <div id="paymentSection" style="display: none; text-align: left;">
+                        <div class="bank-card" style="background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; border-radius: 12px; padding: 15px 20px; box-shadow: 0 6px 15px rgba(0,0,0,0.15); max-width: 380px; margin: 0 auto 20px;">
+                            <!-- ส่วนหัวบัตร -->
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span style="font-size: 0.95rem; font-weight: bold; letter-spacing: 0.5px;">ธนาคารออมสิน</span>
+                            </div>
+                            
+                            <!-- ส่วนเลขบัญชีตรงกลาง -->
+                            <div class="mb-2">
+                                <span style="font-size: 0.7rem; opacity: 0.8; text-transform: uppercase;">เลขที่บัญชี</span>
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <h4 id="accNo" style="margin: 0; font-family: 'Courier New', monospace; letter-spacing: 2px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); font-size: 1.2rem;">020-4-24234-159</h4>
+                                    <button type="button" class="btn btn-light btn-sm fw-bold" onclick="copyAcc()" style="border-radius: 50px; font-size: 0.75rem; padding: 3px 12px;">คัดลอก</button>
+                                </div>
+                            </div>
+                            
+                            <!-- ส่วนชื่อบัญชีด้านล่าง -->
+                            <div>
+                                <span style="font-size: 0.7rem; opacity: 0.8;">ชื่อบัญชี</span>
+                                <p style="margin: 0; font-weight: 500; font-size: 0.85rem; line-height: 1.2;">ศิษย์เก่า รร.วิทยาศาสตร์จุฬาภรณราชวิทยาลัย นศ.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- ค้นหาส่วนอัปโหลดสลิปเดิม แล้ววางโค้ดนี้ทับ -->
+                        <label class="form-label">สลิปการโอนเงิน <span class="text-danger">*</span></label>
+                        <!-- เพิ่ม multiple เพื่อให้เลือกได้หลายไฟล์ -->
+                        <input type="file" class="form-control" id="SlipFile" accept="image/*" multiple onchange="previewAndCheckQR(event)">
+
+                        <!-- เปลี่ยนจาก img 태็กเดียว เป็น div สำหรับใส่หลายรูป -->
+                        <div id="previewContainer" class="d-flex flex-wrap gap-2 mt-3"></div>
+                        <input type="hidden" id="SlipBase64"> <!-- ไม่ได้ใช้เก็บสลิปเดียวแล้ว แต่เก็บไว้เผื่อ compatibility -->
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-3" id="btnSubmit">ลงทะเบียน</button>
+                <a href="https://www.facebook.com/KhaesadNST" target="_blank" style="
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    gap: 12px; 
+                    padding: 16px 0; 
+                    margin: 16px auto 0 auto; 
+                    text-decoration: none; 
+                    width: 100%; 
+                    max-width: 400px;
+                    box-sizing: border-box;
+                    -webkit-tap-highlight-color: transparent;
+                ">
+                    <!-- ส่วนคำว่า "ติดต่อ :" เปลี่ยนสีเป็น var(--primary-orange) -->
+                    <span style="color: var(--primary-orange, #FF6600); font-weight: 500; font-size: 1.2rem; white-space: nowrap;">
+                        ติดต่อ :
+                    </span>
+                    
+                    <!-- ส่วนไอคอน Facebook -->
+                    <i class="bi bi-facebook" style="font-size: 1.3rem; color: var(--primary-blue, #003366); flex-shrink: 0;"></i> 
+                    
+                    <!-- ส่วนชื่อเพจ -->
+                    <span style="color: var(--primary-blue, #003366); font-weight: 500; font-size: 1rem; line-height: 1.4;">
+                        แคแสดสัมพันธ์ ครั้งที่ 4 ปี 2569
+                    </span>
+                </a>
+            </form>
+        </div>
+
+        <div class="tab-pane fade" id="status" role="tabpanel">
+            <div class="card p-3">
+                <form id="searchForm" onsubmit="handleSearch(event)">
+                    <div class="mb-3">
+                        <input type="tel" class="form-control" id="SearchPhone" pattern="0[0-9]{9}" placeholder="เบอร์โทรศัพท์ที่ใช้ลงทะเบียน" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="SearchName" placeholder="ชื่อจริง (ไม่ต้องใส่คำนำหน้า)" required>
+                    </div>
+                    <button type="submit" class="btn btn-outline-orange w-100" id="btnSearch">ตรวจสอบสถานะ</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="ticketResult" class="mt-4" style="display: none; text-align: center;">
+        
+        <div class="vip-ticket mx-auto" id="ticketContent">
+            <div class="vip-ticket-header">
+                <h4>แคแสดสัมพันธ์ ครั้งที่ 4</h4>
+                <div class="ticket-id">ID: <span id="t_id"></span></div>
+            </div>
+            
+            <div class="vip-ticket-body">
+                <div class="ticket-detail-row">
+                    <span class="ticket-detail-label">ชื่อ</span>
+                    <span class="ticket-detail-value" id="t_name"></span>
+                </div>
+                <div class="ticket-detail-row">
+                    <span class="ticket-detail-label">รุ่น</span>
+                    <span class="ticket-detail-value" id="t_batch"></span>
+                </div>
+                <div class="ticket-detail-row">
+                    <span class="ticket-detail-label">สิทธิ์</span>
+                    <span class="ticket-detail-value" id="t_event"></span>
+                </div>
+                <div class="ticket-detail-row">
+                    <span class="ticket-detail-label">อาหาร</span>
+                    <span class="ticket-detail-value" id="t_food"></span>
+                </div>
+                <div class="ticket-detail-row">
+                    <span class="ticket-detail-label">ผู้ติดตาม</span>
+                    <span class="ticket-detail-value" id="t_followers"></span>
+                </div>
+                
+                <!-- ซ่อนสถานะไว้เผื่ออนาคตตามโค้ดเดิม -->
+                <div style="display: none;">
+                    <span id="t_status"></span>
+                </div>
+
+                <div class="ticket-qr-section">
+                    <div id="qrcode" class="d-inline-block bg-white p-2 rounded shadow-sm"></div>
+                    <p>กรุณาแคปหน้าจอเพื่อใช้เข้างาน</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mx-auto mt-3" style="max-width: 360px;">
+            <button class="btn btn-secondary w-100 mt-2" onclick="backToHome()">กลับหน้าหลัก</button>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    // ⚠️ นำ URL Web App ของคุณมาใส่ตรงนี้ ⚠️
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwzYxbwKueYVTr-ZGqzU6pgieySxS08pX6NgTtPTtQsxYOqDsGuvQ0xgZYQHfCuVk116Q/exec"; 
+    
+    let currentTotal = 0;
+    // สร้าง Array สำหรับเก็บรูปภาพสลิปที่เลือก
+    let uploadedSlips = []; 
+
+    // 1. สร้าง Option รุ่น (เพิ่ม ม.ปลาย 1-3)
+    window.onload = () => {
+        const batchSelect = document.getElementById('Batch');
+        
+        // เพิ่ม ม.ปลาย รุ่น 1-3 เข้าไปก่อน
+        for(let i=1; i<=3; i++) {
+            let opt = document.createElement('option');
+            opt.value = `HS${i}`; // รหัสพิเศษสำหรับ ม.ปลาย
+            opt.innerHTML = `ม.ปลาย รุ่น ${i}`;
+            batchSelect.appendChild(opt);
+        }
+
+        // เพิ่มรุ่น 1-30 ตามปกติ
+        for(let i=1; i<=30; i++) {
+            let opt = document.createElement('option');
+            opt.value = `${i}/${i+3}`;
+            opt.innerHTML = `ม.ต้น รุ่น ${i} / ม.ปลายรุ่น ${i+3}`;
+            batchSelect.appendChild(opt);
+        }
+    }; // 👈 [ต้องเติม `};` ตรงนี้ครับ สำคัญมาก!]
+
+    // 2. จัดการช่องคำนำหน้า
+    function toggleCustomPrefix() {
+        const p = document.getElementById('PrefixType').value;
+        const c = document.getElementById('PrefixCustom');
+        if (p === 'อื่นๆ') {
+            c.style.display = 'block';
+            c.required = true;
+        } else {
+            c.style.display = 'none';
+            c.required = false;
+            c.value = '';
+        }
+    }
+
+    // 3. คัดลอกเลขบัญชี
+    function copyAcc() {
+        navigator.clipboard.writeText("020424234159");
+        Swal.fire({icon: 'success', title: 'คัดลอกเลขบัญชีแล้ว', timer: 1000, showConfirmButton: false});
+    }
+
+    // อัปเดตจำนวนผู้ติดตาม
+    function updateFollower(id, change) {
+        const input = document.getElementById(id);
+        const span = document.getElementById('qty_' + id);
+        let val = parseInt(input.value) || 0;
+        
+        if (change > 0) {
+            const adult = parseInt(document.getElementById('AdultCount').value) || 0;
+            const childO12 = parseInt(document.getElementById('ChildO12').value) || 0;
+            const childU12 = parseInt(document.getElementById('ChildU12').value) || 0;
+            if (adult + childO12 + childU12 >= 10) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'จำกัดจำนวน',
+                    text: 'สามารถระบุผู้ติดตามรวมได้สูงสุด 10 คน',
+                    confirmButtonColor: '#003366'
+                });
+                return;
+            }
+        }
+        
+        val += change;
+        if (val < 0) val = 0;
+        input.value = val;
+        span.innerText = val;
+        calcTotal();
+    }
+
+    // 4. คำนวณราคา (อัปเดตใหม่ทั้งหมดตามเรทใหม่ และใช้ Checkbox)
+    function calcTotal() {
+        const batchVal = document.getElementById('Batch').value;
+        // ปรับการดึง batch สำหรับคำนวณราคาหน้าเว็บ
+        let batch = 0;
+        if (batchVal.startsWith('HS')) {
+            batch = parseInt(batchVal.replace('HS', ''));
+        } else {
+            batch = parseInt(batchVal.split('/')[0]) || 0;
+        }
+        
+        // เช็คการเลือก Checkbox
+        const isDay = document.getElementById('eventDay').checked;
+        const isNight = document.getElementById('eventNight').checked;
+        
+        let type = "";
+        if (isDay && isNight) type = "DAY_NIGHT";
+        else if (isDay) type = "DAY_ONLY";
+        else if (isNight) type = "NIGHT_ONLY";
+
+        const adult = parseInt(document.getElementById('AdultCount').value) || 0;
+        const childO12 = parseInt(document.getElementById('ChildO12').value) || 0;
+
+        // ถ้ายอมยังไม่เลือกรุ่น หรือยังไม่เลือกช่วงเวลา ให้ยอดเป็น 0
+        if (!batch || !type) {
+            currentTotal = 0;
+            updatePaymentUI();
+            return;
+        }
+
+        let basePrice = 0;
+        let childPrice = 0;
+
+        // กำหนดราคาฐาน
+        if (batch <= 23) {
+            if (type === "DAY_ONLY") basePrice = 300;
+            else if (type === "NIGHT_ONLY") basePrice = 900;
+            else if (type === "DAY_NIGHT") basePrice = 1000;
+        } else {
+            if (type === "DAY_ONLY") basePrice = 0;
+            else if (type === "NIGHT_ONLY") basePrice = 500;
+            else if (type === "DAY_NIGHT") basePrice = 500;
+        }
+
+        // ราคาศิษย์เก่า (รุ่น 7 ฟรี)
+        let alumniPrice = (batch === 7) ? 0 : basePrice;
+
+        // ราคาเด็กโต (ถ้าไม่มีงานกลางคืน ฟรี)
+        if (type === "NIGHT_ONLY" || type === "DAY_NIGHT") {
+            childPrice = 500;
+        } else {
+            childPrice = 0;
+        }
+
+        // รวมยอด
+        currentTotal = alumniPrice + (adult * basePrice) + (childO12 * childPrice);
+        
+        updatePaymentUI();
+    }
+
+    // ฟังก์ชันย่อยสำหรับอัปเดต UI ยอดชำระ (แยกออกมาให้เรียกซ้ำง่าย)
+    function updatePaymentUI() {
+        document.getElementById('totalDisplay').innerText = currentTotal.toLocaleString() + " บาท";
+
+        const paySec = document.getElementById('paymentSection');
+        const slipFile = document.getElementById('SlipFile');
+        
+        if (currentTotal > 0) {
+            paySec.style.display = 'block';
+            slipFile.required = false;
+        } else {
+            // กรณีเข้าฟรี (ยอด 0 บาท) ซ่อนส่วนชำระเงินและเคลียร์ค่า
+            paySec.style.display = 'none';
+            if (slipFile) {
+                slipFile.required = false;
+                slipFile.value = '';
+            }
+            // ✅ แก้บัค: เปลี่ยนจากล้าง imagePreview เป็นการล้าง previewContainer แบบใหม่
+            const previewContainer = document.getElementById('previewContainer');
+            if (previewContainer) previewContainer.innerHTML = '';
+            
+            uploadedSlips = []; // เคลียร์ Array รูปภาพ
+            
+            const slipBase64 = document.getElementById('SlipBase64');
+            if (slipBase64) slipBase64.value = '';
+        }
+    }
+
+    // 5. พรีวิว บีบอัด ตรวจ QR และแสดงผลหลายรูป
+    function previewAndCheckQR(event) {
+        const files = event.target.files;
+        if (!files || files.length === 0) return;
+
+        let hasWarning = false;
+
+        Array.from(files).forEach((file) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const MAX_WIDTH = 800;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > MAX_WIDTH) {
+                        height = Math.round((height * MAX_WIDTH) / width);
+                        width = MAX_WIDTH;
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
+                    
+                    const base64Url = canvas.toDataURL('image/jpeg', 0.6); 
+                    
+                    // เก็บรูปลง Array พร้อมสร้าง ID สุ่มไว้ใช้ตอนลบ
+                    const imgObj = {
+                        id: Date.now() + Math.random(),
+                        base64: base64Url,
+                        hasQR: !!code
+                    };
+                    uploadedSlips.push(imgObj);
+
+                    // ถ้าไม่มี QR ให้แจ้งเตือน แต่ยังเก็บรูปไว้
+                    if (!imgObj.hasQR && !hasWarning) {
+                        hasWarning = true;
+                        Swal.fire({
+                            icon: 'warning',
+                            html: `
+                                <div style="font-size: 1rem; line-height: 1.6; color: #4b5563;">
+                                    <p>สลิปอาจไม่ถูกต้อง หรือภาพไม่ชัดเจน<br><b>กรุณาตรวจสอบรูปภาพอีกครั้ง</b></p>
+                                    
+                                    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 15px 0;">
+                                    
+                                    <p style="font-size: 0.9rem; color: #6b7280; margin-bottom: 12px;">
+                                        หากพบปัญหาหรือมีข้อสงสัย ติดต่อ:
+                                    </p>
+                                    
+                            <a href="https://www.facebook.com/KhaesadNST" target="_blank" style="
+                                display: flex; 
+                                align-items: center; 
+                                justify-content: center; 
+                                gap: 6px; 
+                                padding: 6px 10px; 
+                                margin: 0 auto;
+                                background-color: #ffffff; 
+                                border: 1px solid #e5e7eb; 
+                                border-left: 6px solid #FF6600; 
+                                border-radius: 4px; 
+                                text-decoration: none; 
+                                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); 
+                                width: 100%; 
+                                max-width: 320px;
+                                box-sizing: border-box;
+                                white-space: nowrap;
+                            ">
+                                <i class="bi bi-facebook" style="font-size: 1.4rem; color: #003366;"></i> 
+                                
+                                <span style="color: #003366; font-weight: 600; font-size: 0.95rem;">
+                                    แคแสดสัมพันธ์ ครั้งที่ 4 ปี 2569
+                                </span>
+                            </a>
+                                </div>
+                            `,
+                            confirmButtonText: 'ตกลง'
+                        });
+                    }
+
+                    renderPreviews(); // อัปเดตหน้าจอแสดงรูป
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        });
+
+        // ล้างค่า input เพื่อให้สามารถเลือกไฟล์เดิมซ้ำได้ถ้าเผลอลบ
+        event.target.value = '';
+    }
+
+    // ฟังก์ชันสร้าง UI รูปพรีวิว และปุ่มลบ
+    function renderPreviews() {
+        const container = document.getElementById('previewContainer');
+        container.innerHTML = '';
+        
+        uploadedSlips.forEach((slip) => {
+            const wrapper = document.createElement('div');
+            wrapper.style.position = 'relative';
+            wrapper.style.display = 'inline-block';
+
+            const imgEl = document.createElement('img');
+            imgEl.src = slip.base64;
+            imgEl.style.width = '100px';
+            imgEl.style.height = '100px';
+            imgEl.style.objectFit = 'cover';
+            imgEl.style.borderRadius = '8px';
+            imgEl.style.border = slip.hasQR ? '2px solid #28a745' : '2px solid #dc3545'; // เขียวถ้ามี QR แดงถ้าไม่มี
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.innerHTML = '✖';
+            deleteBtn.style.position = 'absolute';
+            deleteBtn.style.top = '-5px';
+            deleteBtn.style.right = '-5px';
+            deleteBtn.style.background = 'red';
+            deleteBtn.style.color = 'white';
+            deleteBtn.style.border = 'none';
+            deleteBtn.style.borderRadius = '50%';
+            deleteBtn.style.width = '20px';
+            deleteBtn.style.height = '20px';
+            deleteBtn.style.cursor = 'pointer';
+            deleteBtn.style.fontSize = '12px';
+            deleteBtn.onclick = () => removeSlip(slip.id);
+
+            wrapper.appendChild(imgEl);
+            wrapper.appendChild(deleteBtn);
+            container.appendChild(wrapper);
+        });
+    }
+
+    // ฟังก์ชันลบรูปออกจาก Array
+    function removeSlip(id) {
+        uploadedSlips = uploadedSlips.filter(slip => slip.id !== id);
+        renderPreviews();
+    }
+
+    // 6. Submit Register (อัปเดตหน้าสรุปข้อมูล)
+    async function handleFormSubmit(e) {
+        e.preventDefault();
+        
+        // 1. ตรวจสอบการเลือกร่วมงาน (ต้องเลือกอย่างน้อย 1 อย่าง)
+        const isDay = document.getElementById('eventDay').checked;
+        const isNight = document.getElementById('eventNight').checked;
+        
+        if (!isDay && !isNight) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'ข้อมูลไม่ครบถ้วน',
+                text: 'กรุณาเลือกช่วงเวลาที่ต้องการเข้าร่วมอย่างน้อย 1 ช่วง (กลางวัน หรือ กลางคืน)',
+                confirmButtonColor: '#003366'
+            });
+            return;
+        }
+
+        let eventTypeVal = "";
+        let eventShow = "";
+        if (isDay && isNight) {
+            eventTypeVal = "DAY_NIGHT";
+            eventShow = "กลางวันและกลางคืน";
+        } else if (isDay) {
+            eventTypeVal = "DAY_ONLY";
+            eventShow = "เฉพาะกลางวัน";
+        } else if (isNight) {
+            eventTypeVal = "NIGHT_ONLY";
+            eventShow = "เฉพาะกลางคืน";
+        }
+
+        // 2. ดึงค่าฟิลด์ต่างๆ
+        const prefix = document.getElementById('PrefixType').value;
+        const fName = document.getElementById('FirstName').value;
+        const lName = document.getElementById('LastName').value;
+        const phone = document.getElementById('Phone').value;
+        const batch = document.getElementById('Batch').value;
+        const foodTypeObj = document.querySelector('input[name="FoodType"]:checked');
+
+        // 3. ด่านตรวจจับ: ถ้ามีช่องไหนว่าง
+        if (!prefix || !fName || !lName || !phone || !batch || !foodTypeObj) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'ข้อมูลไม่ครบถ้วน',
+                text: 'กรุณากรอกข้อมูลที่มีเครื่องหมาย * ให้ครบทุกช่อง (รวมถึงประเภทอาหาร)',
+                confirmButtonText: 'ตกลง',
+                confirmButtonColor: '#003366'
+            });
+            return;
+        }
+
+        // 4. ตรวจสอบรูปแบบเบอร์โทรศัพท์ (ต้องเป็น 10 หลักและขึ้นต้นด้วย 0)
+        if (!/^0[0-9]{9}$/.test(phone)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'เบอร์โทรศัพท์ไม่ถูกต้อง',
+                text: 'กรุณากรอกเบอร์โทรศัพท์ 10 หลัก (เช่น 0812345678)',
+                confirmButtonColor: '#003366'
+            });
+            return;
+        }
+
+        // 🚀 [เพิ่มใหม่] ตรวจสอบชื่อ-สกุล และชื่อเล่น ว่าเป็นภาษาไทยเท่านั้น
+        const thaiRegex = /^[ก-๙\s]+$/;
+        const nickname = document.getElementById('Nickname').value;
+        if (!thaiRegex.test(fName) || !thaiRegex.test(lName) || !thaiRegex.test(nickname)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'รูปแบบภาษาไม่ถูกต้อง',
+                text: 'กรุณากรอก ชื่อ, นามสกุล และชื่อเล่น เป็นภาษาไทยเท่านั้นครับ',
+                confirmButtonColor: '#003366'
+            });
+            return;
+        }
+        
+        // 5. ตรวจสอบสลิปการโอนเงิน
+        if (currentTotal > 0 && uploadedSlips.length === 0) {
+            Swal.fire('ข้อผิดพลาด', 'กรุณาอัปโหลดรูปสลิปการโอนเงินอย่างน้อย 1 รูป', 'error');
+            return;
+        }
+
+        // 6. เตรียมข้อมูลเพื่อส่งเข้าระบบ
+        const data = {
+            action: "register",
+            RequestID: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
+            PrefixType: prefix,
+            PrefixCustom: document.getElementById('PrefixCustom').value,
+            FirstName: fName,
+            LastName: lName,
+            Nickname: document.getElementById('Nickname').value,
+            Phone: phone,
+            Batch: batch,
+            EventType: eventTypeVal, 
+            Food: foodTypeObj.value, // เพิ่มข้อมูลอาหารส่งไป Backend
+            AdultCount: document.getElementById('AdultCount').value,
+            ChildOver12Count: document.getElementById('ChildO12').value,
+            ChildUnder12Count: document.getElementById('ChildU12').value
+        };
+
+        function escapeHtml(unsafe) {
+            return String(unsafe).replace(/[&<"'>]/g, function (m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+            });
+        }
+
+        const prefixShow = data.PrefixType === 'อื่นๆ' ? data.PrefixCustom : data.PrefixType;
+        const foodShow = data.Food === 'BUDDHIST' ? 'ไทยพุทธ' : 'ไทยมุสลิม';
+        
+        // 🚀 การจัด Format การโชว์ชื่อรุ่นให้สวยงาม (รองรับ ม.ปลาย 1-3)
+        let batchShow = data.Batch;
+        if (data.Batch.startsWith('HS')) {
+            batchShow = `ม.ปลาย รุ่น ${data.Batch.replace('HS','')}`;
+        } else {
+            const bParts = data.Batch.split('/');
+            if (bParts.length === 2) batchShow = `ม.ต้น รุ่น ${bParts[0]} / ม.ปลาย รุ่น ${bParts[1]}`;
+        }
+        
+        const summaryHTML = `
+            <div style="text-align: left; font-size: 0.95rem; background: #f8f9fa; padding: 15px; border-radius: 10px;">
+                <b>ชื่อ-สกุล:</b> ${escapeHtml(prefixShow)}${escapeHtml(data.FirstName)} ${escapeHtml(data.LastName)} <br>
+                <b>เบอร์โทร:</b> ${escapeHtml(data.Phone)}<br>
+                <b>รุ่น:</b> ${escapeHtml(batchShow)}<br>
+                <b>ประเภท:</b> ${escapeHtml(eventShow)}<br>
+                <b>อาหาร:</b> ${escapeHtml(foodShow)}<br>
+                <b>ผู้ติดตาม:</b> ผู้ใหญ่ ${escapeHtml(data.AdultCount)} | เด็กโต ${escapeHtml(data.ChildOver12Count)} | เด็กเล็ก ${escapeHtml(data.ChildUnder12Count)}<br>
+                <hr style="margin: 10px 0;">
+                <h5 class="text-danger mb-0"><b>ยอดชำระ: ${currentTotal.toLocaleString()} บาท</b></h5>
+            </div>
+        `;
+
+        const result = await Swal.fire({
+            title: 'ตรวจสอบความถูกต้อง',
+            html: summaryHTML,
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: 'ยืนยันการลงทะเบียน',
+            cancelButtonText: 'แก้ไขข้อมูล'
+        });
+
+        if (!result.isConfirmed) return;
+
+        showLoading(); 
+
+        try {
+            // 🚀 [ใหม่] เตรียม Base64 รูปภาพส่งไปให้ Server ตั้งชื่อตาม TicketID
+            const slipBase64s = uploadedSlips.map(s => s.base64.split(',')[1]);
+            data.SlipBase64s = slipBase64s;
+
+            const regRes = await fetchGAS(data);
+            
+            if (regRes.success) {
+                Swal.close();
+                renderTicket({
+                    ticketId: regRes.ticketId,
+                    name: `${prefixShow}${data.FirstName} ${data.LastName} ${data.Nickname ? `(${data.Nickname})` : ''}`,
+                    batch: batchShow,
+                    event: eventShow,
+                    food: foodShow, // ส่งไปโชว์ในบัตร
+                    followers: `ผู้ใหญ่ ${data.AdultCount}, เด็กโต ${data.ChildOver12Count}, เด็กเล็ก ${data.ChildUnder12Count}`,
+                    status: currentTotal > 0 ? "⏳ รอตรวจสอบสลิป" : "⏳ รอการอนุมัติสิทธิ์เข้างาน"
+                });
+            } else if (regRes.errorType === "duplicate_phone") {
+                Swal.fire({
+                    icon: 'warning',
+                    html: `
+                        <div style="font-size: 1rem; line-height: 1.6; color: #4b5563; text-align: center;">
+                            <p>เบอร์โทรศัพท์นี้มีการลงทะเบียนในระบบแล้ว</p>
+                            
+                            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 15px 0;">
+                            
+                            <p style="font-size: 0.9rem; color: #6b7280; margin-bottom: 12px;">
+                                หากพบปัญหาหรือต้องการแก้ไขข้อมูล ติดต่อ:
+                            </p>
+                            
+                            <a href="https://www.facebook.com/KhaesadNST" target="_blank" style="
+                                display: flex; 
+                                align-items: center; 
+                                justify-content: center; 
+                                gap: 6px; 
+                                padding: 6px 10px; 
+                                margin: 0 auto;
+                                background-color: #ffffff; 
+                                border: 1px solid #e5e7eb; 
+                                border-left: 6px solid #FF6600; 
+                                border-radius: 4px; 
+                                text-decoration: none; 
+                                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); 
+                                width: 100%; 
+                                max-width: 320px;
+                                box-sizing: border-box;
+                                white-space: nowrap;
+                            ">
+                                <i class="bi bi-facebook" style="font-size: 1.4rem; color: #003366;"></i> 
+                                
+                                <span style="color: #003366; font-weight: 600; font-size: 0.95rem;">
+                                    แคแสดสัมพันธ์ ครั้งที่ 4 ปี 2569
+                                </span>
+                            </a>
+                        </div>
+                    `,
+                    confirmButtonText: 'ตกลง',
+                    confirmButtonColor: '#003366'
+                });
+            } else if (regRes.message === "duplicate") {
+                Swal.fire('แจ้งเตือน', 'คำขอนี้ถูกส่งไปแล้ว', 'info');
+            } else {
+                throw new Error(regRes.message);
+            }
+        } catch (err) {
+            Swal.fire('เกิดข้อผิดพลาด', err.message || 'ไม่สามารถติดต่อเซิร์ฟเวอร์ได้', 'error');
+        }
+    }
+
+    // 7. ค้นหาตั๋ว (อัปเดตให้รองรับอาหาร และ EventType แบบใหม่)
+    async function handleSearch(e) {
+        e.preventDefault();
+        const phone = document.getElementById('SearchPhone').value;
+        const name = document.getElementById('SearchName').value;
+
+        showLoading();
+        try {
+            const res = await fetchGAS({ 
+                action: "search", 
+                Phone: phone, 
+                FirstName: name,
+                mode: "ALUMNI" // 👈 เพิ่มบรรทัดนี้
+            });
+            
+            Swal.close();
+            if (res.success && res.ticketId) {
+                
+                const eventShowText = res.eventType === 'DAY_ONLY' ? "เฉพาะกลางวัน" : (res.eventType === 'NIGHT_ONLY' ? "เฉพาะกลางคืน" : "กลางวันและกลางคืน");
+                const foodShowText = res.food === 'BUDDHIST' ? "ไทยพุทธ" : (res.food === 'HALAL' ? "ไทยมุสลิม" : (res.food || "ไม่ระบุ"));
+
+                // ✅ เพิ่มการแปลชื่อรุ่นให้เต็ม
+                let batchShowText = res.batch;
+                if (res.batch.startsWith('HS')) {
+                    batchShowText = `ม.ปลาย รุ่น ${res.batch.replace('HS','')}`;
+                } else {
+                    const bParts = res.batch.split('/');
+                    if (bParts.length === 2) batchShowText = `ม.ต้น รุ่น ${bParts[0]} / ม.ปลาย รุ่น ${bParts[1]}`;
+                }
+
+                renderTicket({
+                    ticketId: res.ticketId,
+                    name: res.name, // ชื่อเล่นถูกส่งมาจาก Backend แล้ว
+                    batch: batchShowText, // ✅ ส่งชื่อรุ่นที่แปลแล้วไป
+                    event: eventShowText,
+                    food: foodShowText,
+                    followers: `ผู้ใหญ่ ${res.adult}, เด็กโต ${res.childO12}, เด็กเล็ก ${res.childU12}`, 
+                    status: res.paymentStatus === 'PAID' ? '✅ อนุมัติแล้ว' : (res.paymentStatus === 'REJECTED' ? '❌ ข้อมูลไม่ถูกต้อง' : '⏳ รอตรวจสอบ/รออนุมัติ')
+                });
+            }
+            else {
+                Swal.fire('ไม่พบข้อมูล', res.message || 'ไม่พบประวัติการลงทะเบียน', 'warning');
+            }
+        } catch (err) {
+            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error');
+        }
+    }
+
+    // 8. ล้างข้อมูลฟอร์ม และกลับหน้าหลัก (แก้ไขบัคปุ่มกดไม่ได้)
+    function backToHome() {
+        document.getElementById('regForm').reset();
+        document.getElementById('searchForm').reset();
+        
+        // เคลียร์ Checkbox
+        document.getElementById('eventDay').checked = false;
+        document.getElementById('eventNight').checked = false;
+
+        document.getElementById('totalDisplay').innerText = "0 บาท";
+        document.getElementById('paymentSection').style.display = 'none';
+        
+        // ✅ เคลียร์รูประบบใหม่ (หลายรูป)
+        uploadedSlips = []; 
+        document.getElementById('previewContainer').innerHTML = '';
+        const slipInput = document.getElementById('SlipFile');
+        if(slipInput) slipInput.value = '';
+        
+        document.getElementById('SlipBase64').value = "";
+        document.getElementById('PrefixCustom').style.display = 'none';
+        currentTotal = 0;
+
+        document.getElementById('myTab').style.display = 'flex';
+        document.getElementById('myTabContent').style.display = 'block';
+        document.getElementById('ticketResult').style.display = 'none';
+        document.getElementById('headerImage').style.display = 'block';
+        
+        window.scrollTo(0, 0);
+    }
+
+    // --- Helper Functions ---
+    async function fetchGAS(payload) {
+        const response = await fetch(WEB_APP_URL, {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+        return await response.json();
+    }
+
+    function showLoading() {
+        Swal.fire({ title: 'กำลังประมวลผล...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
+    }
+
+    function renderTicket(t) {
+        document.getElementById('myTab').style.display = 'none';
+        document.getElementById('myTabContent').style.display = 'none';
+        document.getElementById('ticketResult').style.display = 'block';
+        document.getElementById('headerImage').style.display = 'none';
+
+        document.getElementById('t_id').innerText = t.ticketId;
+        document.getElementById('t_name').innerText = t.name;
+        document.getElementById('t_batch').innerText = t.batch ? `${t.batch}` : "";
+        document.getElementById('t_event').innerText = t.event;
+        document.getElementById('t_food').innerText = t.food; // แสดงข้อมูลอาหารบนบัตร
+        document.getElementById('t_followers').innerText = t.followers;
+        document.getElementById('t_status').innerText = t.status;
+
+        document.getElementById('qrcode').innerHTML = "";
+        new QRCode(document.getElementById("qrcode"), {
+            text: t.ticketId,
+            width: 150,
+            height: 150,
+            colorDark : "#003366",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+        window.scrollTo(0, 0);
+    }
+   
+    // ฟังก์ชันสำหรับส่ง Base64 ไปฝากที่ ImgBB ผ่าน GAS
+    async function uploadToImgBB(base64Full, ticketId) {
+        const response = await fetchGAS({
+            action: "uploadImage",
+            base64: base64Full.split(',')[1],
+            ticketId: ticketId
+        });
+    
+        if (response.success) {
+          return response.url; 
+        } else {
+          throw new Error(response.message || "ระบบฝากรูปขัดข้อง กรุณาลองใหม่");
+        }
+    }
+    
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
