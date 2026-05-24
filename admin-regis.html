@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration | Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        :root { 
+            /* Brand Colors & Refined Light Mode */
+            --primary-orange: #FF6600;
+            --primary-blue: #003366;
+            --accent-sky: #0284c7;
+            --bg-body: #f4f7f9; 
+            --bg-card: rgba(235, 110, 57, 0.3); /* Translucent very light orange */
+            --border-sky: #0284c7; 
+            --text-main: #1e293b; 
+            --text-muted: #64748b;
+            --border-radius: 12px;
+        }
+        body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Prompt', sans-serif; }
+        .admin-header { background: linear-gradient(135deg, var(--primary-blue), var(--accent-sky)); padding: 30px 20px; text-align: center; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-bottom: 3px solid var(--primary-orange); }
+        .card-custom { background-color: white; background-image: linear-gradient(var(--bg-card), var(--bg-card)); border: 1px solid var(--border-sky); border-radius: var(--border-radius); padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.08); }
+        .form-control, .form-select { background-color: #ffffff; border-color: #cbd5e1; color: var(--text-main); padding: 12px 15px; border-radius: 8px; transition: all 0.2s; }
+        .form-control::placeholder { color: #94a3b8; opacity: 1; }
+        .form-control:focus, .form-select:focus { background-color: #ffffff; color: var(--text-main); border-color: var(--accent-sky); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
+        .btn-primary { background-color: var(--primary-blue); border: none; font-weight: 600; color: #fff; border-radius: 8px; transition: all 0.2s; }
+        .btn-primary:hover { background-color: var(--accent-sky); color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2); }
+        .nav-tabs { border-bottom: 2px solid #e2e8f0; gap: 5px; }
+        .nav-link { color: var(--text-muted); transition: all 0.2s; border: none; border-bottom: 3px solid transparent; font-weight: 500; padding: 10px 20px; }
+        .nav-link:hover { color: var(--primary-orange); border-color: transparent; }
+        .nav-link.active { background-color: transparent !important; color: var(--primary-blue) !important; border-bottom: 3px solid var(--primary-orange) !important; font-weight: 700; }
+        
+        .vip-ticket { background: #fff; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); position: relative; max-width: 320px; margin: 0 auto; text-align: left; border: 2px solid var(--primary-blue); overflow: hidden; color: #000; }
+        .vip-ticket-header { background: linear-gradient(135deg, var(--primary-blue), var(--accent-sky)); color: white; padding: 18px 15px 25px; text-align: center; position: relative; }
+        .vip-ticket-header h4 { margin: 0; font-weight: 700; font-size: 1.3rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
+        .vip-ticket-header .ticket-id { background: rgba(255,255,255,0.25); padding: 3px 14px; border-radius: 15px; display: inline-block; margin-top: 10px; font-size: 0.9rem; letter-spacing: 1px; font-family: 'Courier New', Courier, monospace; font-weight: bold; color: white; border: 1px solid rgba(255,255,255,0.3); }
+        .vip-ticket-body { padding: 25px 20px 20px; background: #fff; position: relative; }
+        .vip-ticket-body::before, .vip-ticket-body::after { content: ''; position: absolute; top: -14px; width: 28px; height: 28px; background: var(--bg-body); border-radius: 50%; z-index: 2; border: 2px solid var(--primary-blue); }
+        .vip-ticket-body::before { left: -16px; }
+        .vip-ticket-body::after { right: -16px; }
+        
+        .ticket-detail-row { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px dashed #cbd5e1; padding-bottom: 8px; }
+        .ticket-detail-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .ticket-detail-label { color: #64748b; font-size: 0.85rem; font-weight: 600; }
+        .ticket-detail-value { color: var(--primary-blue); font-weight: 700; font-size: 0.95rem; text-align: right; max-width: 75%; }
+        .ticket-qr-section { background: #f8fafc; margin: 20px -20px -20px -20px; padding: 20px; text-align: center; border-top: 2px dashed #cbd5e1; }
+        
+        #authSection { min-height: 100vh; display: flex; align-items: center; justify-content: center; background-color: var(--bg-body); }
+        #mainApp { display: none; }
+
+        /* ================= ปุ่มกดแบบ Custom (Card Select) ================= */
+        .btn-check-custom { display: none; }
+        .btn-label-custom {
+            border: 2px solid #e2e8f0;
+            background-color: #fff;
+            color: var(--text-main);
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease-in-out;
+            flex: 1;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            user-select: none;
+        }
+        .btn-label-custom:hover {
+            border-color: var(--accent-sky);
+            background-color: #f0f9ff;
+        }
+        /* สถานะตอนถูกกด (Active) */
+        .btn-check-custom:checked + .btn-label-custom {
+            background-color: #f0f9ff;
+            border-color: var(--accent-sky);
+            color: var(--accent-sky);
+            font-weight: 600;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+        }
+
+        /* แก้ปัญหา In-app Browser ไม่สามารถเลือก Dropdown ได้ */
+        select.form-select, select {
+            -webkit-appearance: auto !important;
+            appearance: auto !important;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div id="authSection" class="container">
+    <div class="card-custom text-center" style="max-width: 400px; width: 100%;">
+        <h4 class="text-primary mb-3"><i class="bi bi-shield-lock-fill"></i> Admin Access</h4>
+        <input type="password" id="pinInput" class="form-control text-center fs-4 mb-3" placeholder="Enter PIN" maxlength="6">
+        <button class="btn btn-primary w-100 py-2" onclick="login()">เข้าสู่ระบบ</button>
+    </div>
+</div>
+
+<div id="mainApp">
+    <div class="admin-header mb-4">
+        <h3 class="m-0"><i class="bi bi-person-badge-fill me-2"></i>Registration</h3>
+    </div>
+
+    <!-- บีบความกว้างเป็น 500px จัดให้อยู่ตรงกลาง -->
+    <div class="container mx-auto" style="max-width: 500px;">
+        <ul class="nav nav-tabs mb-4" id="myTab">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#newRegis">ออกบัตร</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#searchQR">ค้นหาบัตร</button></li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- ================= TAB 1: ออกตั๋วใหม่ ================= -->
+            <div class="tab-pane fade show active" id="newRegis">
+                <form id="vipForm" onsubmit="submitVIP(event)">
+                    
+                    <div class="card-custom">
+                        <div class="d-flex gap-2">
+                            <input type="radio" name="vipType" id="typeSponsor" value="SPONSOR" class="btn-check-custom" checked onchange="toggleForm()">
+                            <label class="btn-label-custom py-3" for="typeSponsor"><i class="bi bi-briefcase-fill"></i> สปอนเซอร์</label>
+                            
+                            <input type="radio" name="vipType" id="typeTeacher" value="TEACHER" class="btn-check-custom" onchange="toggleForm()">
+                            <label class="btn-label-custom py-3" for="typeTeacher"><i class="bi bi-person-workspace"></i> อาจารย์</label>
+                        </div>
+                    </div>
+
+                    <div class="card-custom">
+                        <div class="row g-3 mb-3">
+                            <div class="col-6"><input type="text" id="fName" class="form-control" placeholder="ชื่อจริง" required></div>
+                            <div class="col-6"><input type="text" id="lName" class="form-control" placeholder="นามสกุล" required></div>
+                            <div class="col-12"><input type="tel" id="phone" class="form-control" placeholder="เบอร์โทรศัพท์ (10 หลัก)" pattern="0[0-9]{9}" required></div>
+                        </div>
+                        
+                        <div id="sponsorFields">
+                            <div class="mb-3">
+                                <label class="form-label text-dark small mb-1 fw-bold">ชื่อบริษัท / หน่วยงาน / ร้านค้า</label>
+                                <input type="text" id="company" class="form-control" placeholder="กรอกชื่อบริษัท">
+                            </div>
+                        </div>
+
+                        <!-- ปรับเป็นปุ่มกด Checkbox แบบเลือกได้ทั้งคู่ -->
+                        <div class="mb-3">
+                            <label class="form-label text-dark small mb-1 fw-bold">ช่วงเวลาที่เข้าร่วม</label>
+                            <div class="d-flex gap-2">
+                                <input type="checkbox" id="eventDay" class="btn-check-custom">
+                                <label class="btn-label-custom" for="eventDay">งานกลางวัน</label>
+                                
+                                <input type="checkbox" id="eventNight" class="btn-check-custom">
+                                <label class="btn-label-custom" for="eventNight">งานกลางคืน</label>
+                            </div>
+                        </div>
+
+                        <!-- ปรับเป็นปุ่มกด Radio -->
+                        <div class="mb-2">
+                            <label class="form-label text-dark small mb-1 fw-bold">ประเภทอาหาร</label>
+                            <div class="d-flex gap-2">
+                                <input type="radio" name="foodMode" id="foodBuddhist" value="BUDDHIST" class="btn-check-custom" checked>
+                                <label class="btn-label-custom" for="foodBuddhist">ไทยพุทธ</label>
+                                
+                                <input type="radio" name="foodMode" id="foodHalal" value="HALAL" class="btn-check-custom">
+                                <label class="btn-label-custom" for="foodHalal">ไทยมุสลิม</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-custom" id="followerCard">
+                        <label class="form-label text-dark small mb-2 fw-bold d-block text-center">จำนวนผู้ติดตาม</label>
+                        <div class="row g-2 text-center">
+                            <div class="col-4">
+                                <label class="text-muted small mb-1">ผู้ใหญ่</label>
+                                <input type="number" id="fAdult" class="form-control text-center fs-5" value="0" min="0">
+                            </div>
+                            <div class="col-4">
+                                <label class="text-muted small mb-1">เด็ก ≥ 12 ปี</label>
+                                <input type="number" id="fChildO12" class="form-control text-center fs-5" value="0" min="0">
+                            </div>
+                            <div class="col-4">
+                                <label class="text-muted small mb-1">เด็ก < 12 ปี</label>
+                                <input type="number" id="fChildU12" class="form-control text-center fs-5" value="0" min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btnSubmitVIP" class="btn btn-primary w-100 py-3 fs-5 mb-5 shadow-sm"> <i class="bi bi-qr-code"></i> ออกบัตร </button>
+                </form>
+            </div>
+
+            <!-- ================= TAB 2: ค้นหาตั๋ว ================= -->
+            <div class="tab-pane fade" id="searchQR">
+                <div class="card-custom">
+                    <h5 class="text-dark mb-3 fw-bold"><i class="bi bi-search me-2"></i>ค้นหาบัตร</h5>
+                    <form onsubmit="searchVIP(event)">
+                        <input type="tel" id="sPhone" class="form-control mb-3" placeholder="เบอร์โทรศัพท์" required>
+                        <input type="text" id="sName" class="form-control mb-3" placeholder="ชื่อจริง (ไม่ต้องมีคำนำหน้า)" required>
+                        <button type="submit" class="btn btn-primary w-100 py-2">ค้นหา</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= ส่วนแสดงตั๋ว (E-Ticket) ================= -->
+    <div class="container pb-5" id="ticketSection" style="display: none; text-align: center;">
+        
+        <div class="vip-ticket mx-auto" id="ticketContent">
+            <div class="vip-ticket-header">
+                <h4>แคแสดสัมพันธ์ ครั้งที่ 4</h4>
+                <div id="t_batch" style="font-size: 0.9rem; margin-top: 5px; opacity: 0.9;"></div>
+                <div class="ticket-id">ID: <span id="t_id"></span></div>
+            </div>
+            
+            <div class="vip-ticket-body">
+                <div class="ticket-detail-row">
+                    <span class="ticket-detail-label">ชื่อ</span>
+                    <span class="ticket-detail-value" id="t_name"></span>
+                </div>
+                <div class="ticket-detail-row" id="companyRow" style="display: none;">
+                    <span class="ticket-detail-label">บริษัท/ร้านค้า</span>
+                    <span class="ticket-detail-value" id="t_company"></span>
+                </div>
+                <div class="ticket-detail-row">
+                    <span class="ticket-detail-label">สิทธิ์</span>
+                    <span class="ticket-detail-value" id="t_event"></span>
+                </div>
+                <div class="ticket-detail-row">
+                    <span class="ticket-detail-label">อาหาร</span>
+                    <span class="ticket-detail-value" id="t_food"></span>
+                </div>
+                <div class="ticket-detail-row" id="followerRow">
+                    <span class="ticket-detail-label">ผู้ติดตาม</span>
+                    <span class="ticket-detail-value" id="t_follower"></span>
+                </div>
+
+                <div class="ticket-qr-section">
+                    <div id="qrcode" class="d-inline-block bg-white p-2 rounded shadow-sm"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mx-auto mt-3" style="max-width: 360px;">
+            <button class="btn btn-success w-100 py-2 fw-bold shadow-sm" onclick="downloadTicket()">
+                <i class="bi bi-download"></i> ดาวน์โหลด QR Code
+            </button>
+            <button class="btn btn-outline-secondary w-100 mt-2 py-2" onclick="closeTicket()">ปิดหน้าต่าง</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwzYxbwKueYVTr-ZGqzU6pgieySxS08pX6NgTtPTtQsxYOqDsGuvQ0xgZYQHfCuVk116Q/exec";
+    let ADMIN_PIN = "";
+
+    async function login() {
+        const pin = document.getElementById('pinInput').value;
+        if (!pin) {
+            Swal.fire({ icon: 'warning', title: 'กรุณากรอก PIN' });
+            return;
+        }
+
+        Swal.fire({ title: 'กำลังตรวจสอบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        
+        try {
+            const res = await fetchGAS({ action: "verifyAdmin", pin: pin });
+            if (res.success) {
+                Swal.close();
+                ADMIN_PIN = pin;
+                document.getElementById('authSection').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+            } else {
+                Swal.fire({ icon: 'error', title: 'PIN ไม่ถูกต้อง', text: 'กรุณาลองใหม่อีกครั้ง' });
+            }
+        } catch (err) {
+            Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message });
+        }
+    }
+
+    function toggleForm() {
+        const type = document.querySelector('input[name="vipType"]:checked').value;
+        if (type === "TEACHER") {
+            document.getElementById('sponsorFields').style.display = 'none';
+            document.getElementById('followerCard').style.display = 'none';
+            document.getElementById('fAdult').value = 0;
+            document.getElementById('fChildO12').value = 0;
+            document.getElementById('fChildU12').value = 0;
+            document.getElementById('company').value = "";
+        } else {
+            document.getElementById('sponsorFields').style.display = 'block';
+            document.getElementById('followerCard').style.display = 'block';
+        }
+    }
+
+    // --- 🛡️ ฟังก์ชันเชื่อมต่อ Server แบบกันกระสุน ---
+    async function fetchGAS(payload) {
+        const response = await fetch(WEB_APP_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload)
+        });
+        const text = await response.text();
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            throw new Error(`เซิร์ฟเวอร์ตอบกลับผิดปกติ: ${text.substring(0, 50)}...`);
+        }
+    }
+
+    // --- 📝 ฟังก์ชันออกตั๋ว VIP ---
+    async function submitVIP(e) {
+        e.preventDefault();
+        const type = document.querySelector('input[name="vipType"]:checked').value;
+        
+        // 📌 ประมวลผลปุ่ม "สิทธิ์การเข้างาน"
+        const isDay = document.getElementById('eventDay').checked;
+        const isNight = document.getElementById('eventNight').checked;
+        let eventMode = "";
+        
+        if (isDay && isNight) eventMode = "DAY_NIGHT";
+        else if (isDay) eventMode = "DAY_ONLY";
+        else if (isNight) eventMode = "NIGHT_ONLY";
+        
+        if (!eventMode) {
+            Swal.fire({icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณาเลือกช่วงเวลางานอย่างน้อย 1 ช่วงเวลา'}); 
+            return;
+        }
+
+        const payload = {
+            action: "registerVIP",
+            pin: ADMIN_PIN,
+            PrefixType: type === "TEACHER" ? "อาจารย์" : "คุณ",
+            FirstName: document.getElementById('fName').value.trim(),
+            LastName: document.getElementById('lName').value.trim(),
+            Phone: document.getElementById('phone').value.trim(),
+            EventType: eventMode,
+            Food: document.querySelector('input[name="foodMode"]:checked').value,
+            Batch: type,
+            Nickname: type === "TEACHER" ? "" : document.getElementById('company').value.trim(),
+            AdultCount: Number(document.getElementById('fAdult').value) || 0,
+            ChildOver12Count: Number(document.getElementById('fChildO12').value) || 0,
+            ChildUnder12Count: Number(document.getElementById('fChildU12').value) || 0
+        };
+
+        if(type === "SPONSOR" && !payload.Nickname) {
+            Swal.fire({icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณากรอกชื่อบริษัท/หน่วยงาน'}); return;
+        }
+
+        const btnSubmit = document.getElementById('btnSubmitVIP');
+        btnSubmit.disabled = true;
+        Swal.fire({ title: 'กำลังออกตั๋ว...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+        try {
+            const res = await fetchGAS(payload);
+            
+            if (res.success) {
+                Swal.close();
+                document.getElementById('vipForm').reset();
+                toggleForm();
+                
+                const eventTxt = payload.EventType === 'DAY_ONLY' ? "เฉพาะกลางวัน" : (payload.EventType === 'NIGHT_ONLY' ? "เฉพาะกลางคืน" : "กลางวันและกลางคืน");
+                const foodTxt = payload.Food === 'BUDDHIST' ? "ไทยพุทธ" : "ไทยมุสลิม";
+                const companyVal = type === "SPONSOR" ? payload.Nickname : "";
+                const batchTxt = type === "TEACHER" ? "อาจารย์" : "สปอนเซอร์";
+                
+                renderTicket(res.ticketId, `${payload.PrefixType} ${payload.FirstName} ${payload.LastName}`, batchTxt, eventTxt, foodTxt, `ผู้ใหญ่ ${payload.AdultCount}, เด็กโต ${payload.ChildOver12Count}, เด็กเล็ก ${payload.ChildUnder12Count}`, companyVal);
+            } else {
+                Swal.fire({ icon: 'error', title: 'การบันทึกล้มเหลว', text: res.message });
+            }
+        } catch (err) {
+            Swal.fire({ icon: 'error', title: 'การเชื่อมต่อผิดพลาด', text: err.message });
+        } finally {
+            btnSubmit.disabled = false;
+        }
+    }
+
+    // --- 🔍 ฟังก์ชันค้นหาตั๋ว ---
+    async function searchVIP(e) {
+        e.preventDefault();
+        Swal.fire({ title: 'กำลังค้นหา...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        
+        try {
+            const res = await fetchGAS({ 
+                action: "search",
+                pin: ADMIN_PIN,
+                Phone: document.getElementById('sPhone').value.trim(), 
+                FirstName: document.getElementById('sName').value.trim(),
+                mode: "VIP" 
+            });
+            
+            if (res.success && res.ticketId) {
+                Swal.close();
+                const eventTxt = res.eventType === 'DAY_ONLY' ? "เฉพาะกลางวัน" : (res.eventType === 'NIGHT_ONLY' ? "เฉพาะกลางคืน" : "กลางวันและกลางคืน");
+                const foodTxt = res.food === 'BUDDHIST' ? "ไทยพุทธ" : (res.food === 'HALAL' ? "ไทยมุสลิม" : (res.food || "-"));
+                
+                let displayName = res.name;
+                let companyVal = "";
+                let match = displayName.match(/\s*\(([^)]+)\)$/);
+                if (match) {
+                    companyVal = match[1];
+                    displayName = displayName.replace(match[0], '').trim();
+                }
+
+                let batchTxt = res.batch;
+                if(res.batch === "TEACHER") {
+                    batchTxt = "อาจารย์";
+                    companyVal = "";
+                } else if(res.batch === "SPONSOR") {
+                    companyVal = res.nickname || res.Nickname || companyVal;
+                    batchTxt = "สปอนเซอร์";
+                }
+
+                renderTicket(res.ticketId, displayName, batchTxt, eventTxt, foodTxt, `ผู้ใหญ่ ${res.adult || 0}, เด็กโต ${res.childO12 || 0}, เด็กเล็ก ${res.childU12 || 0}`, companyVal);
+            } else {
+                Swal.fire({ icon: 'warning', title: 'ไม่พบข้อมูล', text: res.message });
+            }
+        } catch (err) {
+            Swal.fire({ icon: 'error', title: 'การเชื่อมต่อผิดพลาด', text: err.message });
+        }
+    }
+
+    // --- 🎟️ แสดงผลบัตร ---
+    function renderTicket(id, name, batch, event, food, follower, company) {
+        document.getElementById('t_name').innerText = name;
+        document.getElementById('t_batch').innerText = batch ? `(${batch})` : "";
+        document.getElementById('t_event').innerText = event;
+        document.getElementById('t_food').innerText = food;
+        document.getElementById('t_follower').innerText = follower;
+        document.getElementById('t_id').innerText = id;
+
+        if (company && batch && batch.includes("สปอนเซอร์")) {
+            document.getElementById('t_company').innerText = company;
+            document.getElementById('companyRow').style.display = "flex";
+        } else {
+            document.getElementById('companyRow').style.display = "none";
+        }
+
+        if (batch && batch.includes("อาจารย์")) {
+            document.getElementById('followerRow').style.display = "none";
+        } else {
+            document.getElementById('followerRow').style.display = "flex";
+        }
+
+        document.getElementById('qrcode').innerHTML = "";
+        new QRCode(document.getElementById("qrcode"), {
+            text: id, width: 150, height: 150, colorDark : "#003366", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
+        });
+
+        document.getElementById('ticketSection').style.display = 'block';
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    function closeTicket() {
+        document.getElementById('ticketSection').style.display = 'none';
+        window.scrollTo(0, 0);
+    }
+
+    // --- 💾 แคปรูปบัตร ---
+    function downloadTicket() {
+        const qrcodeDiv = document.getElementById('qrcode');
+        const qrCanvas = qrcodeDiv.querySelector('canvas');
+        let imgReplaced = false;
+        
+        if (qrCanvas) {
+            const img = document.createElement('img');
+            img.src = qrCanvas.toDataURL('image/png');
+            img.style.width = "150px"; 
+            img.style.height = "150px";
+            qrcodeDiv.innerHTML = ''; 
+            qrcodeDiv.appendChild(img);
+            imgReplaced = true;
+        }
+
+        setTimeout(() => {
+            const node = document.getElementById('ticketContent');
+            html2canvas(node, { 
+                scale: 2, 
+                useCORS: true, 
+                backgroundColor: "#ffffff"
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `VIP_Ticket_${document.getElementById('t_id').innerText}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                if (imgReplaced) {
+                    qrcodeDiv.innerHTML = '';
+                    new QRCode(qrcodeDiv, {
+                        text: document.getElementById('t_id').innerText, width: 150, height: 150, colorDark : "#003366", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
+                    });
+                }
+            });
+        }, 200);
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สั่งจองของที่ระลึก | แคแสดสัมพันธ์ ครั้งที่ 4</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --primary-orange: #FF6600;
+            --primary-blue: #003366;
+        }
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Sarabun', sans-serif;
+            padding-bottom: 80px; /* space for sticky cart bar */
+        }
+        .nav-tabs .nav-link.active {
+            color: var(--primary-orange);
+            border-bottom: 3px solid var(--primary-orange);
+            font-weight: bold;
+        }
+        .nav-tabs .nav-link {
+            color: #6c757d;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+        .product-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        .product-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid #eee;
+        }
+        .btn-primary {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+        .btn-primary:hover {
+            background-color: #002244;
+            border-color: #002244;
+        }
+        .btn-outline-orange {
+            color: var(--primary-orange);
+            border-color: var(--primary-orange);
+        }
+        .btn-outline-orange:hover {
+            background-color: var(--primary-orange);
+            color: white;
+        }
+        .text-orange { color: var(--primary-orange); }
+        .text-blue { color: var(--primary-blue); }
+
+        /* Cart Bottom Bar */
+        .cart-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            padding: 15px 20px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 20px 20px 0 0;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .cart-bar.active {
+            transform: translateY(0);
+        }
+
+        /* Cart Modal Adjustments */
+        .cart-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px dashed #eee;
+        }
+        .cart-item-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+        .cart-item-details {
+            flex-grow: 1;
+        }
+        .cart-item-title {
+            font-weight: bold;
+            font-size: 0.95rem;
+            color: var(--primary-blue);
+            margin: 0;
+        }
+        .cart-item-meta {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin: 0;
+        }
+        .cart-item-price {
+            font-weight: bold;
+            color: var(--primary-orange);
+            margin: 0;
+        }
+        .qty-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 2px 5px;
+        }
+        .qty-btn {
+            background: none;
+            border: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+            cursor: pointer;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .bank-card {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            border-radius: 12px;
+            padding: 15px 20px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+            max-width: 380px;
+            margin: 0 auto 20px;
+        }
+        
+        .order-status-card {
+            border-left: 5px solid var(--primary-orange);
+        }
+        .status-badge {
+            font-size: 0.85rem;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        /* แก้ปัญหา In-app Browser ไม่สามารถเลือก Dropdown ได้ */
+        select.form-select, select {
+            -webkit-appearance: auto !important;
+            appearance: auto !important;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" style="max-width: 500px; padding-top: 20px;">
+    <!-- Header -->
+    <div style="text-align: center; margin-bottom: 20px;">
+        <img src="image/header.jpg" alt="แคแสดสัมพันธ์ ครั้งที่ 4" style="width: 100%; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+        <h4 class="mt-3 text-blue" style="font-weight: bold;">สั่งจองของที่ระลึก</h4>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="shop-tab" data-bs-toggle="tab" data-bs-target="#shop" type="button" role="tab">🛍️ แคตตาล็อก</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="status-tab" data-bs-toggle="tab" data-bs-target="#status" type="button" role="tab">📦 ตรวจสอบสถานะ</button>
+        </li>
+        <!-- กลับหน้าหลัก -->
+        <li class="nav-item ms-auto">
+            <a href="index.html" class="nav-link text-muted"><i class="bi bi-house-door-fill"></i> หน้าหลัก</a>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="myTabContent">
+        
+        <!-- Tab 1: Shop -->
+        <div class="tab-pane fade show active" id="shop" role="tabpanel">
+            <div id="product-container" class="row g-3 mb-4">
+                <!-- Products will be injected here via JS -->
+            </div>
+        </div>
+
+        <!-- Tab 2: Status -->
+        <div class="tab-pane fade" id="status" role="tabpanel">
+            <div class="card p-4">
+                <form id="searchForm" onsubmit="handleSearch(event)">
+                    <h5 class="text-blue mb-3 text-center"><i class="bi bi-search"></i> ค้นหาคำสั่งซื้อ</h5>
+                    <div class="mb-3">
+                        <input type="tel" class="form-control" id="SearchPhone" pattern="0[0-9]{9}" placeholder="เบอร์โทรศัพท์ที่ใช้สั่งซื้อ" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="SearchName" placeholder="ชื่อจริง (ไม่ต้องใส่คำนำหน้า)" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> ค้นหา</button>
+                </form>
+            </div>
+            
+            <div id="searchResult" style="display: none;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Sticky Cart Bar -->
+<div class="cart-bar" id="cartBar">
+    <div class="d-flex align-items-center">
+        <div class="position-relative me-3">
+            <i class="bi bi-cart3 text-orange" style="font-size: 1.8rem;"></i>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cartCountBadge">0</span>
+        </div>
+        <div>
+            <div style="font-size: 0.8rem; color: #666;">ยอดรวมทั้งหมด</div>
+            <div style="font-weight: bold; font-size: 1.2rem; color: var(--primary-blue);" id="cartTotalText">0 บาท</div>
+        </div>
+    </div>
+    <button class="btn btn-primary px-4 rounded-pill shadow-sm" onclick="openCheckoutModal()">ตะกร้าสินค้า <i class="bi bi-arrow-right"></i></button>
+</div>
+
+<!-- Checkout Modal -->
+<div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-fullscreen-sm-down">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title text-blue fw-bold" id="checkoutModalLabel"><i class="bi bi-cart-check"></i> ยืนยันการสั่งซื้อ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="p-3 bg-white">
+                    <h6 class="text-orange fw-bold mb-3">รายการสินค้าของคุณ</h6>
+                    <div id="cartItemsContainer">
+                        <!-- Cart Items Go Here -->
+                    </div>
+                    <div class="d-flex justify-content-between mt-3 fw-bold px-2">
+                        <span>รวมค่าสินค้า:</span>
+                        <span id="subTotalModal" class="text-blue">0 บาท</span>
+                    </div>
+                </div>
+
+                <div class="bg-light p-2 text-center text-muted" style="font-size: 0.8rem;">--- ข้อมูลสำหรับจัดส่ง ---</div>
+
+                <div class="p-3">
+                    <form id="checkoutForm" onsubmit="handleCheckoutSubmit(event)">
+                        <!-- Customer Info -->
+                        <div class="mb-3">
+                            <label class="form-label text-blue fw-bold small">ชื่อ-นามสกุล <span class="text-danger">*</span></label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input type="text" class="form-control" id="FirstName" placeholder="ชื่อจริง" pattern="^[ก-๙\s]+$" title="กรุณากรอกเป็นภาษาไทยเท่านั้น" required>
+                                </div>
+                                <div class="col-6">
+                                    <input type="text" class="form-control" id="LastName" placeholder="นามสกุล" pattern="^[ก-๙\s]+$" title="กรุณากรอกเป็นภาษาไทยเท่านั้น" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label text-blue fw-bold small">เบอร์โทรศัพท์ <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" id="Phone" pattern="0[0-9]{9}" placeholder="0XXXXXXXXX" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label text-blue fw-bold small">รุ่น <span class="text-danger">*</span></label>
+                                <select class="form-select" id="Batch" required>
+                                    <option value="">-- เลือกรุ่น --</option>
+                                    <!-- Populated via JS -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Delivery Method -->
+                        <div class="mb-3">
+                            <label class="form-label text-blue fw-bold small">รูปแบบการรับสินค้า <span class="text-danger">*</span></label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="deliveryMethod" id="delPickup" value="PICKUP" onchange="updateGrandTotal()" checked>
+                                    <label class="form-check-label" for="delPickup">รับหน้างาน (ฟรี)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="deliveryMethod" id="delPost" value="DELIVERY" onchange="updateGrandTotal()">
+                                    <label class="form-check-label" for="delPost">จัดส่งไปรษณีย์ (+50 บ.)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="addressBox" style="display: none;">
+                            <label class="form-label text-blue fw-bold small">ที่อยู่จัดส่ง <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="Address" rows="3" placeholder="บ้านเลขที่ หมู่ ซอย ถนน ตำบล อำเภอ จังหวัด รหัสไปรษณีย์"></textarea>
+                        </div>
+
+                        <hr>
+                        
+                        <!-- Total & Payment -->
+                        <div class="text-center mb-3">
+                            <h5 class="text-blue">ยอดชำระสุทธิ</h5>
+                            <h3 class="text-orange fw-bold" id="grandTotalDisplay">0 บาท</h3>
+                            <div id="shippingNote" class="text-muted small" style="display: none;">(รวมค่าจัดส่ง 50 บาทแล้ว)</div>
+                        </div>
+
+                        <div class="bank-card">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span style="font-size: 0.95rem; font-weight: bold; letter-spacing: 0.5px;">ธนาคารออมสิน</span>
+                            </div>
+                            <div class="mb-2">
+                                <span style="font-size: 0.7rem; opacity: 0.8; text-transform: uppercase;">เลขที่บัญชี</span>
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <h4 style="margin: 0; font-family: 'Courier New', monospace; letter-spacing: 2px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); font-size: 1.2rem;">020-4-24234-159</h4>
+                                    <button type="button" class="btn btn-light btn-sm fw-bold" onclick="copyAcc()" style="border-radius: 50px; font-size: 0.75rem; padding: 3px 12px;">คัดลอก</button>
+                                </div>
+                            </div>
+                            <div>
+                                <span style="font-size: 0.7rem; opacity: 0.8;">ชื่อบัญชี</span>
+                                <p style="margin: 0; font-weight: 500; font-size: 0.85rem; line-height: 1.2;">ศิษย์เก่า รร.วิทยาศาสตร์จุฬาภรณราชวิทยาลัย นศ.</p>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-blue fw-bold small">แนบสลิปโอนเงิน <span class="text-danger">*</span></label>
+                            <input type="file" class="form-control" id="SlipFile" accept="image/*" required onchange="previewSlip(event)">
+                            <div class="mt-2 text-center" id="slipPreviewContainer" style="display: none;">
+                                <img id="slipImgPreview" src="" alt="Slip Preview" style="max-width: 150px; border-radius: 10px; border: 2px solid #ddd;">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill shadow-sm fs-5" id="btnSubmitOrder">ยืนยันการสั่งซื้อ</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Config
+    const SOUVENIR_WEB_APP_URL = "นำ_URL_ของ_API_ใหม่มาวางตรงนี้"; 
+    const IMGBB_API_KEY = "4c346c47d9368db66076ef2e49b5b285";
+
+    // Products Data
+    const products = [
+        { id: 'S01', name: 'เสื้อ Alumni PCSHS NST', price: 350, image: 'image/size-chart.jpg', hasSize: true },
+        { id: 'T01', name: 'แก้ว Tumbler (สีดำ)', price: 199, image: 'image/tumbler.png', hasSize: false },
+        { id: 'T02', name: 'แก้ว Tumbler (สีครีม)', price: 199, image: 'image/tumbler.png', hasSize: false },
+        { id: 'B01', name: 'ที่เปิดขวด ลายวิทย์', price: 59, image: 'image/bottle_opener_1.png', hasSize: false },
+        { id: 'B02', name: 'ที่เปิดขวด ลายอวกาศ', price: 59, image: 'image/bottle_opener_2.png', hasSize: false },
+        { id: 'K01', name: 'พวงกุญแจ นักบินอวกาศ', price: 59, image: 'image/keychain_1.png', hasSize: false },
+        { id: 'K02', name: 'พวงกุญแจ อะตอม', price: 59, image: 'image/keychain_2.png', hasSize: false }
+    ];
+
+    let cart = [];
+    let slipBase64Str = "";
+
+    window.onload = () => {
+        renderProducts();
+        populateBatches();
+    };
+
+    function populateBatches() {
+        const batchSelect = document.getElementById('Batch');
+        for(let i=1; i<=3; i++) {
+            batchSelect.add(new Option(`ม.ปลาย รุ่น ${i}`, `HS${i}`));
+        }
+        for(let i=1; i<=30; i++) {
+            batchSelect.add(new Option(`ม.ต้น รุ่น ${i} / ม.ปลายรุ่น ${i+3}`, `${i}/${i+3}`));
+        }
+    }
+
+    function renderProducts() {
+        const container = document.getElementById('product-container');
+        container.innerHTML = '';
+
+        products.forEach(p => {
+            let optionsHtml = '';
+            if (p.hasSize) {
+                optionsHtml = `
+                    <select class="form-select form-select-sm mt-2 mb-2 border-orange text-blue" id="size_${p.id}">
+                        <option value="S">Size S (อก 36")</option>
+                        <option value="M">Size M (อก 38")</option>
+                        <option value="L">Size L (อก 40")</option>
+                        <option value="XL">Size XL (อก 42")</option>
+                        <option value="2XL">Size 2XL (อก 44")</option>
+                        <option value="3XL">Size 3XL (อก 46")</option>
+                    </select>
+                `;
+            } else {
+                optionsHtml = `<div style="height: 40px;" class="mt-2 mb-2"></div>`; // Spacer for alignment
+            }
+
+            const html = `
+                <div class="col-6">
+                    <div class="card product-card h-100">
+                        <img src="${p.image}" class="product-img" alt="${p.name}" onerror="this.src='https://via.placeholder.com/200?text=No+Image'">
+                        <div class="card-body p-2 d-flex flex-column">
+                            <h6 class="card-title text-blue mb-1" style="font-size: 0.9rem; font-weight: 700; min-height: 2.4rem;">${p.name}</h6>
+                            <div class="text-orange fw-bold mb-1">${p.price} ฿</div>
+                            ${optionsHtml}
+                            <button class="btn btn-sm btn-outline-orange w-100 mt-auto fw-bold" onclick="addToCart('${p.id}')">
+                                <i class="bi bi-cart-plus"></i> เพิ่มลงตะกร้า
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        });
+    }
+
+    function addToCart(productId) {
+        const product = products.find(p => p.id === productId);
+        let variantId = productId;
+        let variantName = product.name;
+        let size = '';
+
+        if (product.hasSize) {
+            size = document.getElementById(`size_${productId}`).value;
+            variantId = `${productId}_${size}`;
+            variantName = `${product.name} (Size ${size})`;
+        }
+
+        const existingItem = cart.find(item => item.variantId === variantId);
+        if (existingItem) {
+            existingItem.qty++;
+        } else {
+            cart.push({
+                variantId: variantId,
+                productId: productId,
+                name: variantName,
+                price: product.price,
+                qty: 1,
+                image: product.image
+            });
+        }
+
+        updateCartUI();
+        
+        // Small toast notification
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: 'เพิ่มลงตะกร้าแล้ว',
+            showConfirmButton: false,
+            timer: 1500
+        });
+    }
+
+    function updateCartUI() {
+        const cartBar = document.getElementById('cartBar');
+        const countBadge = document.getElementById('cartCountBadge');
+        const totalText = document.getElementById('cartTotalText');
+
+        let totalQty = 0;
+        let totalPrice = 0;
+
+        cart.forEach(item => {
+            totalQty += item.qty;
+            totalPrice += (item.price * item.qty);
+        });
+
+        countBadge.innerText = totalQty;
+        totalText.innerText = totalPrice.toLocaleString() + ' บาท';
+
+        if (totalQty > 0) {
+            cartBar.classList.add('active');
+        } else {
+            cartBar.classList.remove('active');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('checkoutModal'));
+            if(modal) modal.hide();
+        }
+
+        renderCartItemsModal();
+        updateGrandTotal();
+    }
+
+    function renderCartItemsModal() {
+        const container = document.getElementById('cartItemsContainer');
+        const subTotalEl = document.getElementById('subTotalModal');
+        container.innerHTML = '';
+        
+        let subtotal = 0;
+
+        if (cart.length === 0) {
+            container.innerHTML = '<p class="text-center text-muted my-4">ตะกร้าสินค้าว่างเปล่า</p>';
+            subTotalEl.innerText = '0 บาท';
+            return;
+        }
+
+        cart.forEach(item => {
+            subtotal += item.price * item.qty;
+            const html = `
+                <div class="cart-item">
+                    <img src="${item.image}" class="cart-item-img" onerror="this.src='https://via.placeholder.com/50'">
+                    <div class="cart-item-details">
+                        <p class="cart-item-title">${item.name}</p>
+                        <p class="cart-item-price">${item.price} ฿</p>
+                    </div>
+                    <div class="qty-controls">
+                        <button class="qty-btn" onclick="updateQty('${item.variantId}', -1)">-</button>
+                        <span style="font-weight:bold; min-width:20px; text-align:center;">${item.qty}</span>
+                        <button class="qty-btn" onclick="updateQty('${item.variantId}', 1)">+</button>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        });
+
+        subTotalEl.innerText = subtotal.toLocaleString() + ' บาท';
+    }
+
+    function updateQty(variantId, delta) {
+        const itemIndex = cart.findIndex(i => i.variantId === variantId);
+        if (itemIndex > -1) {
+            cart[itemIndex].qty += delta;
+            if (cart[itemIndex].qty <= 0) {
+                cart.splice(itemIndex, 1);
+            }
+            updateCartUI();
+        }
+    }
+
+    function openCheckoutModal() {
+        if (cart.length === 0) return;
+        const myModal = new bootstrap.Modal(document.getElementById('checkoutModal'));
+        myModal.show();
+    }
+
+    function updateGrandTotal() {
+        const isDelivery = document.getElementById('delPost').checked;
+        const addressBox = document.getElementById('addressBox');
+        const addressInput = document.getElementById('Address');
+        const shippingNote = document.getElementById('shippingNote');
+        const grandTotalDisplay = document.getElementById('grandTotalDisplay');
+
+        let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        let shipping = 0;
+
+        if (isDelivery) {
+            addressBox.style.display = 'block';
+            addressInput.required = true;
+            shipping = 50; // Flat rate 50 THB
+            shippingNote.style.display = 'block';
+        } else {
+            addressBox.style.display = 'none';
+            addressInput.required = false;
+            shippingNote.style.display = 'none';
+        }
+
+        const grandTotal = subtotal + shipping;
+        grandTotalDisplay.innerText = grandTotal.toLocaleString() + ' บาท';
+    }
+
+    function copyAcc() {
+        navigator.clipboard.writeText("020424234159");
+        Swal.fire({icon: 'success', title: 'คัดลอกเลขบัญชีแล้ว', timer: 1000, showConfirmButton: false});
+    }
+
+    function previewSlip(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('slipImgPreview').src = e.target.result;
+            document.getElementById('slipPreviewContainer').style.display = 'block';
+            
+            // Compress Image
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const MAX_WIDTH = 800;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > MAX_WIDTH) {
+                    height = Math.round((height * MAX_WIDTH) / width);
+                    width = MAX_WIDTH;
+                }
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+
+                slipBase64Str = canvas.toDataURL('image/jpeg', 0.6); 
+            }
+            img.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+    }
+
+    async function uploadToImgBB(base64Full) {
+        const base64Data = base64Full.split(',')[1]; 
+        const formData = new FormData();
+        formData.append("image", base64Data);
+
+        const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+          method: "POST",
+          body: formData
+        });
+    
+        const result = await response.json();
+        if (result.success) {
+          return result.data.url; 
+        } else {
+          throw new Error("อัปโหลดรูปภาพล้มเหลว");
+        }
+    }
+
+    async function handleCheckoutSubmit(e) {
+        e.preventDefault();
+        
+        if (cart.length === 0) return;
+        if (!slipBase64Str) {
+            Swal.fire('แจ้งเตือน', 'กรุณาแนบสลิปโอนเงิน', 'warning');
+            return;
+        }
+
+        const fName = document.getElementById('FirstName').value;
+        const lName = document.getElementById('LastName').value;
+        const phone = document.getElementById('Phone').value;
+        const batch = document.getElementById('Batch').value;
+        const deliveryMethod = document.querySelector('input[name="deliveryMethod"]:checked').value;
+        const address = document.getElementById('Address').value;
+
+        // Calculate Totals
+        const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        const shipping = deliveryMethod === 'DELIVERY' ? 50 : 0;
+        const totalAmount = subtotal + shipping;
+
+        // Build items list string for summary
+        const itemsStr = cart.map(i => `${i.name} x${i.qty}`).join('\n');
+
+        const summaryHTML = `
+            <div style="text-align: left; font-size: 0.9rem; background: #f8f9fa; padding: 15px; border-radius: 10px;">
+                <b>ชื่อ:</b> ${fName} ${lName}<br>
+                <b>เบอร์โทร:</b> ${phone}<br>
+                <b>จัดส่ง:</b> ${deliveryMethod === 'PICKUP' ? 'รับหน้างาน' : 'ไปรษณีย์'}<br>
+                ${deliveryMethod === 'DELIVERY' ? `<b>ที่อยู่:</b> ${address}<br>` : ''}
+                <hr style="margin: 10px 0;">
+                <div style="white-space: pre-wrap;"><b>สินค้า:</b><br>${itemsStr}</div>
+                <hr style="margin: 10px 0;">
+                <h5 class="text-danger mb-0"><b>ยอดชำระสุทธิ: ${totalAmount.toLocaleString()} บาท</b></h5>
+            </div>
+        `;
+
+        const result = await Swal.fire({
+            title: 'ยืนยันการสั่งซื้อ',
+            html: summaryHTML,
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: 'ยืนยัน',
+            cancelButtonText: 'แก้ไข',
+            confirmButtonColor: '#003366'
+        });
+
+        if (!result.isConfirmed) return;
+
+        Swal.fire({ title: 'กำลังประมวลผล...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
+
+        try {
+            // 1. Upload Slip
+            const slipUrl = await uploadToImgBB(slipBase64Str);
+
+            // 2. Prepare Payload
+            const payload = {
+                action: "souvenirOrder",
+                FirstName: fName,
+                LastName: lName,
+                Phone: phone,
+                Batch: batch,
+                DeliveryMethod: deliveryMethod,
+                Address: deliveryMethod === 'DELIVERY' ? address : '',
+                Items: JSON.stringify(cart),
+                Subtotal: subtotal,
+                ShippingFee: shipping,
+                TotalAmount: totalAmount,
+                SlipURL: slipUrl
+            };
+
+            // 3. Send to GAS
+            const response = await fetch(SOUVENIR_WEB_APP_URL, {
+                method: "POST",
+                body: JSON.stringify(payload)
+            });
+            const resData = await response.json();
+
+            if (resData.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'สั่งซื้อสำเร็จ!',
+                    text: `รหัสคำสั่งซื้อของคุณคือ: ${resData.orderId}`,
+                    confirmButtonColor: '#003366'
+                }).then(() => {
+                    // Reset everything
+                    cart = [];
+                    updateCartUI();
+                    document.getElementById('checkoutForm').reset();
+                    slipBase64Str = "";
+                    document.getElementById('slipPreviewContainer').style.display = 'none';
+                    
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('checkoutModal'));
+                    if(modal) modal.hide();
+                    
+                    // Switch to status tab
+                    const statusTab = new bootstrap.Tab(document.getElementById('status-tab'));
+                    statusTab.show();
+                    
+                    document.getElementById('SearchPhone').value = phone;
+                    document.getElementById('SearchName').value = fName;
+                    
+                    window.scrollTo(0, 0);
+                });
+            } else {
+                throw new Error(resData.message || "เกิดข้อผิดพลาด");
+            }
+
+        } catch (err) {
+            Swal.fire('ข้อผิดพลาด', err.message, 'error');
+        }
+    }
+
+    // Status Search
+    async function handleSearch(e) {
+        e.preventDefault();
+        const phone = document.getElementById('SearchPhone').value;
+        const name = document.getElementById('SearchName').value;
+
+        Swal.fire({ title: 'กำลังค้นหา...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
+
+        try {
+            const response = await fetch(SOUVENIR_WEB_APP_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "souvenirSearch", Phone: phone, FirstName: name })
+            });
+            const resData = await response.json();
+            
+            Swal.close();
+
+            const resContainer = document.getElementById('searchResult');
+            
+            if (resData.success && resData.orders && resData.orders.length > 0) {
+                let html = '<h5 class="text-blue fw-bold mt-4 mb-3">ประวัติการสั่งซื้อของคุณ</h5>';
+                
+                resData.orders.forEach(order => {
+                    let statusColor = order.status === 'PAID' ? 'success' : (order.status === 'REJECTED' ? 'danger' : 'warning');
+                    let statusText = order.status === 'PAID' ? '✅ ตรวจสอบสลิปแล้ว' : (order.status === 'REJECTED' ? '❌ สลิปไม่ถูกต้อง' : '⏳ รอตรวจสอบสลิป');
+                    
+                    let itemsHtml = '';
+                    try {
+                        const items = JSON.parse(order.items);
+                        itemsHtml = items.map(i => `<div class="small text-muted">- ${i.name} x${i.qty}</div>`).join('');
+                    } catch(e) { itemsHtml = '<i>- รายการสินค้าเก่า -</i>'; }
+
+                    html += `
+                        <div class="card p-3 mb-3 order-status-card">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold" style="font-family: monospace;">${order.orderId}</span>
+                                <span class="status-badge bg-${statusColor} text-white">${statusText}</span>
+                            </div>
+                            <div class="mb-2">
+                                ${itemsHtml}
+                            </div>
+                            <div class="d-flex justify-content-between align-items-end mt-2 pt-2 border-top">
+                                <div class="small">
+                                    <span class="text-muted">จัดส่ง:</span> ${order.delivery === 'DELIVERY' ? 'ไปรษณีย์' : 'รับหน้างาน'}
+                                </div>
+                                <div class="fw-bold text-orange">${order.total.toLocaleString()} ฿</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                resContainer.innerHTML = html;
+                resContainer.style.display = 'block';
+            } else {
+                Swal.fire('ไม่พบข้อมูล', 'ไม่พบประวัติการสั่งซื้อด้วยเบอร์และชื่อนี้', 'warning');
+                resContainer.style.display = 'none';
+            }
+        } catch (err) {
+            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error');
+        }
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
