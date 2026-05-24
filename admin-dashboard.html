@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root {
@@ -519,8 +521,8 @@
         .slip-panel {
             position: fixed;
             top: 0;
-            right: -450px;
-            width: 450px;
+            right: -650px;
+            width: 650px;
             max-width: 100vw;
             height: 100vh;
             background-color: var(--bg-panel);
@@ -550,6 +552,22 @@
             flex: 1;
         }
 
+        .slip-content-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 600px) {
+            .slip-content-grid {
+                flex-direction: row;
+            }
+            .slip-content-left, .slip-content-right {
+                flex: 1;
+                min-width: 0;
+            }
+        }
+
         .slip-footer {
             padding: 1.5rem;
             border-top: 1px solid var(--border);
@@ -573,8 +591,9 @@
         .detail-row {
             display: flex;
             justify-content: space-between;
-            padding: 0.75rem 0;
+            padding: 0.35rem 0;
             border-bottom: 1px dashed var(--border);
+            font-size: 0.9rem;
         }
 
         .detail-label {
@@ -668,9 +687,11 @@
                         รอตรวจสอบ <span class="badge" id="badgePending">0</span>
                     </button>
                     <button class="tab-btn" onclick="switchTab(event, 'tabAlumni')">ศิษย์เก่า</button>
-                    <button class="tab-btn" onclick="switchTab(event, 'tabSponsor')">สปอนเซอร์ (Sponsor)</button>
-                    <button class="tab-btn" onclick="switchTab(event, 'tabTeacher')">อาจารย์ (Teacher)</button>
+                    <button class="tab-btn" onclick="switchTab(event, 'tabSponsor')">สปอนเซอร์</button>
+                    <button class="tab-btn" onclick="switchTab(event, 'tabTeacher')">อาจารย์</button>
+                    <button class="tab-btn" onclick="switchTab(event, 'tabStats')">สถิติ</button>
                     <button class="tab-btn" onclick="switchTab(event, 'tabSummary')">สรุปข้อมูล</button>
+                    <button class="tab-btn" onclick="switchTab(event, 'tabFinance')">การเงิน</button>
                 </div>
             </div>
         </nav>
@@ -679,7 +700,7 @@
             <!-- TAB 1: รอตรวจสอบ -->
             <div id="tabPending" class="tab-content active">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2>รอตรวจสอบ (Pending)</h2>
+                    <h2>รอตรวจสอบ</h2>
                     <span class="text-muted" id="pendingCount">0 รายการ</span>
                 </div>
                 <div class="card p-0">
@@ -687,9 +708,9 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>ชื่อ-นามสกุล</th>
-                                    <th>ประเภท</th>
-                                    <th>รุ่น/องค์กร</th>
+                                    <th>ชื่อ</th>
+                                    <th>รุ่น</th>
+                                    <th>ประเภทบัตร</th>
                                     <th>ยอดชำระ</th>
                                     <th>สถานะ</th>
                                 </tr>
@@ -707,7 +728,7 @@
             <!-- TAB 2: ศิษย์เก่า -->
             <div id="tabAlumni" class="tab-content">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2>ศิษย์เก่า (Alumni)</h2>
+                    <h2>ศิษย์เก่า</h2>
                     <span class="text-muted" id="alumniCount">รวม 0 คน</span>
                 </div>
                 <div class="filter-bar">
@@ -729,7 +750,6 @@
                             <thead>
                                 <tr>
                                     <th>ชื่อ</th>
-                                    <th>เบอร์โทร</th>
                                     <th>รุ่น</th>
                                     <th>ประเภทบัตร</th>
                                     <th>ยอดชำระ</th>
@@ -745,7 +765,7 @@
             <!-- TAB 3: Sponsor -->
             <div id="tabSponsor" class="tab-content">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2>สปอนเซอร์ (Sponsor)</h2>
+                    <h2>สปอนเซอร์</h2>
                     <span class="text-muted" id="sponsorCount">รวม 0 คน</span>
                 </div>
                 <div class="filter-bar">
@@ -764,10 +784,8 @@
                             <thead>
                                 <tr>
                                     <th>ชื่อ</th>
-                                    <th>องค์กร (Sponsor)</th>
-                                    <th>เบอร์โทร</th>
+                                    <th>องค์กร</th>
                                     <th>ประเภทบัตร</th>
-                                    <th>ผู้ติดตาม</th>
                                     <th>สถานะ</th>
                                 </tr>
                             </thead>
@@ -780,7 +798,7 @@
             <!-- TAB 4: Teacher -->
             <div id="tabTeacher" class="tab-content">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2>อาจารย์ (Teacher)</h2>
+                    <h2>อาจารย์</h2>
                     <span class="text-muted" id="teacherCount">รวม 0 คน</span>
                 </div>
                 <div class="filter-bar">
@@ -810,12 +828,69 @@
                 </div>
             </div>
 
-            <!-- TAB 5: สรุปข้อมูล -->
-            <div id="tabSummary" class="tab-content">
+            <!-- TAB 5: สถิติ -->
+            <div id="tabStats" class="tab-content">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2>สรุปข้อมูล (Dashboard)</h2>
+                    <h2>สถิติ</h2>
                     <button class="btn btn-outline" onclick="renderSummary()"><i class="bi bi-arrow-repeat"></i>
                         อัปเดต</button>
+                </div>
+
+                <!-- กราฟ -->
+                <div class="summary-tables-grid mb-4">
+                    <div class="card p-0">
+                        <div class="p-3 border-bottom border-secondary" style="border-color: var(--border) !important;">
+                            <h4 class="mb-0">จำนวนศิษย์เก่าแยกตามรุ่น (นับเฉพาะศิษย์)</h4>
+                        </div>
+                        <div class="p-3" style="height: 300px;">
+                            <canvas id="batchChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-tables-grid">
+                    <!-- สถิติแยกรุ่น -->
+                    <div class="card p-0">
+                        <div class="p-3 border-bottom border-secondary" style="border-color: var(--border) !important;">
+                            <h4 class="mb-0">สถิติแยกรุ่น</h4>
+                        </div>
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ชื่อรุ่น</th>
+                                        <th class="text-right">จำนวนคน</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbSumBatch"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- สถิติประเภทบัตร -->
+                    <div class="card p-0">
+                        <div class="p-3 border-bottom border-secondary" style="border-color: var(--border) !important;">
+                            <h4 class="mb-0">สถิติแยกตามประเภทบัตร</h4>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ประเภทบัตร</th>
+                                        <th class="text-right">จำนวนใบ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbSumType"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 6: สรุปข้อมูล -->
+            <div id="tabSummary" class="tab-content">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>สรุปข้อมูล</h2>
                 </div>
 
                 <!-- Overview -->
@@ -832,10 +907,9 @@
                     <div class="stat-card">
                         <h3>อนุมัติแล้ว</h3>
                         <div class="value text-success" id="sumPaid">0</div>
-                        <div class="desc">เฉพาะ PAID</div>
                     </div>
                     <div class="stat-card" style="border-color: var(--accent);">
-                        <h3 class="text-accent">รายได้รวม (PAID)</h3>
+                        <h3 class="text-accent">รายได้รวม</h3>
                         <div class="value text-accent" id="sumRevenue">฿0</div>
                     </div>
                 </div>
@@ -844,7 +918,7 @@
                     <!-- สรุปงานกลางวัน -->
                     <div class="card p-0">
                         <div class="p-3 border-bottom border-secondary">
-                            <h4 class="mb-0 text-accent"><i class="bi bi-sun"></i> สรุปงานกลางวัน (เฉพาะ PAID)</h4>
+                            <h4 class="mb-0 text-accent"><i class="bi bi-sun"></i> สรุปงานกลางวัน</h4>
                         </div>
                         <div class="p-3">
                             <div class="d-flex justify-content-between mb-2"><span>รวมผู้ร่วมงาน:</span><strong
@@ -865,8 +939,7 @@
                     <!-- สรุปงานกลางคืน -->
                     <div class="card p-0">
                         <div class="p-3 border-bottom border-secondary">
-                            <h4 class="mb-0 text-accent"><i class="bi bi-moon-stars"></i> สรุปงานกลางคืน (เฉพาะ PAID)
-                            </h4>
+                            <h4 class="mb-0 text-accent"><i class="bi bi-moon-stars"></i> สรุปงานกลางคืน</h4>
                         </div>
                         <div class="p-3">
                             <div class="d-flex justify-content-between mb-2"><span>รวมผู้ร่วมงาน:</span><strong
@@ -885,40 +958,49 @@
                     </div>
                 </div>
 
-                <div class="summary-tables-grid">
-                    <!-- สถิติแยกรุ่น -->
+                <div class="summary-tables-grid mb-4">
+                    <!-- จัดโต๊ะ -->
                     <div class="card p-0">
                         <div class="p-3 border-bottom border-secondary" style="border-color: var(--border) !important;">
-                            <h4 class="mb-0">สถิติแยกรุ่น (เฉพาะ PAID)</h4>
+                            <h4 class="mb-0 text-warning"><i class="bi bi-diagram-3"></i> จัดโต๊ะงานกลางคืน (โต๊ะละ 5 คน)</h4>
                         </div>
-                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
                             <table>
                                 <thead>
                                     <tr>
                                         <th>ชื่อรุ่น</th>
-                                        <th class="text-right">จำนวนคน</th>
+                                        <th class="text-right">จำนวนคนรวม</th>
+                                        <th class="text-right">จำนวนโต๊ะ</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tbSumBatch"></tbody>
+                                <tbody id="tbSumTable"></tbody>
                             </table>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <!-- สถิติประเภทบัตร -->
+            <!-- TAB 7: การเงิน -->
+            <div id="tabFinance" class="tab-content">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>การเงิน</h2>
+                    <button class="btn btn-outline" onclick="renderSummary()"><i class="bi bi-arrow-repeat"></i>
+                        อัปเดต</button>
+                </div>
+                
+                <div class="summary-tables-grid mb-4">
+                    <!-- สรุปการเงิน -->
                     <div class="card p-0">
                         <div class="p-3 border-bottom border-secondary" style="border-color: var(--border) !important;">
-                            <h4 class="mb-0">สถิติแยกตามประเภทบัตร (เฉพาะ PAID)</h4>
+                            <h4 class="mb-0 text-success"><i class="bi bi-cash-coin"></i> สรุปการเงิน</h4>
                         </div>
-                        <div class="table-responsive">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>ประเภทบัตร</th>
-                                        <th class="text-right">จำนวนใบ</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tbSumType"></tbody>
-                            </table>
+                        <div class="p-3">
+                            <div class="d-flex justify-content-between mb-2"><span>ขายบัตร (ศิษย์เก่า/ทั่วไป):</span><strong id="sumRevTicket">฿0</strong></div>
+                            <div class="d-flex justify-content-between mb-2"><span>สปอนเซอร์:</span><strong id="sumRevSponsor">฿0 (รอเชื่อมข้อมูล)</strong></div>
+                            <div class="d-flex justify-content-between mb-2"><span>ขายของที่ระลึก:</span><strong id="sumRevSouvenir" class="text-warning">รอเชื่อมข้อมูล</strong></div>
+                            <div class="d-flex justify-content-between mb-2"><span>เงินจากเจ้าภาพ:</span><strong id="sumRevHost" class="text-warning">รอเชื่อมข้อมูล</strong></div>
+                            <hr class="border-secondary my-2">
+                            <div class="d-flex justify-content-between"><span>รวมทั้งหมดที่ได้รับ:</span><strong class="text-success fs-5" id="sumRevTotal">฿0</strong></div>
                         </div>
                     </div>
                 </div>
@@ -1093,8 +1175,8 @@
                 tbody.innerHTML = pendingData.map(d => `
                 <tr onclick="openSlip('${escapeHTML(d.recordId)}')">
                     <td><div style="font-weight: 500;">${escapeHTML(d.name)}</div><div class="text-muted" style="font-size:0.8rem;">${escapeHTML(d.phone)}</div></td>
-                    <td>${d.isTeacher ? 'Teacher' : (d.isSponsor ? 'Sponsor' : 'ศิษย์เก่า')}</td>
                     <td>${formatBatchDisplay(d.batch)} ${d.batch === 'SPONSOR' && d.nickname ? '<br><span class="text-accent" style="font-size:0.8rem;">' + escapeHTML(d.nickname) + '</span>' : ''}</td>
+                    <td>${formatEventType(d.eventType)}</td>
                     <td><span class="text-accent" style="font-weight: 600;">${formatCurrency(d.numAmount)}</span></td>
                     <td>${getStatusBadge(d.paymentStatus)}</td>
                 </tr>
@@ -1130,8 +1212,7 @@
 
                 tbody.innerHTML = filtered.map(d => `
                 <tr onclick="openSlip('${escapeHTML(d.recordId)}')">
-                    <td><div style="font-weight: 500;">${escapeHTML(d.name)}</div><div class="text-muted" style="font-size:0.75rem;">${new Date(d.timestamp).toLocaleString('th-TH')}</div></td>
-                    <td>${escapeHTML(d.phone)}</td>
+                    <td><div style="font-weight: 500;">${escapeHTML(d.name)}</div><div class="text-muted" style="font-size:0.75rem;">${escapeHTML(d.phone)}</div></td>
                     <td>${formatBatchDisplay(d.batch)}</td>
                     <td>${formatEventType(d.eventType)}</td>
                     <td><span class="text-accent" style="font-weight: 600;">${formatCurrency(d.numAmount)}</span></td>
@@ -1167,11 +1248,9 @@
 
                 tbody.innerHTML = filtered.map(d => `
                 <tr onclick="openSlip('${escapeHTML(d.recordId)}')">
-                    <td><div style="font-weight: 500;">${escapeHTML(d.name)}</div></td>
+                    <td><div style="font-weight: 500;">${escapeHTML(d.name)}</div><div class="text-muted" style="font-size:0.75rem;">${escapeHTML(d.phone)}</div></td>
                     <td>${escapeHTML(d.nickname) || '-'}</td>
-                    <td>${escapeHTML(d.phone)}</td>
                     <td>${formatEventType(d.eventType)}</td>
-                    <td>${d.totalFollower > 0 ? `ผู้ใหญ่ ${d.adultCount}<br>เด็กโต ${d.childOver12Count} / เด็กเล็ก ${d.childUnder12Count}` : '-'}</td>
                     <td>${getStatusBadge(d.paymentStatus)}</td>
                 </tr>
             `).join('');
@@ -1233,6 +1312,11 @@
 
                 let typeCount = { 'DAY_NIGHT': 0, 'DAY_ONLY': 0, 'NIGHT_ONLY': 0 };
                 let batchCount = {};
+                let batchTableCount = {};
+                let regDateCount = {};
+                
+                let revTicket = 0;
+                let revSponsor = 0;
 
                 paidData.forEach(d => {
                     const totalInRecord = d.totalPeople; // 1 owner + followers
@@ -1256,9 +1340,16 @@
                     // Type stats
                     if (typeCount[d.eventType] !== undefined) typeCount[d.eventType]++;
 
+                    // Finance
+                    if (d.isSponsor) revSponsor += d.numAmount;
+                    else if (!d.isTeacher) revTicket += d.numAmount;
+
                     // Batch stats (Only Alumni)
                     if (!d.isSponsor && !d.isTeacher) {
-                        batchCount[d.batch] = (batchCount[d.batch] || 0) + totalInRecord;
+                        batchCount[d.batch] = (batchCount[d.batch] || 0) + 1; // นับเฉพาะศิษย์ 1 คน
+                        if (d.eventType === 'DAY_NIGHT' || d.eventType === 'NIGHT_ONLY') {
+                            batchTableCount[d.batch] = (batchTableCount[d.batch] || 0) + totalInRecord; // จัดโต๊ะนับเฉพาะคนลงทะเบียนกลางคืน
+                        }
                     }
                 });
 
@@ -1286,12 +1377,65 @@
                 <tr><td>${formatBatchDisplay(b)}</td><td class="text-right">${batchCount[b]}</td></tr>
             `).join('');
 
+                // Table Arrangement
+                const sortedTableBatches = Object.keys(batchTableCount).sort((a, b) => batchTableCount[b] - batchTableCount[a]);
+                document.getElementById('tbSumTable').innerHTML = sortedTableBatches.map(b => {
+                    const totalP = batchTableCount[b];
+                    const tables = Math.ceil(totalP / 5);
+                    return `<tr><td>${formatBatchDisplay(b)}</td><td class="text-right">${totalP}</td><td class="text-right text-accent" style="font-weight:600;">${tables}</td></tr>`;
+                }).join('');
+
+                // Finance Update
+                document.getElementById('sumRevTicket').innerText = formatCurrency(revTicket);
+                document.getElementById('sumRevSponsor').innerText = formatCurrency(revSponsor) + ' (รอเชื่อมข้อมูล)';
+                document.getElementById('sumRevTotal').innerText = formatCurrency(revTicket + revSponsor);
+
                 // Type Table
                 document.getElementById('tbSumType').innerHTML = `
                 <tr><td>กลางวันและกลางคืน</td><td class="text-right">${typeCount['DAY_NIGHT']}</td></tr>
                 <tr><td>เฉพาะกลางคืน</td><td class="text-right">${typeCount['NIGHT_ONLY']}</td></tr>
                 <tr><td>เฉพาะกลางวัน</td><td class="text-right">${typeCount['DAY_ONLY']}</td></tr>
             `;
+
+                renderCharts(sortedBatches, batchCount);
+            }
+
+            let chartInstanceBatch = null;
+
+            function renderCharts(sortedBatches, batchCount) {
+                // Batch Chart
+                const topBatches = sortedBatches.slice(0, 10); // Top 10
+                const batchLabels = topBatches.map(b => formatBatchShortDisplay(b));
+                const batchData = topBatches.map(b => batchCount[b]);
+
+                const ctxBatch = document.getElementById('batchChart');
+                if(ctxBatch) {
+                    if (chartInstanceBatch) chartInstanceBatch.destroy();
+                    chartInstanceBatch = new Chart(ctxBatch, {
+                        type: 'bar',
+                        data: {
+                            labels: batchLabels,
+                            datasets: [{
+                                label: 'จำนวนศิษย์เก่า (คน)',
+                                data: batchData,
+                                backgroundColor: '#38bdf8',
+                                borderRadius: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                y: { beginAtZero: true, grid: { color: '#374151' }, ticks: { color: '#9ca3af', stepSize: 1 } },
+                                x: { grid: { display: false }, ticks: { color: '#9ca3af' } }
+                            }
+                        }
+                    });
+                }
+
             }
 
             // --- Helper & UI Functions ---
@@ -1330,10 +1474,21 @@
                 let followerHtml = '';
                 if (data.totalFollower > 0) {
                     followerHtml = `
-                    <div class="mt-3 mb-2" style="color:var(--accent); font-weight:600;">ผู้ติดตาม</div>
-                    <div class="detail-row"><span class="detail-label">ผู้ใหญ่</span><span class="detail-value">${data.adultCount} คน</span></div>
-                    <div class="detail-row"><span class="detail-label">เด็ก (≥ 12 ปี)</span><span class="detail-value">${data.childOver12Count} คน</span></div>
-                    <div class="detail-row"><span class="detail-label">เด็ก (< 12 ปี)</span><span class="detail-value">${data.childUnder12Count} คน</span></div>
+                    <div class="mt-2 mb-2" style="color:var(--accent); font-weight:600; font-size: 0.9rem;">ผู้ติดตาม</div>
+                    <div class="d-flex text-center justify-content-between p-2 rounded" style="background: rgba(255,255,255,0.05);">
+                        <div class="flex-fill border-end border-secondary">
+                            <div class="text-muted mb-1" style="font-size:0.8rem;">ผู้ใหญ่</div>
+                            <div class="fw-bold">${data.adultCount}</div>
+                        </div>
+                        <div class="flex-fill border-end border-secondary">
+                            <div class="text-muted mb-1" style="font-size:0.8rem;">เด็ก &gt;12</div>
+                            <div class="fw-bold">${data.childOver12Count}</div>
+                        </div>
+                        <div class="flex-fill">
+                            <div class="text-muted mb-1" style="font-size:0.8rem;">เด็ก &lt;12</div>
+                            <div class="fw-bold">${data.childUnder12Count}</div>
+                        </div>
+                    </div>
                 `;
                 }
 
@@ -1342,31 +1497,76 @@
                     sponsorHtml = `<div class="detail-row"><span class="detail-label">ชื่อองค์กร</span><span class="detail-value text-accent">${escapeHTML(data.nickname) || '-'}</span></div>`;
                 }
 
+                let cachedApiHtml = '<div class="text-muted text-center" style="font-size: 0.85rem;">คลิก "โหลดใหม่" เพื่ออ่านสลิป</div>';
+                if (data.paymentRef) {
+                    try {
+                        const cached = JSON.parse(data.paymentRef);
+                        const isCorrectAmount = (cached.amount == data.numAmount);
+                        const amountColor = isCorrectAmount ? 'text-success' : 'text-danger';
+                        const amountBadge = isCorrectAmount ? '<span class="badge bg-success ms-2" style="font-size: 0.7rem;">ยอดตรงกัน</span>' : '<span class="badge bg-danger ms-2" style="font-size: 0.7rem;">ยอดไม่ตรง!</span>';
+                        
+                        const statusColor = isCorrectAmount ? 'text-success' : 'text-warning';
+                        const statusIcon = isCorrectAmount ? '<i class="bi bi-check-circle-fill"></i>' : '<i class="bi bi-exclamation-triangle-fill"></i>';
+                        const statusText = isCorrectAmount ? 'สลิปถูกต้อง' : 'สลิปจริง (แต่ยอดไม่ตรง)';
+
+                        cachedApiHtml = `
+                            <div class="detail-row py-1"><span class="detail-label">สถานะ</span><span class="detail-value ${statusColor}">${statusIcon} ${statusText}</span></div>
+                            <div class="detail-row py-1"><span class="detail-label">ธนาคาร</span><span class="detail-value" style="font-size: 0.85rem;">${escapeHTML(cached.bank)}</span></div>
+                            <div class="detail-row py-1"><span class="detail-label">ผู้โอน</span><span class="detail-value" style="font-size: 0.85rem;">${escapeHTML(cached.sender)}</span></div>
+                            <div class="detail-row py-1"><span class="detail-label">ยอดที่อ่านได้</span><span class="detail-value ${amountColor} fw-bold" style="font-size: 0.95rem;">${formatCurrency(cached.amount)} ${amountBadge}</span></div>
+                            <div class="detail-row py-1"><span class="detail-label">เวลาสลิป</span><span class="detail-value" style="font-size: 0.85rem;">${escapeHTML(cached.dt)}</span></div>
+                        `;
+                    } catch(e) {}
+                }
+
                 slipContent.innerHTML = `
-                <div class="text-center mb-4">
-                    ${getStatusBadge(data.paymentStatus)}
-                    <h4 class="mt-2">${escapeHTML(data.name)}</h4>
-                    <div class="text-muted">${escapeHTML(data.phone)}</div>
+                <div class="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom border-secondary">
+                    <div>
+                        <h4 class="mb-1">${escapeHTML(data.name)}</h4>
+                        <div class="text-muted" style="font-size: 0.85rem;"><i class="bi bi-telephone-fill me-1"></i>${escapeHTML(data.phone)}</div>
+                    </div>
+                    <div>
+                        ${getStatusBadge(data.paymentStatus)}
+                    </div>
                 </div>
 
-                <div class="mb-4">
-                    <div class="detail-row"><span class="detail-label">รุ่น/ประเภท</span><span class="detail-value">${data.isTeacher ? 'Teacher' : (data.isSponsor ? 'Sponsor' : formatBatchDisplay(data.batch))}</span></div>
-                    ${sponsorHtml}
-                    <div class="detail-row"><span class="detail-label">สิทธิ์การเข้างาน</span><span class="detail-value">${formatEventType(data.eventType)}</span></div>
-                    <div class="detail-row"><span class="detail-label">ประเภทอาหาร</span><span class="detail-value">${formatFood(data.food)}</span></div>
-                    <div class="detail-row"><span class="detail-label">ยอดชำระ</span><span class="detail-value text-accent fs-5" style="font-size:1.25rem;">${formatCurrency(data.numAmount)}</span></div>
-                </div>
+                <div class="slip-content-grid">
+                    <div class="slip-content-left">
+                        <div class="mb-4">
+                            <div class="detail-row"><span class="detail-label">รุ่น/ประเภท</span><span class="detail-value">${data.isTeacher ? 'Teacher' : (data.isSponsor ? 'Sponsor' : formatBatchDisplay(data.batch))}</span></div>
+                            ${sponsorHtml}
+                            <div class="detail-row"><span class="detail-label">สิทธิ์การเข้างาน</span><span class="detail-value">${formatEventType(data.eventType)}</span></div>
+                            <div class="detail-row"><span class="detail-label">ประเภทอาหาร</span><span class="detail-value">${formatFood(data.food)}</span></div>
+                            <div class="detail-row"><span class="detail-label">ยอดชำระ</span><span class="detail-value fw-bold fs-5" style="color: #ffd700;">${formatCurrency(data.numAmount)}</span></div>
+                        </div>
 
-                ${followerHtml}
+                        ${followerHtml}
 
-                <div class="mt-4">
-                    <div class="mb-2 text-muted">หลักฐานการโอนเงิน:</div>
-                    ${data.slipUrl ? `<img src="${escapeHTML(data.slipUrl)}" class="slip-img" onclick="showImg('${escapeHTML(data.slipUrl)}')">` : '<div class="p-4 text-center border border-secondary rounded text-muted">ไม่พบรูปภาพ</div>'}
-                </div>
+                        <!-- API Slip Verification UI -->
+                        <div class="mt-4 p-3 rounded" style="background-color: rgba(16, 185, 129, 0.05); border: 1px solid var(--success);">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <strong class="text-success" style="font-size: 0.9rem;"><i class="bi bi-shield-check"></i> ข้อมูลสลิป (API)</strong>
+                                <button class="btn btn-sm btn-outline-success px-2 py-1" style="font-size: 0.75rem;" onclick="verifySlipAPI('${escapeHTML(data.slipUrl)}', ${data.numAmount})">
+                                    <i class="bi bi-arrow-repeat"></i> ดึงใหม่
+                                </button>
+                            </div>
+                            <div id="apiSlipResult">
+                                ${cachedApiHtml}
+                            </div>
+                        </div>
+                    </div>
 
-                <div class="mt-4">
-                    <label class="text-muted mb-2 d-block">บันทึกจาก Admin:</label>
-                    <textarea id="adminNoteInput" class="form-control" rows="3" placeholder="ระบุเหตุผล (เช่น สลิปไม่ชัดเจน)">${escapeHTML(data.adminNote) || ''}</textarea>
+                    <div class="slip-content-right">
+                        <div class="mb-4">
+                            <div class="mb-2 text-muted" style="font-size: 0.9rem;">หลักฐานการโอนเงิน:</div>
+                            <div id="slipImagesContainer"></div>
+                        </div>
+
+                        <div class="mt-2">
+                            <label class="text-muted mb-2 d-block" style="font-size: 0.9rem;">บันทึกจาก Admin:</label>
+                            <textarea id="adminNoteInput" class="form-control" rows="3" placeholder="ระบุเหตุผล (เช่น สลิปไม่ชัดเจน)">${escapeHTML(data.adminNote) || ''}</textarea>
+                        </div>
+                    </div>
                 </div>
             `;
 
@@ -1387,6 +1587,15 @@
                     <button class="btn btn-success w-100 py-2" onclick="updateStatus('PAID')">อนุมัติ</button>
                     <button class="btn btn-danger w-100 py-2" onclick="updateStatus('REJECTED')">ปฏิเสธ</button>
                 `;
+                }
+
+                // Render images
+                const imgContainer = document.getElementById('slipImagesContainer');
+                if (data.slipUrl) {
+                    const urls = data.slipUrl.split(',').map(u => u.trim());
+                    imgContainer.innerHTML = urls.map(u => `<img src="${escapeHTML(u)}" class="slip-img mb-3" style="max-height: 400px; object-fit: contain; width: 100%;" onclick="showImg('${escapeHTML(u)}')">`).join('');
+                } else {
+                    imgContainer.innerHTML = '<div class="p-4 text-center border border-secondary rounded text-muted">ไม่พบรูปภาพ</div>';
                 }
 
                 document.getElementById('slipOverlay').classList.add('show');
@@ -1452,6 +1661,64 @@
                 }
             }
 
+            // API Slip Verification
+            async function verifySlipAPI(slipUrl, expectedAmount) {
+                const resultContainer = document.getElementById('apiSlipResult');
+                resultContainer.innerHTML = '<div class="text-center text-muted"><div class="spinner-border spinner-border-sm mb-2" role="status"></div><br>กำลังตรวจสอบสลิปผ่าน API...</div>';
+                
+                try {
+                    const response = await fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify({ action: "verifySlip", pin: ADMIN_PIN, slipUrl: slipUrl, ticketId: currentSlipTicketId })
+                    });
+                    const res = await response.json();
+
+                    if (res.success && res.data) {
+                        const slipData = res.data;
+                        const amount = slipData.amount;
+                        const isCorrectAmount = (amount == expectedAmount);
+                        const amountColor = isCorrectAmount ? 'text-success' : 'text-danger';
+                        const amountBadge = isCorrectAmount ? '<span class="badge bg-success ms-2" style="font-size: 0.7rem;">ยอดตรงกัน</span>' : '<span class="badge bg-danger ms-2" style="font-size: 0.7rem;">ยอดไม่ตรง!</span>';
+                        
+                        const statusColor = isCorrectAmount ? 'text-success' : 'text-warning';
+                        const statusIcon = isCorrectAmount ? '<i class="bi bi-check-circle-fill"></i>' : '<i class="bi bi-exclamation-triangle-fill"></i>';
+                        const statusText = isCorrectAmount ? 'สลิปถูกต้อง' : 'สลิปจริง (แต่ยอดไม่ตรง)';
+
+                        // Update cache internally so we don't need a full reload if they close and reopen panel
+                        try {
+                            const cachedStr = res.cachedData;
+                            if (cachedStr) {
+                                const currentData = allData.find(d => d.ticketId === currentSlipTicketId);
+                                if (currentData) currentData.paymentRef = cachedStr;
+                            }
+                        } catch(e) {}
+                        
+                        resultContainer.innerHTML = `
+                            <div class="detail-row py-1"><span class="detail-label">สถานะ API</span><span class="detail-value ${statusColor}">${statusIcon} ${statusText}</span></div>
+                            <div class="detail-row py-1"><span class="detail-label">ธนาคาร</span><span class="detail-value" style="font-size: 0.85rem;">${escapeHTML(slipData.sendingBank || slipData.sender?.bank?.name || '-')}</span></div>
+                            <div class="detail-row py-1"><span class="detail-label">ผู้โอน</span><span class="detail-value" style="font-size: 0.85rem;">${escapeHTML(slipData.sender?.displayName || slipData.sender?.name || '-')}</span></div>
+                            <div class="detail-row py-1"><span class="detail-label">ผู้รับเงิน</span><span class="detail-value" style="font-size: 0.85rem;">${escapeHTML(slipData.receiver?.displayName || slipData.receiver?.name || '-')}</span></div>
+                            <div class="detail-row py-1"><span class="detail-label">ยอดที่อ่านได้</span><span class="detail-value ${amountColor} fw-bold" style="font-size: 0.95rem;">${formatCurrency(amount)} ${amountBadge}</span></div>
+                            <div class="detail-row py-1"><span class="detail-label">เวลาสลิป</span><span class="detail-value" style="font-size: 0.85rem;">${escapeHTML(slipData.transDate || '')} ${escapeHTML(slipData.transTime || '')}</span></div>
+                        `;
+                    } else {
+                        const errMsg = res.data && res.data.message ? res.data.message : (res.message || 'QR Code ไม่ถูกต้อง หรืออ่านไม่ได้');
+                        resultContainer.innerHTML = `<div class="p-3 text-center rounded" style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger);">
+                            <div class="text-danger mb-1"><i class="bi bi-x-circle fs-4"></i></div>
+                            <div class="text-danger fw-bold">ไม่สามารถตรวจสอบสลิปได้</div>
+                            <div class="text-muted mt-2" style="font-size: 0.85rem;">สาเหตุ: ${escapeHTML(errMsg)}</div>
+                        </div>`;
+                    }
+                } catch (err) {
+                    resultContainer.innerHTML = `<div class="p-3 text-center rounded" style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger);">
+                        <div class="text-danger mb-1"><i class="bi bi-x-circle fs-4"></i></div>
+                        <div class="text-danger fw-bold">เกิดข้อผิดพลาดในการเชื่อมต่อ</div>
+                        <div class="text-muted mt-2" style="font-size: 0.85rem;">สาเหตุ: ${escapeHTML(err.message)}</div>
+                    </div>`;
+                }
+            }
+
             // Formatters
             function formatBatchDisplay(batchRaw) {
                 if (!batchRaw) return '-';
@@ -1460,6 +1727,16 @@
                 if (batchRaw.includes('/')) return `ม.ต้น รุ่น ${batchRaw.split('/')[0]} / ม.ปลาย รุ่น ${batchRaw.split('/')[1]}`;
                 if (batchRaw.startsWith('MS')) return `ม.ต้น รุ่น ${batchRaw.replace('MS', '')}`;
                 if (batchRaw.startsWith('HS')) return `ม.ปลาย รุ่น ${batchRaw.replace('HS', '')}`;
+                return batchRaw;
+            }
+
+            function formatBatchShortDisplay(batchRaw) {
+                if (!batchRaw) return '-';
+                if (batchRaw === 'TEACHER') return 'Teacher';
+                if (batchRaw === 'SPONSOR') return 'Sponsor';
+                if (batchRaw.includes('/')) return batchRaw; // e.g. "9/12"
+                if (batchRaw.startsWith('MS')) return batchRaw.replace('MS', ''); // e.g. "9"
+                if (batchRaw.startsWith('HS')) return batchRaw.replace('HS', ''); // e.g. "12"
                 return batchRaw;
             }
 
