@@ -1035,7 +1035,8 @@
 
         <script>
             // Replace point: JS_LOGIC
-            const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwzYxbwKueYVTr-ZGqzU6pgieySxS08pX6NgTtPTtQsxYOqDsGuvQ0xgZYQHfCuVk116Q/exec";
+            const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxoUw_ndO0eRf9M07cgDb1N02R_gBx_E_ZjdcARHOi__Yqt9ZbVmQd5bcuCLQ9ctrTjWQ/exec";
+            const EXPECTED_KEYWORDS = ["ศิษย์เก่า", "SUWIJAK", "Kaewni", "วิทยาศาสตร์", "จุฬาภรณราชวิทยาลัย"];
             let ADMIN_PIN = "";
 
             // State Management
@@ -1058,6 +1059,21 @@
                         '"': '&quot;'
                     }[tag])
                 );
+            }
+
+            function copyText(text, btnElement) {
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalHtml = btnElement.innerHTML;
+                    btnElement.innerHTML = '<i class="bi bi-check-lg"></i>';
+                    btnElement.classList.add('btn-success');
+                    setTimeout(() => {
+                        btnElement.innerHTML = originalHtml;
+                        btnElement.classList.remove('btn-success');
+                    }, 2000);
+                    if(navigator.vibrate) navigator.vibrate(50);
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
             }
 
             async function login() {
@@ -1498,23 +1514,37 @@
                 }
 
                 let cachedApiHtml = '<div class="text-muted text-center" style="font-size: 0.85rem;">คลิก "โหลดใหม่" เพื่ออ่านสลิป</div>';
+                let apiBgColor = "rgba(156, 163, 175, 0.05)";
+                let apiBorderColor = "var(--border)";
+
                 if (data.paymentRef) {
                     try {
                         const cached = JSON.parse(data.paymentRef);
                         const isCorrectAmount = (cached.amount == data.numAmount);
-                        const amountColor = isCorrectAmount ? 'text-success' : 'text-danger';
-                        const amountBadge = isCorrectAmount ? '<span class="badge bg-success ms-2" style="font-size: 0.7rem;">ยอดตรงกัน</span>' : '<span class="badge bg-danger ms-2" style="font-size: 0.7rem;">ยอดไม่ตรง!</span>';
+                        const receiverName = (cached.receiver || "").toUpperCase();
+                        const isCorrectReceiver = EXPECTED_KEYWORDS.some(kw => receiverName.includes(kw.toUpperCase()));
                         
-                        const statusColor = isCorrectAmount ? 'text-success' : 'text-warning';
-                        const statusIcon = isCorrectAmount ? '<i class="bi bi-check-circle-fill"></i>' : '<i class="bi bi-exclamation-triangle-fill"></i>';
-                        const statusText = isCorrectAmount ? 'สลิปถูกต้อง' : 'สลิปจริง (แต่ยอดไม่ตรง)';
+                        // Duplicate check
+                        const isDuplicate = allData.some(d => d.ticketId !== data.ticketId && d.paymentRef && d.paymentRef.includes(cached.transRef) && cached.transRef);
+
+                        const amountColor = isCorrectAmount ? 'text-success' : 'text-danger';
+                        const amountBadge = isCorrectAmount ? '<span class="badge bg-success ms-2" style="font-size: 0.7rem;">ยอดตรง</span>' : '<span class="badge bg-danger ms-2" style="font-size: 0.7rem;">ยอดไม่ตรง!</span>';
+                        
+                        const receiverStatus = isCorrectReceiver ? '<span class="text-success fw-bold"><i class="bi bi-check-circle-fill"></i> บัญชีถูกต้อง</span>' : '<span class="text-danger fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> บัญชีไม่ถูกต้อง!</span>';
+                        const duplicateAlert = isDuplicate ? '<div class="mt-2 p-2 rounded bg-danger text-white fw-bold text-center" style="font-size:0.8rem;"><i class="bi bi-shield-slash"></i> ระวัง! สลิปนี้ถูกใช้ซ้ำในรายการอื่น</div>' : '';
+
+                        const isAllGood = isCorrectReceiver && isCorrectAmount && !isDuplicate;
+                        apiBgColor = isAllGood ? "rgba(16, 185, 129, 0.1)" : "rgba(244, 63, 94, 0.1)";
+                        apiBorderColor = isAllGood ? "var(--success)" : "var(--danger)";
 
                         cachedApiHtml = `
-                            <div class="detail-row py-1"><span class="detail-label">สถานะ</span><span class="detail-value ${statusColor}">${statusIcon} ${statusText}</span></div>
-                            <div class="detail-row py-1"><span class="detail-label">ธนาคาร</span><span class="detail-value" style="font-size: 0.85rem;">${escapeHTML(cached.bank)}</span></div>
-                            <div class="detail-row py-1"><span class="detail-label">ผู้โอน</span><span class="detail-value" style="font-size: 0.85rem;">${escapeHTML(cached.sender)}</span></div>
-                            <div class="detail-row py-1"><span class="detail-label">ยอดที่อ่านได้</span><span class="detail-value ${amountColor} fw-bold" style="font-size: 0.95rem;">${formatCurrency(cached.amount)} ${amountBadge}</span></div>
-                            <div class="detail-row py-1"><span class="detail-label">เวลาสลิป</span><span class="detail-value" style="font-size: 0.85rem;">${escapeHTML(cached.dt)}</span></div>
+                            <div class="detail-row py-1"><span class="detail-label">สถานะสลิป</span><span class="detail-value">${receiverStatus}</span></div>
+                            <div class="detail-row py-1"><span class="detail-label">ผู้รับเงิน</span><span class="detail-value" style="font-size: 0.85rem;">${escapeHTML(cached.receiver || '-')}</span></div>
+                            <div class="detail-row py-1"><span class="detail-label">ยอดจากสลิป</span><span class="detail-value ${amountColor} fw-bold" style="font-size: 0.95rem;">${formatCurrency(cached.amount)} ${amountBadge}</span></div>
+                            <div class="detail-row py-1"><span class="detail-label">เลขอ้างอิง</span><span class="detail-value" style="font-size: 0.8rem; font-family:var(--font-en);">${escapeHTML(cached.transRef || '-')}</span></div>
+                            <div class="detail-row py-1"><span class="detail-label">วันเวลาโอน</span><span class="detail-value" style="font-size: 0.85rem;">${escapeHTML(cached.dt)}</span></div>
+                            <div class="detail-row py-1"><span class="detail-label">ผู้โอน/ธนาคาร</span><span class="detail-value" style="font-size: 0.8rem;">${escapeHTML(cached.sender)} (${escapeHTML(cached.bank)})</span></div>
+                            ${duplicateAlert}
                         `;
                     } catch(e) {}
                 }
@@ -1523,7 +1553,9 @@
                 <div class="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom border-secondary">
                     <div>
                         <h4 class="mb-1">${escapeHTML(data.name)}</h4>
-                        <div class="text-muted" style="font-size: 0.85rem;"><i class="bi bi-telephone-fill me-1"></i>${escapeHTML(data.phone)}</div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted" style="font-size: 0.85rem;">${escapeHTML(data.phone)}</span>
+                        </div>
                     </div>
                     <div>
                         ${getStatusBadge(data.paymentStatus)}
@@ -1543,11 +1575,11 @@
                         ${followerHtml}
 
                         <!-- API Slip Verification UI -->
-                        <div class="mt-4 p-3 rounded" style="background-color: rgba(16, 185, 129, 0.05); border: 1px solid var(--success);">
+                        <div class="mt-4 p-3 rounded" style="background-color: ${apiBgColor}; border: 1px solid ${apiBorderColor};">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <strong class="text-success" style="font-size: 0.9rem;"><i class="bi bi-shield-check"></i> ข้อมูลสลิป (API)</strong>
-                                <button class="btn btn-sm btn-outline-success px-2 py-1" style="font-size: 0.75rem;" onclick="verifySlipAPI('${escapeHTML(data.slipUrl)}', ${data.numAmount})">
-                                    <i class="bi bi-arrow-repeat"></i> ดึงใหม่
+                                <strong style="font-size: 0.9rem; color: ${apiBorderColor === 'var(--border)' ? 'var(--text-main)' : apiBorderColor};"><i class="bi bi-shield-check"></i> ตรวจสอบสลิป (API)</strong>
+                                <button class="btn btn-sm px-2 py-1" style="font-size: 0.75rem; border: 1px solid ${apiBorderColor}; color: ${apiBorderColor === 'var(--border)' ? 'var(--text-main)' : apiBorderColor};" onclick="verifySlipAPI('${escapeHTML(data.slipUrl)}', ${data.numAmount})">
+                                    <i class="bi bi-arrow-repeat"></i> โหลดใหม่
                                 </button>
                             </div>
                             <div id="apiSlipResult">
@@ -1600,6 +1632,11 @@
 
                 document.getElementById('slipOverlay').classList.add('show');
                 document.getElementById('slipPanel').classList.add('show');
+
+                // Auto-verify if no cache and is pending
+                if (!data.paymentRef && data.paymentStatus === 'PENDING' && data.slipUrl) {
+                    setTimeout(() => verifySlipAPI(data.slipUrl, data.numAmount), 500);
+                }
             }
 
             function closeSlip() {
@@ -1661,10 +1698,9 @@
                 }
             }
 
-            // API Slip Verification
             async function verifySlipAPI(slipUrl, expectedAmount) {
                 const resultContainer = document.getElementById('apiSlipResult');
-                resultContainer.innerHTML = '<div class="text-center text-muted"><div class="spinner-border spinner-border-sm mb-2" role="status"></div><br>กำลังตรวจสอบสลิปผ่าน API...</div>';
+                resultContainer.innerHTML = '<div class="text-center text-muted"><div class="spinner-border spinner-border-sm mb-2" role="status"></div><br>กำลังตรวจสอบ...</div>';
                 
                 try {
                     const response = await fetch(WEB_APP_URL, {
@@ -1677,15 +1713,28 @@
                     if (res.success && res.data) {
                         const slipData = res.data;
                         const amount = slipData.amount;
-                        const isCorrectAmount = (amount == expectedAmount);
-                        const amountColor = isCorrectAmount ? 'text-success' : 'text-danger';
-                        const amountBadge = isCorrectAmount ? '<span class="badge bg-success ms-2" style="font-size: 0.7rem;">ยอดตรงกัน</span>' : '<span class="badge bg-danger ms-2" style="font-size: 0.7rem;">ยอดไม่ตรง!</span>';
+                        const receiverName = (slipData.receiver?.displayName || slipData.receiver?.name || '-').toUpperCase();
                         
-                        const statusColor = isCorrectAmount ? 'text-success' : 'text-warning';
-                        const statusIcon = isCorrectAmount ? '<i class="bi bi-check-circle-fill"></i>' : '<i class="bi bi-exclamation-triangle-fill"></i>';
-                        const statusText = isCorrectAmount ? 'สลิปถูกต้อง' : 'สลิปจริง (แต่ยอดไม่ตรง)';
+                        const isCorrectAmount = (amount == expectedAmount);
+                        const isCorrectReceiver = EXPECTED_KEYWORDS.some(kw => receiverName.includes(kw.toUpperCase()));
+                        const isDuplicate = allData.some(d => d.ticketId !== currentSlipTicketId && d.paymentRef && d.paymentRef.includes(slipData.transRef) && slipData.transRef);
 
-                        // Update cache internally so we don't need a full reload if they close and reopen panel
+                        const amountColor = isCorrectAmount ? 'text-success' : 'text-danger';
+                        const amountBadge = isCorrectAmount ? '<span class="badge bg-success ms-2" style="font-size: 0.7rem;">ยอดตรง</span>' : '<span class="badge bg-danger ms-2" style="font-size: 0.7rem;">ยอดไม่ตรง!</span>';
+                        
+                        const receiverStatus = isCorrectReceiver ? '<span class="text-success fw-bold"><i class="bi bi-check-circle-fill"></i> บัญชีถูกต้อง</span>' : '<span class="text-danger fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> บัญชีไม่ถูกต้อง!</span>';
+                        const duplicateAlert = isDuplicate ? '<div class="mt-2 p-2 rounded bg-danger text-white fw-bold text-center" style="font-size:0.8rem;"><i class="bi bi-shield-slash"></i> ระวัง! สลิปนี้ถูกใช้ซ้ำในรายการอื่น</div>' : '';
+
+                        const apiBox = resultContainer.parentElement;
+                        const isAllGood = isCorrectReceiver && isCorrectAmount && !isDuplicate;
+                        const finalColor = isAllGood ? "var(--success)" : "var(--danger)";
+                        apiBox.style.backgroundColor = isAllGood ? "rgba(16, 185, 129, 0.1)" : "rgba(244, 63, 94, 0.1)";
+                        apiBox.style.borderColor = finalColor;
+                        apiBox.querySelector('strong').style.color = finalColor;
+                        apiBox.querySelector('button').style.borderColor = finalColor;
+                        apiBox.querySelector('button').style.color = finalColor;
+
+                        // Update cache internally
                         try {
                             const cachedStr = res.cachedData;
                             if (cachedStr) {
@@ -1695,12 +1744,13 @@
                         } catch(e) {}
                         
                         resultContainer.innerHTML = `
-                            <div class="detail-row py-1"><span class="detail-label">สถานะ API</span><span class="detail-value ${statusColor}">${statusIcon} ${statusText}</span></div>
-                            <div class="detail-row py-1"><span class="detail-label">ธนาคาร</span><span class="detail-value" style="font-size: 0.85rem;">${escapeHTML(slipData.sendingBank || slipData.sender?.bank?.name || '-')}</span></div>
-                            <div class="detail-row py-1"><span class="detail-label">ผู้โอน</span><span class="detail-value" style="font-size: 0.85rem;">${escapeHTML(slipData.sender?.displayName || slipData.sender?.name || '-')}</span></div>
+                            <div class="detail-row py-1"><span class="detail-label">สถานะ API</span><span class="detail-value">${receiverStatus}</span></div>
                             <div class="detail-row py-1"><span class="detail-label">ผู้รับเงิน</span><span class="detail-value" style="font-size: 0.85rem;">${escapeHTML(slipData.receiver?.displayName || slipData.receiver?.name || '-')}</span></div>
-                            <div class="detail-row py-1"><span class="detail-label">ยอดที่อ่านได้</span><span class="detail-value ${amountColor} fw-bold" style="font-size: 0.95rem;">${formatCurrency(amount)} ${amountBadge}</span></div>
-                            <div class="detail-row py-1"><span class="detail-label">เวลาสลิป</span><span class="detail-value" style="font-size: 0.85rem;">${escapeHTML(slipData.transDate || '')} ${escapeHTML(slipData.transTime || '')}</span></div>
+                            <div class="detail-row py-1"><span class="detail-label">ยอดจากสลิป</span><span class="detail-value ${amountColor} fw-bold" style="font-size: 0.95rem;">${formatCurrency(amount)} ${amountBadge}</span></div>
+                            <div class="detail-row py-1"><span class="detail-label">เลขอ้างอิง</span><span class="detail-value" style="font-size: 0.8rem; font-family:var(--font-en);">${escapeHTML(slipData.transRef || '-')}</span></div>
+                            <div class="detail-row py-1"><span class="detail-label">วันเวลาโอน</span><span class="detail-value" style="font-size: 0.85rem;">${escapeHTML(slipData.transDate || '')}</span></div>
+                            <div class="detail-row py-1"><span class="detail-label">ผู้โอน/ธนาคาร</span><span class="detail-value" style="font-size: 0.8rem;">${escapeHTML(slipData.sender?.displayName || slipData.sender?.name || '-')} (${escapeHTML(slipData.sendingBank || '-')})</span></div>
+                            ${duplicateAlert}
                         `;
                     } else {
                         const errMsg = res.data && res.data.message ? res.data.message : (res.message || 'QR Code ไม่ถูกต้อง หรืออ่านไม่ได้');
