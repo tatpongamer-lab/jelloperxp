@@ -677,9 +677,11 @@
         <nav class="navbar">
             <div class="container d-flex justify-content-between align-items-center mb-3">
                 <div class="nav-brand">Admin <span class="text-accent">Dashboard</span></div>
-                <button class="btn btn-primary" onclick="fetchData()" id="btnRefresh">
-                    <i class="bi bi-arrow-clockwise"></i> รีเฟรชข้อมูล
-                </button>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" onclick="fetchData()" id="btnRefresh">
+                        <i class="bi bi-arrow-clockwise"></i> รีเฟรชข้อมูล
+                    </button>
+                </div>
             </div>
             <div class="container">
                 <div class="tabs">
@@ -689,8 +691,8 @@
                     <button class="tab-btn" onclick="switchTab(event, 'tabAlumni')">ศิษย์เก่า</button>
                     <button class="tab-btn" onclick="switchTab(event, 'tabSponsor')">สปอนเซอร์</button>
                     <button class="tab-btn" onclick="switchTab(event, 'tabTeacher')">คุณครู</button>
-                    <button class="tab-btn" onclick="switchTab(event, 'tabStats')">สถิติ</button>
                     <button class="tab-btn" onclick="switchTab(event, 'tabSummary')">สรุปข้อมูล</button>
+                    <button class="tab-btn" onclick="switchTab(event, 'tabStats')">สถิติ</button>
                     <button class="tab-btn" onclick="switchTab(event, 'tabFinance')">การเงิน</button>
                 </div>
             </div>
@@ -837,14 +839,21 @@
                 </div>
 
                 <!-- กราฟ -->
-                <div class="summary-tables-grid mb-4">
-                    <div class="card p-0">
-                        <div class="p-3 border-bottom border-secondary" style="border-color: var(--border) !important;">
-                            <h4 class="mb-0">จำนวนศิษย์เก่าแยกตามรุ่น (นับเฉพาะศิษย์)</h4>
-                        </div>
-                        <div class="p-3" style="height: 300px;">
-                            <canvas id="batchChart"></canvas>
-                        </div>
+                <div class="card p-0 mb-4">
+                    <div class="p-3 border-bottom border-secondary" style="border-color: var(--border) !important;">
+                        <h4 class="mb-0">จำนวนศิษย์เก่าแยกตามรุ่น (นับเฉพาะศิษย์)</h4>
+                    </div>
+                    <div class="p-3" style="height: 300px;">
+                        <canvas id="batchChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card p-0 mb-4">
+                    <div class="p-3 border-bottom border-secondary" style="border-color: var(--border) !important;">
+                        <h4 class="mb-0 text-success">ยอดเงินรวมแยกตามรุ่น</h4>
+                    </div>
+                    <div class="p-3" style="height: 300px;">
+                        <canvas id="revenueChart"></canvas>
                     </div>
                 </div>
 
@@ -859,7 +868,9 @@
                                 <thead>
                                     <tr>
                                         <th>ชื่อรุ่น</th>
-                                        <th class="text-right">จำนวนคน</th>
+                                        <th class="text-right">ศิษย์เก่า (คน)</th>
+                                        <th class="text-right">รวมผู้ติดตาม (คน)</th>
+                                        <th class="text-right">จำนวนเงิน (บาท)</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tbSumBatch"></tbody>
@@ -987,21 +998,91 @@
                     <button class="btn btn-outline" onclick="renderSummary()"><i class="bi bi-arrow-repeat"></i>
                         อัปเดต</button>
                 </div>
-                
                 <div class="summary-tables-grid mb-4">
-                    <!-- สรุปการเงิน -->
+                    <!-- สรุปภาพรวมบัญชี -->
                     <div class="card p-0">
                         <div class="p-3 border-bottom border-secondary" style="border-color: var(--border) !important;">
-                            <h4 class="mb-0 text-success"><i class="bi bi-cash-coin"></i> สรุปการเงิน</h4>
+                            <h4 class="mb-0 text-success"><i class="bi bi-wallet2"></i> ภาพรวมบัญชี</h4>
+                        </div>
+                        <div class="p-3">
+                            <div class="d-flex justify-content-between mb-2"><span>ยอดรับรวมทั้งหมด:</span><strong id="sumRevTotal" class="text-success fs-5">฿0</strong></div>
+                            <div class="d-flex justify-content-between mb-2"><span>ยอดจ่ายรวมทั้งหมด:</span><strong id="sumExpTotal" class="text-danger fs-5">฿0</strong></div>
+                            <hr class="border-secondary my-2">
+                            <div class="d-flex justify-content-between"><span>คงเหลือสุทธิ (Balance):</span><strong class="fs-4" id="sumBalance">฿0</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- ที่มารายรับ -->
+                    <div class="card p-0">
+                        <div class="p-3 border-bottom border-secondary" style="border-color: var(--border) !important;">
+                            <h4 class="mb-0 text-info"><i class="bi bi-graph-up-arrow"></i> ที่มารายรับ</h4>
                         </div>
                         <div class="p-3">
                             <div class="d-flex justify-content-between mb-2"><span>ขายบัตร (ศิษย์เก่า/ทั่วไป):</span><strong id="sumRevTicket">฿0</strong></div>
-                            <div class="d-flex justify-content-between mb-2"><span>สปอนเซอร์:</span><strong id="sumRevSponsor">฿0 (รอเชื่อมข้อมูล)</strong></div>
-                            <div class="d-flex justify-content-between mb-2"><span>ขายของที่ระลึก:</span><strong id="sumRevSouvenir" class="text-warning">รอเชื่อมข้อมูล</strong></div>
-                            <div class="d-flex justify-content-between mb-2"><span>เงินจากเจ้าภาพ:</span><strong id="sumRevHost" class="text-warning">รอเชื่อมข้อมูล</strong></div>
-                            <hr class="border-secondary my-2">
-                            <div class="d-flex justify-content-between"><span>รวมทั้งหมดที่ได้รับ:</span><strong class="text-success fs-5" id="sumRevTotal">฿0</strong></div>
+                            <div class="d-flex justify-content-between mb-2"><span>สปอนเซอร์:</span><strong id="sumRevSponsor">฿0</strong></div>
+                            <div class="d-flex justify-content-between mb-2"><span>เงินจากเจ้าภาพ 7/10:</span><strong id="sumRevHost">฿0</strong></div>
+                            <div class="d-flex justify-content-between mb-2"><span>ขายของที่ระลึก:</span><strong id="sumRevSouvenir" class="text-warning">รอการเชื่อมต่อ</strong></div>
                         </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3 mt-5">
+                    <h3 class="mb-0"><i class="bi bi-cart-dash text-danger"></i> ประวัติรายจ่าย</h3>
+                    <button class="btn btn-success fw-bold" onclick="openExpenseModal()"><i class="bi bi-plus-circle"></i> บันทึกรายจ่าย</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>วันที่ทำรายการ</th>
+                                <th>รายละเอียด</th>
+                                <th>ผู้เบิก/ผู้จ่าย</th>
+                                <th class="text-right">จำนวนเงิน</th>
+                                <th class="text-center">สลิป/ใบเสร็จ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbExpenses">
+                            <tr><td colspan="5" class="text-center text-muted py-4">กำลังโหลดข้อมูล...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expense Modal -->
+        <div class="modal" id="expenseModal" tabindex="-1" style="display: none; background: rgba(0,0,0,0.8); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1050; align-items: center; justify-content: center;">
+            <div class="modal-dialog" style="width: 100%; max-width: 500px; margin: auto;">
+                <div class="modal-content" style="background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 8px;">
+                    <div class="modal-header border-secondary p-3 d-flex justify-content-between align-items-center">
+                        <h5 class="modal-title m-0">บันทึกรายจ่ายใหม่</h5>
+                        <button type="button" class="btn" style="color: white; font-size: 1.5rem; padding: 0;" onclick="closeExpenseModal()">&times;</button>
+                    </div>
+                    <div class="modal-body p-3">
+                        <form id="expenseForm">
+                            <div class="mb-3">
+                                <label class="form-label">รายละเอียด / รายการ <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="expDesc" required placeholder="เช่น ค่าอาหารค่ำ, ค่าเวที">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">จำนวนเงิน (บาท) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="expAmount" required min="0" step="0.01" placeholder="0.00">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">ผู้เบิก/ผู้จ่าย </label>
+                                <input type="text" class="form-control" id="expPayer" placeholder="ชื่อคนจ่ายเงิน">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">แนบสลิป/ใบเสร็จ </label>
+                                <input type="file" class="form-control" id="expSlip" accept="image/*">
+                                <div id="expSlipPreview" class="mt-2 text-center" style="display:none;">
+                                    <img src="" style="max-height: 150px; border-radius: 4px; border: 1px solid var(--border);">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer border-secondary p-3 d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-secondary" onclick="closeExpenseModal()">ยกเลิก</button>
+                        <button type="button" class="btn btn-success" onclick="submitExpense()" id="btnSubmitExpense">บันทึกข้อมูล</button>
                     </div>
                 </div>
             </div>
@@ -1047,6 +1128,8 @@
             let sponsorData = [];
             let teacherData = [];
             let extSponsorRevenue = 0;
+            let hostRevenue = 0;
+            let expensesData = [];
             let currentSlipTicketId = null;
 
             function escapeHTML(str) {
@@ -1124,6 +1207,9 @@
                     if (res.success) {
                         rawData = res.data;
                         extSponsorRevenue = parseFloat(res.sponsorRevenue) || 0;
+                        window.sponsorRevenueByBatch = res.sponsorRevenueByBatch || {};
+                        hostRevenue = parseFloat(res.hostRevenue) || 0;
+                        expensesData = res.expenses || [];
                         processData();
                         updateSelectOptions();
 
@@ -1330,6 +1416,8 @@
 
                 let typeCount = { 'DAY_NIGHT': 0, 'DAY_ONLY': 0, 'NIGHT_ONLY': 0 };
                 let batchCount = {};
+                let batchPeopleCount = {};
+                let batchRevenue = {};
                 let batchTableCount = {};
                 let regDateCount = {};
                 
@@ -1359,17 +1447,38 @@
                     if (typeCount[d.eventType] !== undefined) typeCount[d.eventType]++;
 
                     // Finance
-                    if (d.isSponsor) revSponsor += d.numAmount;
-                    else if (!d.isTeacher) revTicket += d.numAmount;
+                    if (d.isSponsor) {
+                        revSponsor += d.numAmount;
+                        // Add Sponsor revenue to batch if they have a batch specified (e.g. from Column G 'Batch')
+                        let sBatch = d.Batch || d.sponsorBatch || d.batchRaw || (d.batch !== 'SPONSOR' ? d.batch : null);
+                        if (sBatch && sBatch.toString().trim() !== '' && sBatch !== 'SPONSOR') {
+                            batchRevenue[sBatch] = (batchRevenue[sBatch] || 0) + d.numAmount;
+                        }
+                    }
+                    else if (!d.isTeacher) {
+                        revTicket += d.numAmount;
+                    }
 
                     // Batch stats (Only Alumni)
                     if (!d.isSponsor && !d.isTeacher) {
                         batchCount[d.batch] = (batchCount[d.batch] || 0) + 1; // นับเฉพาะศิษย์ 1 คน
+                        batchPeopleCount[d.batch] = (batchPeopleCount[d.batch] || 0) + totalInRecord; // จำนวนคนรวมผู้ติดตาม
+                        batchRevenue[d.batch] = (batchRevenue[d.batch] || 0) + d.numAmount; // จำนวนเงินรวม
                         if (d.eventType === 'DAY_NIGHT' || d.eventType === 'NIGHT_ONLY') {
                             batchTableCount[d.batch] = (batchTableCount[d.batch] || 0) + totalInRecord; // จัดโต๊ะนับเฉพาะคนลงทะเบียนกลางคืน
                         }
                     }
                 });
+
+                // รวมยอดเงินสปอนเซอร์จาก Sponsorship_DB (ที่ถูกจับกลุ่มตามรุ่นมาจาก API)
+                if (window.sponsorRevenueByBatch) {
+                    Object.keys(window.sponsorRevenueByBatch).forEach(b => {
+                        const batchName = b.toString().trim();
+                        if (batchName !== "") {
+                            batchRevenue[batchName] = (batchRevenue[batchName] || 0) + window.sponsorRevenueByBatch[batchName];
+                        }
+                    });
+                }
 
                 // Update UI - Night
                 document.getElementById('sumNightTotal').innerText = `${nightAdult + nightChildO12 + nightChildU12} คน`;
@@ -1388,11 +1497,27 @@
                 document.getElementById('sumDayFoodH').innerText = `${dayFoodH} คน`;
 
                 // Batch Table
+                // Ensure batches from sponsor-only revenue are included
+                Object.keys(batchRevenue).forEach(b => {
+                    if (batchCount[b] === undefined) {
+                        batchCount[b] = 0;
+                    }
+                });
+
                 const sortedBatches = Object.keys(batchCount).sort((a, b) => {
-                    return batchCount[b] - batchCount[a]; // Descending by count
+                    // Sort by count descending, then by revenue descending
+                    if (batchCount[b] !== batchCount[a]) {
+                        return batchCount[b] - batchCount[a];
+                    }
+                    return (batchRevenue[b] || 0) - (batchRevenue[a] || 0);
                 });
                 document.getElementById('tbSumBatch').innerHTML = sortedBatches.map(b => `
-                <tr><td>${formatBatchDisplay(b)}</td><td class="text-right">${batchCount[b]}</td></tr>
+                <tr>
+                    <td>${formatBatchDisplay(b)}</td>
+                    <td class="text-right">${batchCount[b]}</td>
+                    <td class="text-right text-accent">${batchPeopleCount[b]}</td>
+                    <td class="text-right text-success" style="font-weight: 500;">฿${batchRevenue[b].toLocaleString()}</td>
+                </tr>
             `).join('');
 
                 // Table Arrangement
@@ -1404,9 +1529,42 @@
                 }).join('');
 
                 // Finance Update
+                const totalRevenue = revTicket + extSponsorRevenue + hostRevenue;
+                const totalExpenses = expensesData.reduce((sum, item) => sum + item.amount, 0);
+                const netBalance = totalRevenue - totalExpenses;
+
                 document.getElementById('sumRevTicket').innerText = formatCurrency(revTicket);
                 document.getElementById('sumRevSponsor').innerText = formatCurrency(extSponsorRevenue);
-                document.getElementById('sumRevTotal').innerText = formatCurrency(revTicket + extSponsorRevenue);
+                document.getElementById('sumRevHost').innerText = formatCurrency(hostRevenue);
+                
+                document.getElementById('sumRevTotal').innerText = formatCurrency(totalRevenue);
+                document.getElementById('sumExpTotal').innerText = formatCurrency(totalExpenses);
+                document.getElementById('sumBalance').innerText = formatCurrency(netBalance);
+                
+                const balanceEl = document.getElementById('sumBalance');
+                if (netBalance >= 0) {
+                    balanceEl.className = "fs-4 text-success";
+                } else {
+                    balanceEl.className = "fs-4 text-danger";
+                }
+
+                // Render Expense Table
+                const tbExp = document.getElementById('tbExpenses');
+                if (expensesData.length === 0) {
+                    tbExp.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">ยังไม่มีข้อมูลรายจ่าย</td></tr>';
+                } else {
+                    tbExp.innerHTML = expensesData.map(exp => {
+                        const dStr = new Date(exp.date).toLocaleDateString('th-TH');
+                        const slipBtn = exp.slipUrl ? `<button class="btn btn-sm btn-outline" onclick="showImg('${escapeHTML(exp.slipUrl)}')"><i class="bi bi-image"></i> ดูสลิป</button>` : '-';
+                        return `<tr>
+                            <td>${dStr}</td>
+                            <td>${escapeHTML(exp.desc)}</td>
+                            <td>${escapeHTML(exp.payer)}</td>
+                            <td class="text-right text-danger">-${formatCurrency(exp.amount)}</td>
+                            <td class="text-center">${slipBtn}</td>
+                        </tr>`;
+                    }).join('');
+                }
 
                 // Type Table
                 document.getElementById('tbSumType').innerHTML = `
@@ -1415,14 +1573,15 @@
                 <tr><td>เฉพาะกลางวัน</td><td class="text-right">${typeCount['DAY_ONLY']}</td></tr>
             `;
 
-                renderCharts(sortedBatches, batchCount);
+                renderCharts(sortedBatches, batchCount, batchRevenue);
             }
 
             let chartInstanceBatch = null;
+            let chartInstanceRevenue = null;
 
-            function renderCharts(sortedBatches, batchCount) {
+            function renderCharts(sortedBatches, batchCount, batchRevenue) {
                 // Batch Chart
-                const topBatches = sortedBatches.slice(0, 10); // Top 10
+                const topBatches = sortedBatches; // All batches
                 const batchLabels = topBatches.map(b => formatBatchShortDisplay(b));
                 const batchData = topBatches.map(b => batchCount[b]);
 
@@ -1448,6 +1607,46 @@
                             },
                             scales: {
                                 y: { beginAtZero: true, grid: { color: '#374151' }, ticks: { color: '#9ca3af', stepSize: 1 } },
+                                x: { grid: { display: false }, ticks: { color: '#9ca3af' } }
+                            }
+                        }
+                    });
+                }
+
+                // Revenue Chart
+                const sortedByRevenue = [...sortedBatches].sort((a, b) => batchRevenue[b] - batchRevenue[a]);
+                const revenueLabels = sortedByRevenue.map(b => formatBatchShortDisplay(b));
+                const revenueData = sortedByRevenue.map(b => batchRevenue[b]);
+
+                const ctxRevenue = document.getElementById('revenueChart');
+                if(ctxRevenue) {
+                    if (chartInstanceRevenue) chartInstanceRevenue.destroy();
+                    chartInstanceRevenue = new Chart(ctxRevenue, {
+                        type: 'bar',
+                        data: {
+                            labels: revenueLabels,
+                            datasets: [{
+                                label: 'ยอดเงินรวม (บาท)',
+                                data: revenueData,
+                                backgroundColor: '#10b981',
+                                borderRadius: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return '฿' + context.parsed.y.toLocaleString();
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: { beginAtZero: true, grid: { color: '#374151' }, ticks: { color: '#9ca3af', callback: function(value) { return '฿' + value.toLocaleString(); } } },
                                 x: { grid: { display: false }, ticks: { color: '#9ca3af' } }
                             }
                         }
@@ -1813,6 +2012,86 @@
 
             function formatCurrency(num) {
                 return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(num);
+            }
+
+            // --- Expense Logic ---
+            function openExpenseModal() {
+                document.getElementById('expenseForm').reset();
+                document.getElementById('expSlipPreview').style.display = 'none';
+                document.getElementById('expenseModal').style.display = 'flex';
+            }
+
+            function closeExpenseModal() {
+                document.getElementById('expenseModal').style.display = 'none';
+            }
+
+            document.getElementById('expSlip').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.getElementById('expSlipPreview').querySelector('img');
+                        img.src = e.target.result;
+                        document.getElementById('expSlipPreview').style.display = 'block';
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            async function submitExpense() {
+                const desc = document.getElementById('expDesc').value.trim();
+                const amount = parseFloat(document.getElementById('expAmount').value);
+                const payer = document.getElementById('expPayer').value.trim();
+                const fileInput = document.getElementById('expSlip');
+                
+                if (!desc || isNaN(amount) || amount <= 0) {
+                    Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกรายละเอียดและจำนวนเงิน', 'warning');
+                    return;
+                }
+
+                const btn = document.getElementById('btnSubmitExpense');
+                btn.innerHTML = '<i class="spinner-border spinner-border-sm"></i> กำลังบันทึก...';
+                btn.disabled = true;
+
+                async function doSubmit(base64Data) {
+                    const payload = {
+                        action: "addExpense",
+                        pin: ADMIN_PIN,
+                        desc: desc,
+                        amount: amount,
+                        payer: payer,
+                        slipBase64: base64Data || ""
+                    };
+
+                    try {
+                        const res = await fetch(WEB_APP_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                            body: JSON.stringify(payload)
+                        });
+                        const result = await res.json();
+                        if (result.success) {
+                            closeExpenseModal();
+                            Swal.fire('สำเร็จ', 'บันทึกรายจ่ายเรียบร้อยแล้ว', 'success');
+                            fetchData();
+                        } else {
+                            Swal.fire('ผิดพลาด', result.message || 'ไม่สามารถบันทึกได้', 'error');
+                        }
+                    } catch (err) {
+                        Swal.fire('ผิดพลาด', err.message, 'error');
+                    } finally {
+                        btn.innerHTML = 'บันทึกข้อมูล';
+                        btn.disabled = false;
+                    }
+                }
+
+                if (fileInput.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) { doSubmit(e.target.result); };
+                    reader.readAsDataURL(fileInput.files[0]);
+                } else {
+                    doSubmit("");
+                }
             }
         </script>
 </body>
