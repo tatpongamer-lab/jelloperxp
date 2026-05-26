@@ -206,12 +206,12 @@
 <!-- ================= ส่วนแสดงตั๋ว (E-Ticket) ================= -->
 <div class="container pb-5 mx-auto" id="ticketSection" style="max-width: 400px; display: none; text-align: center;">
     
-    <h3 class="page-title mt-4">บัตรเข้างานของคุณ</h3>
+    <h3 class="page-title mt-4">บัตรเข้างานภาคกลางคืน</h3>
 
     <div class="vip-ticket mx-auto" id="ticketContent">
         <div class="vip-ticket-header">
             <h4>แคแสดสัมพันธ์ ครั้งที่ 4</h4>
-            <div id="t_batch" style="font-size: 0.9rem; margin-top: 5px; opacity: 0.9;">(อาจารย์)</div>
+            <div id="t_batch" style="font-size: 0.9rem; margin-top: 5px; opacity: 0.9;">(คุณครู)</div>
             <div class="ticket-id">ID: <span id="t_id"></span></div>
         </div>
         
@@ -231,7 +231,7 @@
 
             <div class="ticket-qr-section">
                 <div id="qrcode" class="d-inline-block bg-white p-2 rounded shadow-sm"></div>
-                <p style="color: var(--primary-orange); font-weight: 700; font-size: 0.85rem; margin-top: 10px; margin-bottom: 0;">กรุณาแคปหน้าจอเพื่อใช้เข้างาน</p>
+                <p style="color: var(--primary-orange); font-weight: 700; font-size: 1.2rem; margin-top: 10px; margin-bottom: 0;">กรุณาแคปหน้าจอเพื่อใช้เข้างาน</p>
             </div>
         </div>
     </div>
@@ -268,7 +268,7 @@
 
         const payload = {
             action: "registerTeacher",
-            PrefixType: "อาจารย์",
+            PrefixType: "ครู",
             FirstName: fName,
             LastName: lName,
             Phone: phone,
@@ -313,7 +313,7 @@
     function showSuccessPopup(ticketId, fName, lName, food) {
         Swal.fire({
             html: `<p class="mb-2" style="font-size:1.1rem; line-height: 1.5; color: #003366;">
-                คณะผู้จัดงานขอขอบพระคุณอาจารย์เป็นอย่างสูง ที่ให้เกียรติมาร่วมสร้างความทรงจำดีๆ ในงานแคแสดสัมพันธ์ ครั้งที่ 4 ครับ/ค่ะ
+                คณะผู้จัดงานขอขอบพระคุณ คุณครูเป็นอย่างสูง ที่ให้เกียรติมาร่วมสร้างความทรงจำดีๆ ในงานแคแสดสัมพันธ์ ครั้งที่ 4 ครับ/ค่ะ
                 </p>`,
             confirmButtonText: '<i class="bi bi-qr-code-scan"></i> รับ QR เข้างาน',
             confirmButtonColor: '#FF6600',
@@ -321,7 +321,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 const foodTxt = food === 'BUDDHIST' ? "ไทยพุทธ" : "ไทยมุสลิม";
-                renderTicket(ticketId, `อาจารย์ ${fName} ${lName}`, foodTxt);
+                renderTicket(ticketId, `ครู ${fName} ${lName}`, foodTxt);
             }
         });
     }

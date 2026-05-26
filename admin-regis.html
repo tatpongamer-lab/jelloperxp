@@ -128,7 +128,7 @@
                             <label class="btn-label-custom py-3" for="typeSponsor"><i class="bi bi-briefcase-fill"></i> สปอนเซอร์</label>
                             
                             <input type="radio" name="vipType" id="typeTeacher" value="TEACHER" class="btn-check-custom" onchange="toggleForm()">
-                            <label class="btn-label-custom py-3" for="typeTeacher"><i class="bi bi-person-workspace"></i> อาจารย์</label>
+                            <label class="btn-label-custom py-3" for="typeTeacher"><i class="bi bi-person-workspace"></i> คุณครู</label>
                         </div>
                     </div>
 
@@ -334,7 +334,7 @@
         const payload = {
             action: "registerVIP",
             pin: ADMIN_PIN,
-            PrefixType: type === "TEACHER" ? "อาจารย์" : "คุณ",
+            PrefixType: type === "TEACHER" ? "ครู" : "คุณ",
             FirstName: document.getElementById('fName').value.trim(),
             LastName: document.getElementById('lName').value.trim(),
             Phone: document.getElementById('phone').value.trim(),
@@ -366,7 +366,7 @@
                 const eventTxt = payload.EventType === 'DAY_ONLY' ? "เฉพาะกลางวัน" : (payload.EventType === 'NIGHT_ONLY' ? "เฉพาะกลางคืน" : "กลางวันและกลางคืน");
                 const foodTxt = payload.Food === 'BUDDHIST' ? "ไทยพุทธ" : "ไทยมุสลิม";
                 const companyVal = type === "SPONSOR" ? payload.Nickname : "";
-                const batchTxt = type === "TEACHER" ? "อาจารย์" : "สปอนเซอร์";
+                const batchTxt = type === "TEACHER" ? "คุณครู" : "สปอนเซอร์";
                 
                 renderTicket(res.ticketId, `${payload.PrefixType} ${payload.FirstName} ${payload.LastName}`, batchTxt, eventTxt, foodTxt, `ผู้ใหญ่ ${payload.AdultCount}, เด็กโต ${payload.ChildOver12Count}, เด็กเล็ก ${payload.ChildUnder12Count}`, companyVal);
             } else {
@@ -408,7 +408,7 @@
 
                 let batchTxt = res.batch;
                 if(res.batch === "TEACHER") {
-                    batchTxt = "อาจารย์";
+                    batchTxt = "คุณครู";
                     companyVal = "";
                 } else if(res.batch === "SPONSOR") {
                     companyVal = res.nickname || res.Nickname || companyVal;
@@ -440,7 +440,7 @@
             document.getElementById('companyRow').style.display = "none";
         }
 
-        if (batch && batch.includes("อาจารย์")) {
+        if (batch && batch.includes("คุณครู")) {
             document.getElementById('followerRow').style.display = "none";
         } else {
             document.getElementById('followerRow').style.display = "flex";
