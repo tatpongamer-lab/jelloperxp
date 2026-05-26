@@ -1046,6 +1046,7 @@
             let alumniData = [];
             let sponsorData = [];
             let teacherData = [];
+            let extSponsorRevenue = 0;
             let currentSlipTicketId = null;
 
             function escapeHTML(str) {
@@ -1122,6 +1123,7 @@
 
                     if (res.success) {
                         rawData = res.data;
+                        extSponsorRevenue = parseFloat(res.sponsorRevenue) || 0;
                         processData();
                         updateSelectOptions();
 
@@ -1403,8 +1405,8 @@
 
                 // Finance Update
                 document.getElementById('sumRevTicket').innerText = formatCurrency(revTicket);
-                document.getElementById('sumRevSponsor').innerText = formatCurrency(revSponsor) + ' (รอเชื่อมข้อมูล)';
-                document.getElementById('sumRevTotal').innerText = formatCurrency(revTicket + revSponsor);
+                document.getElementById('sumRevSponsor').innerText = formatCurrency(extSponsorRevenue);
+                document.getElementById('sumRevTotal').innerText = formatCurrency(revTicket + extSponsorRevenue);
 
                 // Type Table
                 document.getElementById('tbSumType').innerHTML = `
