@@ -274,9 +274,9 @@
             text-align: center;
         }
         /* แก้ปัญหา In-App Browser กด Dropdown ไม่ได้ */
-        select.form-select {
-            -webkit-appearance: auto !important;
-            appearance: auto !important;
+        select.form-select, select {
+            -webkit-appearance: menulist !important;
+            appearance: menulist !important;
             background-image: none !important;
             cursor: pointer;
         }
@@ -555,6 +555,7 @@
     let currentTotal = 0;
     // สร้าง Array สำหรับเก็บรูปภาพสลิปที่เลือก
     let uploadedSlips = []; 
+    let pendingReads = 0; // จำนวน FileReader ที่กำลังทำงานอยู่
 
     // 1. สร้าง Option รุ่น (เพิ่ม ม.ปลาย 1-3)
     window.onload = () => {
@@ -719,11 +720,29 @@
         if (!files || files.length === 0) return;
 
         let hasWarning = false;
+        pendingReads += files.length;
 
         Array.from(files).forEach((file) => {
             const reader = new FileReader();
+
+            reader.onerror = function() {
+                pendingReads = Math.max(0, pendingReads - 1);
+                console.error("FileReader error:", file.name);
+            };
+
+            reader.onabort = function() {
+                pendingReads = Math.max(0, pendingReads - 1);
+                console.warn("FileReader aborted:", file.name);
+            };
+
             reader.onload = function(e) {
                 const img = new Image();
+
+                img.onerror = function() {
+                    pendingReads = Math.max(0, pendingReads - 1);
+                    console.error("Image load error:", file.name);
+                };
+
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
@@ -739,8 +758,15 @@
                     canvas.height = height;
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
+                    let code = null;
+                    try {
+                        if (typeof jsQR !== 'undefined') {
+                            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                            code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
+                        }
+                    } catch (err) {
+                        console.error("QR Code error:", err);
+                    }
                     
                     const base64Url = canvas.toDataURL('image/jpeg', 0.6); 
                     
@@ -751,6 +777,7 @@
                         hasQR: !!code
                     };
                     uploadedSlips.push(imgObj);
+                    pendingReads = Math.max(0, pendingReads - 1);
 
                     // ถ้าไม่มี QR ให้แจ้งเตือน แต่ยังเก็บรูปไว้
                     if (!imgObj.hasQR && !hasWarning) {
@@ -804,8 +831,7 @@
             reader.readAsDataURL(file);
         });
 
-        // ล้างค่า input เพื่อให้สามารถเลือกไฟล์เดิมซ้ำได้ถ้าเผลอลบ
-        event.target.value = '';
+        // ไม่ล้าง input.value เพื่อป้องกัน FileReader ถูก abort บน iOS/Android WebView
     }
 
     // ฟังก์ชันสร้าง UI รูปพรีวิว และปุ่มลบ
@@ -857,6 +883,18 @@
     // 6. Submit Register (อัปเดตหน้าสรุปข้อมูล)
     async function handleFormSubmit(e) {
         e.preventDefault();
+
+        // 0. รอให้รูปภาพประมวลผลเสร็จก่อน
+        if (pendingReads > 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'กำลังประมวลผลรูปภาพ',
+                text: 'กรุณารอสักครู่แล้วกดลงทะเบียนอีกครั้ง',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            return;
+        }
         
         // 1. ตรวจสอบการเลือกร่วมงาน (ต้องเลือกอย่างน้อย 1 อย่าง)
         const isDay = document.getElementById('eventDay').checked;
