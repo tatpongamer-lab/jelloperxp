@@ -650,8 +650,8 @@
 
         /* แก้ปัญหา In-app Browser ไม่สามารถเลือก Dropdown ได้ */
         select.form-select, select {
-            -webkit-appearance: auto !important;
-            appearance: auto !important;
+            -webkit-appearance: menulist !important;
+            appearance: menulist !important;
             cursor: pointer;
         }
     </style>
@@ -697,7 +697,9 @@
             </div>
 
             <div class="form-group">
-                <input type="text" id="Batch" placeholder="รุ่นการศึกษา (กรณีศิษย์เก่า)">
+                <select id="Batch">
+                    <option value="">-- รุ่นการศึกษา (กรณีศิษย์เก่า) --</option>
+                </select>
             </div>
             
             <div class="form-group">
@@ -726,6 +728,11 @@
             <div class="form-group" id="customAmountGroup" style="display: none;">
                 <label for="CustomAmount">ระบุจำนวนเงิน (บาท)</label>
                 <input type="number" id="CustomAmount" placeholder="ระบุจำนวนเงิน" min="1">
+            </div>
+
+            <div class="form-group" id="noteGroup" style="display: none;">
+                <label for="SponsorNote">หมายเหตุ</label>
+                <textarea id="SponsorNote" rows="2" placeholder="ระบุหมายเหตุเพิ่มเติม (ถ้ามี)" style="resize: none;"></textarea>
             </div>
 
             <div class="privilege-box">
@@ -767,6 +774,11 @@
                         <button type="button" class="btn-counter btn-add" onclick="updateGift('tumbler', 1)">+</button>
                     </div>
                 </div>
+            </div>
+
+            <div style="margin-top: 15px; padding: 12px 15px; background: #fff8f0; border: 1px solid #ffe0b2; border-left: 4px solid var(--primary-orange); border-radius: 8px; font-size: 0.85rem; line-height: 1.6; color: #5d4037;">
+                
+                สำหรับผู้ที่ลงทะเบียนสปอนเซอร์แล้วเลือกบัตรเข้างาน ไม่จำเป็นต้องลงทะเบียนเข้างานผ่านระบบปกติ ทั้งนี้ทางคณะผู้จัดงานจะดำเนินการลงทะเบียนให้ท่านโดยอัตโนมัติ
             </div>
 
             <div id="size-wrapper" style="display: none; margin-top: 15px; padding: 15px; background: #f8f9fa; border: 1px solid #eee; border-radius: 8px;">
@@ -914,6 +926,27 @@
     let slipFilesArray = [];
     let logoFilesArray = [];
 
+    // --- สร้าง Option รุ่น Dropdown (แบบเดียวกับ index.html) ---
+    (function initBatchDropdown() {
+        const batchSelect = document.getElementById('Batch');
+
+        // เพิ่ม ม.ปลาย รุ่น 1-3
+        for (let i = 1; i <= 3; i++) {
+            const opt = document.createElement('option');
+            opt.value = `HS${i}`;
+            opt.innerHTML = `ม.ปลาย รุ่น ${i}`;
+            batchSelect.appendChild(opt);
+        }
+
+        // เพิ่มรุ่น 1-30 (ม.ต้น/ม.ปลาย)
+        for (let i = 1; i <= 30; i++) {
+            const opt = document.createElement('option');
+            opt.value = `${i}/${i + 3}`;
+            opt.innerHTML = `ม.ต้น รุ่น ${i} / ม.ปลายรุ่น ${i + 3}`;
+            batchSelect.appendChild(opt);
+        }
+    })();
+
     // --- Logic การคำนวณสิทธิ์ ---
     const amountSelect = document.getElementById('AmountSelect');
     const customAmountInput = document.getElementById('CustomAmount');
@@ -933,10 +966,12 @@
         
         if (val === 'other') {
             document.getElementById('customAmountGroup').style.display = 'block';
+            document.getElementById('noteGroup').style.display = 'block';
             amount = Number(customAmountInput.value) || 0;
             customAmountInput.required = true;
         } else {
             document.getElementById('customAmountGroup').style.display = 'none';
+            document.getElementById('noteGroup').style.display = 'none';
             amount = Number(val) || 0;
             customAmountInput.required = false;
         }
@@ -1073,7 +1108,9 @@
             reader.readAsDataURL(file);
         });
         
-        inputElement.value = ''; // เคลียร์ input
+        setTimeout(() => {
+            if(inputElement) inputElement.value = '';
+        }, 2000);
     }
 
     function renderPreview(array, container, type) {
@@ -1155,8 +1192,8 @@
             FirstName: document.getElementById('FirstName').value,
             LastName: document.getElementById('LastName').value,
             DisplayName: document.getElementById('DisplayName').value,
-            Batch: document.getElementById('Batch').value || "ไม่ระบุ",
-            Phone: document.getElementById('Phone').value, // ไม่ต้องใส่ ' ตรงนี้แล้ว เพราะ Backend จัดการให้
+            Batch: document.getElementById('Batch').value,
+            Phone: document.getElementById('Phone').value,
             Email: document.getElementById('Email').value,
             Amount: Number(finalAmount),
             Address: finalAddress,
@@ -1164,6 +1201,7 @@
             gift_shirt: gifts.shirt,
             shirt_sizes: shirtSizesStr,
             gift_tumbler: gifts.tumbler,
+            Note: document.getElementById('SponsorNote').value || "",
             SlipFiles: slipFilesArray,
             LogoFiles: logoFilesArray
         };
@@ -1189,6 +1227,26 @@
                                 
                 // 3. แสดง Modal สวยๆ
                 document.getElementById('successModal').classList.add('show');
+
+                // 4. ล้างข้อมูลฟอร์มทั้งหมด
+                document.getElementById('sponsorForm').reset();
+                document.getElementById('Batch').selectedIndex = 0;
+                document.getElementById('customAmountGroup').style.display = 'none';
+                document.getElementById('noteGroup').style.display = 'none';
+                document.getElementById('SponsorNote').value = '';
+                document.getElementById('addressGroup').style.display = 'none';
+                document.getElementById('size-wrapper').style.display = 'none';
+                document.getElementById('size-container').innerHTML = '';
+                document.getElementById('remainPrivilegeText').innerText = '0';
+                document.getElementById('slipPreview').innerHTML = '';
+                document.getElementById('logoPreview').innerHTML = '';
+                gifts = { ticket: 0, shirt: 0, tumbler: 0 };
+                maxPrivilege = 0;
+                slipFilesArray = [];
+                logoFilesArray = [];
+                document.getElementById('qty_ticket').innerText = '0';
+                document.getElementById('qty_shirt').innerText = '0';
+                document.getElementById('qty_tumbler').innerText = '0';
                 
                 // หากต้องการให้เว็บสั่นเตือนเบาๆ ว่าสำเร็จ (สำหรับมือถือ)
                 if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
