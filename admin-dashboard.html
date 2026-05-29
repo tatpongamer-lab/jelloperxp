@@ -865,25 +865,58 @@
                         อัปเดต</button>
                 </div>
 
-                <!-- กราฟ -->
+                <!-- Goal Progress Bar -->
                 <div class="card p-0 mb-4">
                     <div class="p-3 border-bottom border-secondary" style="border-color: var(--border) !important;">
-                        <h4 class="mb-0">จำนวนศิษย์เก่าแยกตามรุ่น (นับเฉพาะศิษย์)</h4>
+                        <h4 class="mb-0 text-accent">เป้าหมายผู้เข้าร่วมงาน 400 คน</h4>
+                    </div>
+                    <div class="p-4 text-center">
+                        <h2 id="goalText" class="mb-3">0 / 400 คน (0%)</h2>
+                        <div class="progress" style="height: 30px; background-color: var(--bg-base); border-radius: 15px; border: 1px solid var(--border); overflow: hidden;">
+                            <div id="goalProgressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%; transition: width 1s ease-in-out;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="400"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trend Line Chart -->
+                <div class="card p-0 mb-4">
+                    <div class="p-3 border-bottom border-secondary" style="border-color: var(--border) !important;">
+                        <h4 class="mb-0 text-info">แนวโน้มการลงทะเบียน (รายวัน)</h4>
+                    </div>
+                    <div class="p-3" style="height: 300px;">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- กราฟจำนวนศิษย์เก่า -->
+                <div class="card p-0 mb-4">
+                    <div class="p-3 border-bottom border-secondary" style="border-color: var(--border) !important;">
+                        <h4 class="mb-0">จำนวนศิษย์เก่าแยกตามรุ่น (นับเฉพาะศิษย์เก่า)</h4>
                     </div>
                     <div class="p-3" style="height: 300px;">
                         <canvas id="batchChart"></canvas>
                     </div>
                 </div>
                 
+                <!-- กราฟรายได้ค่าบัตร -->
                 <div class="card p-0 mb-4">
                     <div class="p-3 border-bottom border-secondary" style="border-color: var(--border) !important;">
-                        <h4 class="mb-0 text-success">ยอดเงินรวมแยกตามรุ่น</h4>
+                        <h4 class="mb-0 text-success">รายได้ค่าบัตร แยกตามรุ่น</h4>
                     </div>
                     <div class="p-3" style="height: 300px;">
-                        <canvas id="revenueChart"></canvas>
+                        <canvas id="ticketRevenueChart"></canvas>
                     </div>
                 </div>
 
+                <!-- กราฟยอดสปอนเซอร์ -->
+                <div class="card p-0 mb-4">
+                    <div class="p-3 border-bottom border-secondary" style="border-color: var(--border) !important;">
+                        <h4 class="mb-0 text-warning">ยอดเงินสปอนเซอร์ แยกตามรุ่น</h4>
+                    </div>
+                    <div class="p-3" style="height: 300px;">
+                        <canvas id="sponsorRevenueChart"></canvas>
+                    </div>
+                </div>
 
             </div>
 
@@ -1437,6 +1470,43 @@
                 const revenue = paidData.reduce((sum, d) => sum + d.numAmount, 0);
                 document.getElementById('sumRevenue').innerText = `฿${revenue.toLocaleString()}`;
 
+                // Calculate Goal Progress (Target 400: Alumni, Teacher, Sponsor, Adult followers)
+                let goalCurrent = 0;
+                paidData.forEach(d => {
+                    goalCurrent += (1 + d.adultCount);
+                });
+                
+                const goalTarget = 400;
+                const goalPercent = Math.min(100, (goalCurrent / goalTarget) * 100).toFixed(1);
+                document.getElementById('goalText').innerText = `${goalCurrent} / ${goalTarget} คน (${goalPercent}%)`;
+                document.getElementById('goalProgressBar').style.width = `${goalPercent}%`;
+                if(goalCurrent >= goalTarget) {
+                    document.getElementById('goalText').classList.add('text-success');
+                } else {
+                    document.getElementById('goalText').classList.remove('text-success');
+                }
+
+                // Trend Data (Group by Date YYYY-MM-DD for sorting)
+                let trendMapISO = {};
+                allData.forEach(d => {
+                    if(d.timestamp) {
+                         const dateObj = new Date(d.timestamp);
+                         if (!isNaN(dateObj)) {
+                             const y = dateObj.getFullYear();
+                             const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+                             const day = String(dateObj.getDate()).padStart(2, '0');
+                             const dateISO = `${y}-${m}-${day}`;
+                             trendMapISO[dateISO] = (trendMapISO[dateISO] || 0) + 1;
+                         }
+                    }
+                });
+                const sortedDates = Object.keys(trendMapISO).sort();
+                const trendLabels = sortedDates.map(d => {
+                    const [y, m, day] = d.split('-');
+                    return `${day}/${m}/${y.substring(2)}`;
+                });
+                const trendData = sortedDates.map(d => trendMapISO[d]);
+
                 // Night Event logic (DAY_NIGHT or NIGHT_ONLY)
                 let nightAdult = 0, nightChildO12 = 0, nightChildU12 = 0;
                 let nightFoodB = 0, nightFoodH = 0;
@@ -1639,23 +1709,94 @@
                 <tr><td>เฉพาะกลางวัน</td><td class="text-right">${typeCount['DAY_ONLY']}</td></tr>
             `;
 
-                renderCharts(sortedBatches, batchCount, batchTicketRevenue, batchSponsorRevenue);
+                renderCharts(sortedBatches, batchCount, batchTicketRevenue, batchSponsorRevenue, trendLabels, trendData);
             }
 
+            let chartInstanceTrend = null;
             let chartInstanceBatch = null;
-            let chartInstanceRevenue = null;
+            let chartInstanceTicketRevenue = null;
+            let chartInstanceSponsorRevenue = null;
 
-            function renderCharts(sortedBatches, batchCount, batchTicketRevenue, batchSponsorRevenue) {
+            function renderCharts(sortedBatches, batchCount, batchTicketRevenue, batchSponsorRevenue, trendLabels, trendData) {
                 // Store for re-rendering on theme change
-                window.lastFetchResult = { sortedBatches, batchCount, batchTicketRevenue, batchSponsorRevenue };
+                window.lastFetchResult = { sortedBatches, batchCount, batchTicketRevenue, batchSponsorRevenue, trendLabels, trendData };
 
                 // Register datalabels plugin locally
                 const plugins = [ChartDataLabels];
 
+                const textColor = getComputedStyle(document.documentElement).getPropertyValue('--chart-text').trim();
+                const commonOptions = {
+                    layout: { padding: { top: 40 } },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ฿' + context.parsed.y.toLocaleString();
+                                }
+                            }
+                        },
+                        datalabels: {
+                            align: 'end', anchor: 'end', offset: 4, rotation: -90,
+                            color: textColor,
+                            font: { size: 10, family: "'Prompt', sans-serif" },
+                            formatter: (value) => value > 0 ? (value >= 1000 ? (value/1000).toFixed(1)+'k' : value) : ''
+                        }
+                    },
+                    scales: {
+                        y: { display: false },
+                        x: { 
+                            grid: { display: false }, 
+                            ticks: { color: textColor, autoSkip: false, maxRotation: 45, minRotation: 45 } 
+                        }
+                    }
+                };
+
+                // Trend Chart
+                const ctxTrend = document.getElementById('trendChart');
+                if(ctxTrend) {
+                    if (chartInstanceTrend) chartInstanceTrend.destroy();
+                    chartInstanceTrend = new Chart(ctxTrend, {
+                        type: 'line',
+                        plugins: plugins,
+                        data: {
+                            labels: trendLabels,
+                            datasets: [{
+                                label: 'ยอดลงทะเบียนใหม่',
+                                data: trendData,
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.3
+                            }]
+                        },
+                        options: {
+                            layout: { padding: { top: 20 } },
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                datalabels: {
+                                    align: 'top', anchor: 'center',
+                                    color: textColor,
+                                    font: { size: 10, family: "'Prompt', sans-serif" },
+                                    formatter: (value) => value > 0 ? value : ''
+                                }
+                            },
+                            scales: {
+                                y: { display: false },
+                                x: { grid: { display: false }, ticks: { color: textColor, maxRotation: 45, minRotation: 45 } }
+                            }
+                        }
+                    });
+                }
+
                 // Batch Chart
-                const topBatches = sortedBatches; // All batches
-                const batchLabels = topBatches.map(b => formatBatchShortDisplay(b));
-                const batchData = topBatches.map(b => batchCount[b]);
+                const batchLabels = sortedBatches.map(b => formatBatchShortDisplay(b));
+                const batchData = sortedBatches.map(b => batchCount[b]);
 
                 const ctxBatch = document.getElementById('batchChart');
                 if(ctxBatch) {
@@ -1672,119 +1813,49 @@
                                 borderRadius: 4
                             }]
                         },
-                        options: {
-                            layout: {
-                                padding: { top: 40 }
-                            },
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false },
-                                datalabels: {
-                                    align: 'end',
-                                    anchor: 'end',
-                                    offset: 4,
-                                    rotation: -90,
-                                    color: getComputedStyle(document.documentElement).getPropertyValue('--chart-text').trim(),
-                                    font: { size: 10, family: "'Prompt', sans-serif" },
-                                    formatter: (value) => value > 0 ? value : ''
-                                }
-                            },
-                            scales: {
-                                y: { display: false },
-                                x: { 
-                                    grid: { display: false }, 
-                                    ticks: { 
-                                        color: getComputedStyle(document.documentElement).getPropertyValue('--chart-text').trim(),
-                                        autoSkip: false,
-                                        maxRotation: 45,
-                                        minRotation: 45
-                                    } 
-                                }
-                            }
-                        }
+                        options: commonOptions
                     });
                 }
 
-                // Revenue Chart (Stacked)
-                const revenueLabels = batchLabels;
-                const ticketData = topBatches.map(b => batchTicketRevenue[b] || 0);
-                const sponsorData = topBatches.map(b => batchSponsorRevenue[b] || 0);
-
-                const ctxRevenue = document.getElementById('revenueChart');
-                if(ctxRevenue) {
-                    if (chartInstanceRevenue) chartInstanceRevenue.destroy();
-                    chartInstanceRevenue = new Chart(ctxRevenue, {
+                // Ticket Revenue Chart
+                const ticketData = sortedBatches.map(b => batchTicketRevenue[b] || 0);
+                const ctxTicket = document.getElementById('ticketRevenueChart');
+                if(ctxTicket) {
+                    if (chartInstanceTicketRevenue) chartInstanceTicketRevenue.destroy();
+                    chartInstanceTicketRevenue = new Chart(ctxTicket, {
                         type: 'bar',
                         plugins: plugins,
                         data: {
-                            labels: revenueLabels,
-                            datasets: [
-                                {
-                                    label: 'ค่าบัตร (ศิษย์เก่า)',
-                                    data: ticketData,
-                                    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--chart-color-2').trim(),
-                                    datalabels: { display: false }
-                                },
-                                {
-                                    label: 'สปอนเซอร์',
-                                    data: sponsorData,
-                                    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--chart-color-1').trim(),
-                                    datalabels: {
-                                        color: '#9ca3af',
-                                        align: 'end',
-                                        anchor: 'end',
-                                        offset: 4,
-                                        rotation: -90,
-                                        font: { size: 10, family: "'Prompt', sans-serif" },
-                                        formatter: (value, context) => {
-                                            const idx = context.dataIndex;
-                                            const total = ticketData[idx] + sponsorData[idx];
-                                            if (total === 0) return '';
-                                            return total >= 1000 ? (total/1000).toFixed(1)+'k' : total;
-                                        }
-                                    }
-                                }
-                            ]
+                            labels: batchLabels,
+                            datasets: [{
+                                label: 'รายได้ค่าบัตร',
+                                data: ticketData,
+                                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--chart-color-2').trim() || '#10b981',
+                                borderRadius: 4
+                            }]
                         },
-                        options: {
-                            layout: {
-                                padding: { top: 40 }
-                            },
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { 
-                                    display: true, 
-                                    position: 'top',
-                                    labels: { color: '#9ca3af', font: { family: "'Prompt', sans-serif" } }
-                                },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            return context.dataset.label + ': ฿' + context.parsed.y.toLocaleString();
-                                        }
-                                    }
-                                }
-                            },
-                            scales: {
-                                y: { 
-                                    display: false,
-                                    stacked: true, 
-                                    beginAtZero: true
-                                },
-                                x: { 
-                                    stacked: true, 
-                                    grid: { display: false }, 
-                                    ticks: { 
-                                        color: getComputedStyle(document.documentElement).getPropertyValue('--chart-text').trim(),
-                                        autoSkip: false,
-                                        maxRotation: 45,
-                                        minRotation: 45
-                                    } 
-                                }
-                            }
-                        }
+                        options: commonOptions
+                    });
+                }
+
+                // Sponsor Revenue Chart
+                const sponsorData = sortedBatches.map(b => batchSponsorRevenue[b] || 0);
+                const ctxSponsor = document.getElementById('sponsorRevenueChart');
+                if(ctxSponsor) {
+                    if (chartInstanceSponsorRevenue) chartInstanceSponsorRevenue.destroy();
+                    chartInstanceSponsorRevenue = new Chart(ctxSponsor, {
+                        type: 'bar',
+                        plugins: plugins,
+                        data: {
+                            labels: batchLabels,
+                            datasets: [{
+                                label: 'ยอดเงินสปอนเซอร์',
+                                data: sponsorData,
+                                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--chart-color-1').trim() || '#fbbf24',
+                                borderRadius: 4
+                            }]
+                        },
+                        options: commonOptions
                     });
                 }
 

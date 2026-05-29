@@ -852,7 +852,7 @@
             </div>
         </div>
 
-        <button type="submit" class="submit-btn">ยืนยันการส่งข้อมูล</button>
+        <button type="submit" class="submit-btn" id="btnSubmit">ยืนยันการส่งข้อมูล</button>
     </form>
 
     <div class="footer">
@@ -924,6 +924,24 @@
     let gifts = { ticket: 0, shirt: 0, tumbler: 0 };
     let slipFilesArray = [];
     let logoFilesArray = [];
+    let pendingReads = 0;
+
+    // ฟังก์ชันจัดการสถานะปุ่มยืนยัน
+    function updateSubmitButtonState() {
+        const btn = document.getElementById('btnSubmit');
+        if (!btn) return;
+        if (pendingReads > 0) {
+            btn.disabled = true;
+            btn.innerText = "กำลังประมวลผลรูปภาพ...";
+            btn.style.opacity = '0.7';
+            btn.style.cursor = 'not-allowed';
+        } else {
+            btn.disabled = false;
+            btn.innerText = "ยืนยันการส่งข้อมูล";
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+        }
+    }
 
     // --- สร้าง Option รุ่น Dropdown (แบบเดียวกับ index.html) ---
     (function initBatchDropdown() {
@@ -1091,8 +1109,12 @@
             return;
         }
 
+        pendingReads += files.length;
+        updateSubmitButtonState();
+
         Array.from(files).forEach(file => {
             const reader = new FileReader();
+            
             reader.onload = function(e) {
                 const base64String = e.target.result;
                 const fileObj = {
@@ -1103,13 +1125,25 @@
                 
                 targetArray.push(fileObj);
                 renderPreview(targetArray, targetPreview, type);
+                
+                pendingReads = Math.max(0, pendingReads - 1);
+                updateSubmitButtonState();
             };
+            
+            reader.onerror = function() {
+                pendingReads = Math.max(0, pendingReads - 1);
+                updateSubmitButtonState();
+                console.error("FileReader error");
+            };
+            
+            reader.onabort = function() {
+                pendingReads = Math.max(0, pendingReads - 1);
+                updateSubmitButtonState();
+                console.warn("FileReader aborted");
+            };
+            
             reader.readAsDataURL(file);
         });
-        
-        setTimeout(() => {
-            if(inputElement) inputElement.value = '';
-        }, 2000);
     }
 
     function renderPreview(array, container, type) {
@@ -1152,6 +1186,9 @@
     // --- Submit Form ---
     document.getElementById('sponsorForm').addEventListener('submit', function(e) {
         e.preventDefault();
+
+        // กันเหนียวกรณีปุ่มโดน force click
+        if (pendingReads > 0) return;
 
         // 1. ตรวจสอบสลิป
         if (slipFilesArray.length === 0) {
