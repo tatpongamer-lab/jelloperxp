@@ -463,24 +463,24 @@
         if (company && batch && batch.includes("สปอนเซอร์")) {
             document.getElementById('t_company').innerText = company;
             document.getElementById('companyRow').style.display = "flex";
-            // Premium VIP Gold for Sponsor
-            ticketHeader.style.background = 'linear-gradient(135deg, #D4AF37, #FFD700)';
-            ticketHeader.style.color = '#000'; // Dark text for gold background
-            document.querySelector('.ticket-id').style.color = '#000';
-            document.querySelector('.ticket-id').style.border = '1px solid rgba(0,0,0,0.3)';
-            document.querySelector('.ticket-id').style.background = 'rgba(255,255,255,0.4)';
+            // Premium Gold + Brown for Sponsor (135deg like index.html)
+            ticketHeader.style.background = 'linear-gradient(135deg, #F3D289, #4A2411)';
+            ticketHeader.style.color = '#fff'; 
+            document.querySelector('.ticket-id').style.color = '#fff';
+            document.querySelector('.ticket-id').style.border = '1px solid rgba(255,255,255,0.4)';
+            document.querySelector('.ticket-id').style.background = 'rgba(255,255,255,0.25)';
         } else {
             document.getElementById('companyRow').style.display = "none";
         }
 
         if (batch && batch.includes("คุณครู")) {
             document.getElementById('followerRow').style.display = "none";
-            // Blue + Premium Gold for Teacher
+            // Blue + Premium Gold for Teacher (135deg like index.html)
             ticketHeader.style.background = 'linear-gradient(135deg, #003366, #D4AF37)';
             ticketHeader.style.color = '#fff';
             document.querySelector('.ticket-id').style.color = '#fff';
             document.querySelector('.ticket-id').style.border = '1px solid rgba(255,255,255,0.4)';
-            document.querySelector('.ticket-id').style.background = 'rgba(255,255,255,0.2)';
+            document.querySelector('.ticket-id').style.background = 'rgba(255,255,255,0.25)';
         } else {
             document.getElementById('followerRow').style.display = "flex";
             if (!batch || !batch.includes("สปอนเซอร์")) {
