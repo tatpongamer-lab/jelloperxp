@@ -144,6 +144,12 @@
                                 <label class="form-label text-dark small mb-1 fw-bold">ชื่อบริษัท / หน่วยงาน / ร้านค้า</label>
                                 <input type="text" id="company" class="form-control" placeholder="กรอกชื่อบริษัท">
                             </div>
+                            <div class="mb-3">
+                                <label class="form-label text-dark small mb-1 fw-bold">รุ่น (เฉพาะศิษย์เก่า)</label>
+                                <select class="form-select" id="Batch">
+                                    <option value="">-- ไม่ใช่ศิษย์เก่า / ไม่ระบุ --</option>
+                                </select>
+                            </div>
                         </div>
 
                         <!-- ปรับเป็นปุ่มกด Checkbox แบบเลือกได้ทั้งคู่ -->
@@ -258,6 +264,24 @@
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxoUw_ndO0eRf9M07cgDb1N02R_gBx_E_ZjdcARHOi__Yqt9ZbVmQd5bcuCLQ9ctrTjWQ/exec";
     let ADMIN_PIN = "";
 
+    window.onload = () => {
+        const batchSelect = document.getElementById('Batch');
+        if (batchSelect) {
+            for (let i = 1; i <= 3; i++) {
+                const opt = document.createElement('option');
+                opt.value = `HS${i}`;
+                opt.innerHTML = `ม.ปลาย รุ่น ${i}`;
+                batchSelect.appendChild(opt);
+            }
+            for (let i = 1; i <= 30; i++) {
+                const opt = document.createElement('option');
+                opt.value = `${i}/${i + 3}`;
+                opt.innerHTML = `ม.ต้น รุ่น ${i} / ม.ปลายรุ่น ${i + 3}`;
+                batchSelect.appendChild(opt);
+            }
+        }
+    };
+
     async function login() {
         const pin = document.getElementById('pinInput').value;
         if (!pin) {
@@ -340,7 +364,8 @@
             Phone: document.getElementById('phone').value.trim(),
             EventType: eventMode,
             Food: document.querySelector('input[name="foodMode"]:checked').value,
-            Batch: type,
+            Batch: type === "TEACHER" ? "" : document.getElementById('Batch').value,
+            Role: type,
             Nickname: type === "TEACHER" ? "" : document.getElementById('company').value.trim(),
             AdultCount: Number(document.getElementById('fAdult').value) || 0,
             ChildOver12Count: Number(document.getElementById('fChildO12').value) || 0,
@@ -366,7 +391,7 @@
                 const eventTxt = payload.EventType === 'DAY_ONLY' ? "เฉพาะกลางวัน" : (payload.EventType === 'NIGHT_ONLY' ? "เฉพาะกลางคืน" : "กลางวันและกลางคืน");
                 const foodTxt = payload.Food === 'BUDDHIST' ? "ไทยพุทธ" : "ไทยมุสลิม";
                 const companyVal = type === "SPONSOR" ? payload.Nickname : "";
-                const batchTxt = type === "TEACHER" ? "คุณครู" : "สปอนเซอร์";
+                const batchTxt = type === "TEACHER" ? "คุณครู" : "สปอนเซอร์" + (payload.Batch ? ` (รุ่น ${payload.Batch})` : "");
                 
                 renderTicket(res.ticketId, `${payload.PrefixType} ${payload.FirstName} ${payload.LastName}`, batchTxt, eventTxt, foodTxt, `ผู้ใหญ่ ${payload.AdultCount}, เด็กโต ${payload.ChildOver12Count}, เด็กเล็ก ${payload.ChildUnder12Count}`, companyVal);
             } else {
@@ -407,12 +432,12 @@
                 }
 
                 let batchTxt = res.batch;
-                if(res.batch === "TEACHER") {
+                if(res.role === "TEACHER" || res.batch === "TEACHER") {
                     batchTxt = "คุณครู";
                     companyVal = "";
-                } else if(res.batch === "SPONSOR") {
+                } else if(res.role === "SPONSOR" || res.batch === "SPONSOR") {
                     companyVal = res.nickname || res.Nickname || companyVal;
-                    batchTxt = "สปอนเซอร์";
+                    batchTxt = "สปอนเซอร์" + (res.batch && res.batch !== "SPONSOR" ? ` (รุ่น ${res.batch})` : "");
                 }
 
                 renderTicket(res.ticketId, displayName, batchTxt, eventTxt, foodTxt, `ผู้ใหญ่ ${res.adult || 0}, เด็กโต ${res.childO12 || 0}, เด็กเล็ก ${res.childU12 || 0}`, companyVal);
@@ -433,17 +458,39 @@
         document.getElementById('t_follower').innerText = follower;
         document.getElementById('t_id').innerText = id;
 
+        const ticketHeader = document.querySelector('.vip-ticket-header');
+
         if (company && batch && batch.includes("สปอนเซอร์")) {
             document.getElementById('t_company').innerText = company;
             document.getElementById('companyRow').style.display = "flex";
+            // Premium VIP Gold for Sponsor
+            ticketHeader.style.background = 'linear-gradient(135deg, #D4AF37, #FFD700)';
+            ticketHeader.style.color = '#000'; // Dark text for gold background
+            document.querySelector('.ticket-id').style.color = '#000';
+            document.querySelector('.ticket-id').style.border = '1px solid rgba(0,0,0,0.3)';
+            document.querySelector('.ticket-id').style.background = 'rgba(255,255,255,0.4)';
         } else {
             document.getElementById('companyRow').style.display = "none";
         }
 
         if (batch && batch.includes("คุณครู")) {
             document.getElementById('followerRow').style.display = "none";
+            // Blue + Premium Gold for Teacher
+            ticketHeader.style.background = 'linear-gradient(135deg, #003366, #D4AF37)';
+            ticketHeader.style.color = '#fff';
+            document.querySelector('.ticket-id').style.color = '#fff';
+            document.querySelector('.ticket-id').style.border = '1px solid rgba(255,255,255,0.4)';
+            document.querySelector('.ticket-id').style.background = 'rgba(255,255,255,0.2)';
         } else {
             document.getElementById('followerRow').style.display = "flex";
+            if (!batch || !batch.includes("สปอนเซอร์")) {
+                 // Default style
+                 ticketHeader.style.background = 'linear-gradient(135deg, var(--primary-blue), var(--accent-sky))';
+                 ticketHeader.style.color = '#fff';
+                 document.querySelector('.ticket-id').style.color = '#fff';
+                 document.querySelector('.ticket-id').style.border = '1px solid rgba(255,255,255,0.3)';
+                 document.querySelector('.ticket-id').style.background = 'rgba(255,255,255,0.25)';
+            }
         }
 
         document.getElementById('qrcode').innerHTML = "";

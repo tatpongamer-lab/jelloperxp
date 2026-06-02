@@ -95,9 +95,9 @@
 
         /* ================= รูปแบบบัตรเข้างาน ================= */
         .vip-ticket { background: #fff; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); position: relative; max-width: 320px; margin: 0 auto; text-align: left; border: none; overflow: hidden; color: #000; }
-        .vip-ticket-header { background: linear-gradient(135deg, var(--primary-orange), var(--primary-blue)); color: white; padding: 15px 15px 20px; text-align: center; position: relative; }
+        .vip-ticket-header { background: linear-gradient(135deg, #003366, #D4AF37); color: white; padding: 15px 15px 20px; text-align: center; position: relative; }
         .vip-ticket-header h4 { margin: 0; font-weight: 700; font-size: 1.25rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); font-family: 'Sarabun', sans-serif;}
-        .vip-ticket-header .ticket-id { background: rgba(255,255,255,0.25); padding: 2px 12px; border-radius: 15px; display: inline-block; margin-top: 8px; font-size: 0.85rem; letter-spacing: 1px; font-family: 'Courier New', Courier, monospace; font-weight: bold; color: white; }
+        .vip-ticket-header .ticket-id { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); padding: 2px 12px; border-radius: 15px; display: inline-block; margin-top: 8px; font-size: 0.85rem; letter-spacing: 1px; font-family: 'Courier New', Courier, monospace; font-weight: bold; color: white; }
         .vip-ticket-body { padding: 20px 15px 15px; background: #fff; position: relative; }
         .vip-ticket-body::before, .vip-ticket-body::after { content: ''; position: absolute; top: -12px; width: 24px; height: 24px; background: #f8f9fa; border-radius: 50%; z-index: 2; box-shadow: inset 0 3px 5px rgba(0,0,0,0.1); }
         .vip-ticket-body::before { left: -12px; }
@@ -274,7 +274,8 @@
             Phone: phone,
             EventType: "NIGHT_ONLY",
             Food: food,
-            Batch: "TEACHER",
+            Batch: "",
+            Role: "TEACHER",
             Nickname: "",
             AdultCount: 0,
             ChildOver12Count: 0,
