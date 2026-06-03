@@ -136,7 +136,8 @@
                         <div class="row g-3 mb-3">
                             <div class="col-6"><input type="text" id="fName" class="form-control" placeholder="ชื่อจริง" required></div>
                             <div class="col-6"><input type="text" id="lName" class="form-control" placeholder="นามสกุล" required></div>
-                            <div class="col-12"><input type="tel" id="phone" class="form-control" placeholder="เบอร์โทรศัพท์ (10 หลัก)" pattern="0[0-9]{9}" required></div>
+                            <div class="col-6"><input type="text" id="nickname" class="form-control" placeholder="ชื่อเล่น (ไม่บังคับ)"></div>
+                            <div class="col-6"><input type="tel" id="phone" class="form-control" placeholder="เบอร์โทร (10 หลัก)" pattern="0[0-9]{9}" required></div>
                         </div>
                         
                         <div id="sponsorFields">
@@ -228,9 +229,8 @@
                     <span class="ticket-detail-label">ชื่อ</span>
                     <span class="ticket-detail-value" id="t_name"></span>
                 </div>
-                <div class="ticket-detail-row" id="companyRow" style="display: none;">
-                    <span class="ticket-detail-label">บริษัท/ร้านค้า</span>
-                    <span class="ticket-detail-value" id="t_company"></span>
+                <div class="ticket-detail-row" id="companyRow" style="display: none; justify-content: flex-end;">
+                    <span class="ticket-detail-value" id="t_company" style="max-width: 100%;"></span>
                 </div>
                 <div class="ticket-detail-row">
                     <span class="ticket-detail-label">สิทธิ์</span>
@@ -361,18 +361,19 @@
             PrefixType: type === "TEACHER" ? "ครู" : "คุณ",
             FirstName: document.getElementById('fName').value.trim(),
             LastName: document.getElementById('lName').value.trim(),
+            Nickname: document.getElementById('nickname').value.trim(),
             Phone: document.getElementById('phone').value.trim(),
             EventType: eventMode,
             Food: document.querySelector('input[name="foodMode"]:checked').value,
             Batch: type === "TEACHER" ? "" : document.getElementById('Batch').value,
             Role: type,
-            Nickname: type === "TEACHER" ? "" : document.getElementById('company').value.trim(),
+            Company: type === "TEACHER" ? "" : document.getElementById('company').value.trim(),
             AdultCount: Number(document.getElementById('fAdult').value) || 0,
             ChildOver12Count: Number(document.getElementById('fChildO12').value) || 0,
             ChildUnder12Count: Number(document.getElementById('fChildU12').value) || 0
         };
 
-        if(type === "SPONSOR" && !payload.Nickname) {
+        if(type === "SPONSOR" && !payload.Company) {
             Swal.fire({icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณากรอกชื่อบริษัท/หน่วยงาน'}); return;
         }
 
@@ -390,7 +391,7 @@
                 
                 const eventTxt = payload.EventType === 'DAY_ONLY' ? "เฉพาะกลางวัน" : (payload.EventType === 'NIGHT_ONLY' ? "เฉพาะกลางคืน" : "กลางวันและกลางคืน");
                 const foodTxt = payload.Food === 'BUDDHIST' ? "ไทยพุทธ" : "ไทยมุสลิม";
-                const companyVal = type === "SPONSOR" ? payload.Nickname : "";
+                const companyVal = type === "SPONSOR" ? payload.Company : "";
                 const batchTxt = type === "TEACHER" ? "คุณครู" : "สปอนเซอร์" + (payload.Batch ? ` (รุ่น ${payload.Batch})` : "");
                 
                 renderTicket(res.ticketId, `${payload.PrefixType} ${payload.FirstName} ${payload.LastName}`, batchTxt, eventTxt, foodTxt, `ผู้ใหญ่ ${payload.AdultCount}, เด็กโต ${payload.ChildOver12Count}, เด็กเล็ก ${payload.ChildUnder12Count}`, companyVal);
@@ -424,19 +425,20 @@
                 const foodTxt = res.food === 'BUDDHIST' ? "ไทยพุทธ" : (res.food === 'HALAL' ? "ไทยมุสลิม" : (res.food || "-"));
                 
                 let displayName = res.name;
-                let companyVal = "";
+                // ตัดชื่อเล่นที่อาจติดมากับ API (ในวงเล็บท้ายชื่อ) ออกเพื่อไม่ให้แสดงบนตั๋ว VIP
                 let match = displayName.match(/\s*\(([^)]+)\)$/);
                 if (match) {
-                    companyVal = match[1];
                     displayName = displayName.replace(match[0], '').trim();
                 }
+                
+                let companyVal = "";
 
                 let batchTxt = res.batch;
                 if(res.role === "TEACHER" || res.batch === "TEACHER") {
                     batchTxt = "คุณครู";
                     companyVal = "";
                 } else if(res.role === "SPONSOR" || res.batch === "SPONSOR") {
-                    companyVal = res.nickname || res.Nickname || companyVal;
+                    companyVal = res.company || "";
                     batchTxt = "สปอนเซอร์" + (res.batch && res.batch !== "SPONSOR" ? ` (รุ่น ${res.batch})` : "");
                 }
 
