@@ -122,6 +122,7 @@
                         </div>
                     </div>
                 </div>
+                <div id="productSummaryContainer"></div>
             </div>
 
             <!-- Tab: Orders -->
@@ -214,7 +215,7 @@
                     </div>
 
                     <!-- Right Column -->
-                    <div class="lg:w-80 space-y-6 flex-shrink-0">
+                    <div class="lg:w-96 space-y-6 flex-shrink-0">
                         <!-- Payment -->
                         <div>
                             <h4 class="text-xs uppercase tracking-widest text-gray-400 font-bold mb-3"><i class="bi bi-credit-card mr-1"></i> การชำระเงิน</h4>
@@ -230,11 +231,13 @@
                                         <div class="font-bold text-navy mb-1"><i class="bi bi-info-circle"></i> ข้อมูลจาก SlipOK</div>
                                         <div class="grid grid-cols-2 gap-2 text-xs">
                                             <div class="text-gray-500">ยอดเงิน:</div><div id="slipAmount" class="font-medium"></div>
+                                            <div class="text-gray-500">บัญชีผู้รับ:</div><div id="slipReceiver" class="font-medium truncate"></div>
                                             <div class="text-gray-500">ผู้โอน:</div><div id="slipSender" class="font-medium truncate"></div>
                                             <div class="text-gray-500">ธนาคาร:</div><div id="slipBank" class="font-medium"></div>
                                             <div class="text-gray-500">วันเวลา:</div><div id="slipDate" class="font-medium"></div>
                                             <div class="text-gray-500">อ้างอิง:</div><div id="slipRef" class="font-medium text-[10px] break-all"></div>
                                         </div>
+                                        <div id="slipMatchAlert" class="mt-2 text-xs font-bold px-2 py-1 rounded hidden"></div>
                                     </div>
                                 </div>
                                 <div id="omNoSlip" class="text-sm text-gray-400 hidden">ไม่มีสลิป</div>
@@ -257,6 +260,7 @@
                                     <select id="omFulStatus" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-gold outline-none">
                                         <option value="UNFULFILLED">ยังไม่จัดส่ง</option>
                                         <option value="FULFILLED">จัดส่งแล้ว</option>
+                                        <option value="NOT_REQUIRED">ไม่ต้องจัดส่ง</option>
                                     </select>
                                 </div>
                                 <div>
@@ -416,6 +420,7 @@
 
                     updateStoreUI();
                     renderTable();
+                    renderProductSummary();
                 } else {
                     Swal.fire("ผิดพลาด", data.message || "ไม่สามารถโหลดข้อมูลได้", "error");
                     statusText.innerText = "v3.0 — ERROR: " + (data.message || "unknown");
@@ -509,6 +514,59 @@
             });
         });
 
+        // ===== PRODUCT SUMMARY =====
+        function renderProductSummary() {
+            var summaryContainer = document.getElementById("productSummaryContainer");
+            if (!summaryContainer) return;
+            
+            var productSummary = {};
+            currentOrders.forEach(function(o) {
+                if (o.paymentStatus === "REJECTED") return; 
+                if (o.items && Array.isArray(o.items)) {
+                    o.items.forEach(function(item) {
+                        var pName = item.name;
+                        if (!productSummary[pName]) productSummary[pName] = { total: 0, sizes: {} };
+                        productSummary[pName].total += item.quantity;
+                        if (item.size) {
+                            if (!productSummary[pName].sizes[item.size]) productSummary[pName].sizes[item.size] = 0;
+                            productSummary[pName].sizes[item.size] += item.quantity;
+                        }
+                    });
+                }
+            });
+
+            var pNames = Object.keys(productSummary).sort(function(a, b) {
+                var aIsShirt = a.indexOf("เสื้อ") !== -1;
+                var bIsShirt = b.indexOf("เสื้อ") !== -1;
+                if (aIsShirt && !bIsShirt) return -1;
+                if (!aIsShirt && bIsShirt) return 1;
+                return a.localeCompare(b);
+            });
+
+            if (pNames.length === 0) {
+                summaryContainer.innerHTML = '';
+            } else {
+                var html = '<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6"><h3 class="text-lg font-bold text-navy mb-4"><i class="bi bi-box-seam mr-2"></i>สรุปยอดขายสินค้า (ไม่รวมบิลที่ถูกปฏิเสธ)</h3><div class="flex flex-row overflow-x-auto gap-4 pb-2" style="-webkit-overflow-scrolling: touch;">';
+                pNames.forEach(function(pName) {
+                    var pData = productSummary[pName];
+                    var hasSizes = Object.keys(pData.sizes).length > 0;
+                    html += '<div class="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col min-w-[250px] shrink-0">';
+                    html += '  <div class="flex justify-between items-center"><span class="font-bold text-navy truncate">' + pName + '</span><span class="font-bold text-white bg-navy px-3 py-1 rounded-md text-sm">' + pData.total + '</span></div>';
+                    if (hasSizes) {
+                        var sKeys = Object.keys(pData.sizes).sort();
+                        html += '<div class="space-y-1 mt-3 border-t border-gray-200 pt-3">';
+                        sKeys.forEach(function(sKey) {
+                            html += '<div class="flex justify-between items-center text-sm"><span class="text-gray-600 pl-2">- ไซส์ ' + sKey + '</span><span class="font-medium text-gray-800 bg-white border border-gray-200 px-2 py-0.5 rounded">' + pData.sizes[sKey] + '</span></div>';
+                        });
+                        html += '</div>';
+                    }
+                    html += '</div>';
+                });
+                html += '</div></div>';
+                summaryContainer.innerHTML = html;
+            }
+        }
+
         // ===== ORDERS TABLE =====
         function renderTable() {
             var tbody = document.getElementById("ordersBody");
@@ -521,9 +579,14 @@
 
             currentOrders.forEach(function(o) {
                 var payBadge = o.paymentStatus === "PAID" ? "bg-green-100 text-green-700" : (o.paymentStatus === "REJECTED" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700");
-                var payLabel = o.paymentStatus === "PAID" ? "ชำระแล้ว" : (o.paymentStatus === "REJECTED" ? "ปฏิเสธ" : "รอชำระ");
-                var fulBadge = o.fulfillmentStatus === "FULFILLED" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600";
-                var fulLabel = o.fulfillmentStatus === "FULFILLED" ? "จัดส่งแล้ว" : "ยังไม่จัดส่ง";
+                var payLabel = o.paymentStatus === "PAID" ? "ชำระแล้ว" : (o.paymentStatus === "REJECTED" ? "ปฏิเสธ" : "รอตรวจสอบ");
+                
+                var isPickup = o.deliveryMethod && (o.deliveryMethod.indexOf("pickup") !== -1 || o.deliveryMethod.indexOf("รับ") !== -1);
+                var curFul = o.fulfillmentStatus || "UNFULFILLED";
+                if (isPickup) curFul = "NOT_REQUIRED";
+                
+                var fulBadge = curFul === "FULFILLED" ? "bg-blue-100 text-blue-700" : (curFul === "NOT_REQUIRED" ? "bg-gray-100 text-gray-500" : "bg-gray-100 text-gray-600");
+                var fulLabel = curFul === "FULFILLED" ? "จัดส่งแล้ว" : (curFul === "NOT_REQUIRED" ? "ไม่ต้องจัดส่ง" : "ยังไม่จัดส่ง");
 
                 var deliveryLabel = "-";
                 switch (o.deliveryMethod) {
@@ -596,11 +659,36 @@
                 if (o.slipVerifyData) {
                     try {
                         var d = typeof o.slipVerifyData === "string" ? JSON.parse(o.slipVerifyData) : o.slipVerifyData;
-                        document.getElementById("slipAmount").innerText = d.amount ? parseFloat(d.amount).toLocaleString() + " ฿" : "-";
+                        
+                        var expectedAmount = o.total || 0;
+                        var actualAmount = parseFloat(d.amount) || 0;
+                        var amountMatched = (actualAmount === expectedAmount);
+                        
+                        var receiverName = d.receiver || "";
+                        var accMatched = receiverName.indexOf("ศิษย์เก่า") !== -1 || receiverName.indexOf("วิทยาศาสตร์") !== -1 || receiverName.indexOf("4159") !== -1 || receiverName.indexOf("020424234159") !== -1;
+                        if (!receiverName) accMatched = false;
+
+                        var amountColor = amountMatched ? "text-green-600" : "text-red-600 font-bold";
+                        document.getElementById("slipAmount").innerHTML = '<span class="' + amountColor + '">' + (d.amount ? parseFloat(d.amount).toLocaleString() + " ฿" : "-") + '</span>';
+                        
+                        var accColor = accMatched ? "text-green-600" : "text-red-600 font-bold";
+                        document.getElementById("slipReceiver").innerHTML = '<span class="' + accColor + '" title="' + receiverName + '">' + (receiverName || "-") + '</span>';
+
                         document.getElementById("slipBank").innerText = d.sendingBank || "-";
                         document.getElementById("slipSender").innerText = d.sender || "-";
                         document.getElementById("slipDate").innerText = d.transDate || "-";
                         document.getElementById("slipRef").innerText = d.transRef || "-";
+
+                        var alertBox = document.getElementById("slipMatchAlert");
+                        alertBox.classList.remove("hidden");
+                        if (amountMatched && accMatched) {
+                            alertBox.className = "mt-2 text-xs font-bold px-2 py-1 rounded bg-green-100 text-green-700";
+                            alertBox.innerHTML = '<i class="bi bi-check-circle"></i> ข้อมูลถูกต้อง (ยอดและบัญชีตรง)';
+                        } else {
+                            alertBox.className = "mt-2 text-xs font-bold px-2 py-1 rounded bg-red-100 text-red-700";
+                            alertBox.innerHTML = '<i class="bi bi-exclamation-triangle"></i> ข้อมูลไม่ตรง! โปรดตรวจสอบด้วยตนเอง';
+                        }
+                        
                         slipResult.classList.remove("hidden");
                     } catch (e) { slipResult.classList.add("hidden"); }
                 } else {
@@ -613,8 +701,12 @@
             }
 
             // Dropdowns
+            var isPickup = o.deliveryMethod && (o.deliveryMethod.indexOf("pickup") !== -1 || o.deliveryMethod.indexOf("รับ") !== -1);
+            var curFul = o.fulfillmentStatus || "UNFULFILLED";
+            if (isPickup && curFul === "UNFULFILLED") curFul = "NOT_REQUIRED";
+            
             document.getElementById("omPayStatus").value = o.paymentStatus || "PENDING";
-            document.getElementById("omFulStatus").value = o.fulfillmentStatus || "UNFULFILLED";
+            document.getElementById("omFulStatus").value = curFul;
             document.getElementById("omTracking").value = o.trackingNumber || "";
             document.getElementById("omCarrier").value = o.carrier || "";
 
@@ -642,11 +734,37 @@
                 if (data.success && data.data) {
                     Swal.close();
                     var d = data.data;
-                    document.getElementById("slipAmount").innerText = d.amount ? parseFloat(d.amount).toLocaleString() + " ฿" : "-";
+                    o.slipVerifyData = JSON.stringify(d); // Update local object so it persists in UI without refresh
+                    
+                    var expectedAmount = o.total || 0;
+                    var actualAmount = parseFloat(d.amount) || 0;
+                    var amountMatched = (actualAmount === expectedAmount);
+                    
+                    var receiverName = d.receiver || "";
+                    var accMatched = receiverName.indexOf("ศิษย์เก่า") !== -1 || receiverName.indexOf("วิทยาศาสตร์") !== -1 || receiverName.indexOf("4159") !== -1 || receiverName.indexOf("020424234159") !== -1;
+                    if (!receiverName) accMatched = false;
+
+                    var amountColor = amountMatched ? "text-green-600" : "text-red-600 font-bold";
+                    document.getElementById("slipAmount").innerHTML = '<span class="' + amountColor + '">' + (d.amount ? parseFloat(d.amount).toLocaleString() + " ฿" : "-") + '</span>';
+                    
+                    var accColor = accMatched ? "text-green-600" : "text-red-600 font-bold";
+                    document.getElementById("slipReceiver").innerHTML = '<span class="' + accColor + '" title="' + receiverName + '">' + (receiverName || "-") + '</span>';
+
                     document.getElementById("slipBank").innerText = d.sendingBank || "-";
                     document.getElementById("slipSender").innerText = d.sender || "-";
                     document.getElementById("slipDate").innerText = d.transDate || "-";
                     document.getElementById("slipRef").innerText = d.transRef || "-";
+
+                    var alertBox = document.getElementById("slipMatchAlert");
+                    alertBox.classList.remove("hidden");
+                    if (amountMatched && accMatched) {
+                        alertBox.className = "mt-2 text-xs font-bold px-2 py-1 rounded bg-green-100 text-green-700";
+                        alertBox.innerHTML = '<i class="bi bi-check-circle"></i> ข้อมูลถูกต้อง (ยอดและบัญชีตรง)';
+                    } else {
+                        alertBox.className = "mt-2 text-xs font-bold px-2 py-1 rounded bg-red-100 text-red-700";
+                        alertBox.innerHTML = '<i class="bi bi-exclamation-triangle"></i> ข้อมูลไม่ตรง! โปรดตรวจสอบด้วยตนเอง';
+                    }
+                    
                     document.getElementById("omSlipResult").classList.remove("hidden");
                 } else {
                     Swal.fire("ตรวจสอบไม่สำเร็จ", data.message || "ไม่สามารถอ่านข้อมูลสลิปได้", "warning");
