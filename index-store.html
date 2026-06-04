@@ -104,12 +104,24 @@
             <!-- Hero Carousel -->
             <section id="home" class="relative w-full aspect-[5/4] bg-navy overflow-hidden">
                 <div id="carousel-inner" class="flex transition-transform duration-500 ease-out h-full">
-                    <img src="image/promo-image-1.png" class="w-full h-full object-cover shrink-0" alt="Promo 1" onerror="this.src='https://placehold.co/800x600/1E2A38/C8A96B?text=Alumni+Store'">
-                    <img src="image/promo-image-2.jpg" class="w-full h-full object-cover shrink-0" alt="Promo 2" onerror="this.src='https://placehold.co/800x600/1E2A38/C8A96B?text=Exclusive+Collection'">
+                    <img src="image/promo-image-1.png" class="w-full h-full object-cover shrink-0" alt="Promo 1">
+                    <img src="image/promo-image-2.png" class="w-full h-full object-cover shrink-0" alt="Promo 2">
+                    <img src="image/promo-image-3.jpg" class="w-full h-full object-cover shrink-0" alt="Promo 3">
+                    <img src="image/promo-image-4.jpg" class="w-full h-full object-cover shrink-0" alt="Promo 4">
+                    <img src="image/promo-image-5.png" class="w-full h-full object-cover shrink-0" alt="Promo 5">
+                    <img src="image/promo-image-6.png" class="w-full h-full object-cover shrink-0" alt="Promo 6">
+                    <img src="image/promo-image-7.png" class="w-full h-full object-cover shrink-0" alt="Promo 7">
+                    <img src="image/promo-image-8.jpg" class="w-full h-full object-cover shrink-0" alt="Promo 8">
                 </div>
                 <div class="absolute bottom-4 left-0 w-full flex justify-center gap-2" id="carousel-dots">
                     <div class="w-2 h-2 rounded-full bg-white opacity-100 transition-opacity" data-index="0"></div>
                     <div class="w-2 h-2 rounded-full bg-white opacity-50 transition-opacity" data-index="1"></div>
+                    <div class="w-2 h-2 rounded-full bg-white opacity-50 transition-opacity" data-index="2"></div>
+                    <div class="w-2 h-2 rounded-full bg-white opacity-50 transition-opacity" data-index="3"></div>
+                    <div class="w-2 h-2 rounded-full bg-white opacity-50 transition-opacity" data-index="4"></div>
+                    <div class="w-2 h-2 rounded-full bg-white opacity-50 transition-opacity" data-index="5"></div>
+                    <div class="w-2 h-2 rounded-full bg-white opacity-50 transition-opacity" data-index="6"></div>
+                    <div class="w-2 h-2 rounded-full bg-white opacity-50 transition-opacity" data-index="7"></div>
                 </div>
             </section>
 
@@ -202,6 +214,8 @@
                         <li><strong>ภาพวาดสายมูร่วมสมัย:</strong> ประยุกต์ลายเส้นโมเดิร์นวาดองค์เทพ เช่น องค์พระพิฆเนศ และองค์แม่ลักษมี ซึ่งได้รับความนิยมอย่างมาก</li>
                     </ul>
                     <img src="image/designer-pic-2.jpg" alt="Designer Art 2" class="w-full rounded-xl shadow-md object-cover aspect-[4/3] my-6" onerror="this.style.display='none'">
+                    <img src="image/designer-pic-3.jpg" alt="Designer Art 2" class="w-full rounded-xl shadow-md object-cover aspect-[4/3] my-6" onerror="this.style.display='none'">
+                    <img src="image/designer-pic-4.jpg" alt="Designer Art 2" class="w-full rounded-xl shadow-md object-cover aspect-[4/3] my-6" onerror="this.style.display='none'">
                     <p>ปัจจุบัน เธอยังคงสร้างสรรค์ผลงานอย่างต่อเนื่อง ทั้งงานวาดภาพประกอบเชิงพาณิชย์ และการเปิดคลาสเวิร์กชอปสอนศิลปะ เพื่อแบ่งปันเทคนิคและแรงบันดาลใจ<br>
                     <br>ติดตามผลงานของเธอได้ที่<br>Instagram: @kapiz<br>Facebook: Kapi</p>
                 </div>
@@ -422,10 +436,10 @@
         // --- ข้อมูลสินค้า (Fallback) ---
         var products = [
             { id: 'shirt', name: 'The Reunion Polo เสื้อใส่แล้วคิดถึง', price: 419, img: 'image/t-shirt-design-1.jpg', group: 1, hasSize: true, shipFeeItem: true },
-            { id: 'opener', name: 'Cheers Opener ที่เปิดขวดเปิดบทสนทนา', price: 79, img: 'image/bottle-opener-design-1.jpg', group: 1, hasSize: false, shipFeeItem: false },
-            { id: 'totebag', name: 'Carry Your Memories Tote ถุงผ้าพกแคแสดไปด้วย', price: 199, img: 'image/tote-bag-design.jpg', group: 1, hasSize: false, shipFeeItem: false },
             { id: 'tumbler', name: 'Memory Tumbler แก้วจิบความทรงจำ', price: 349, img: 'image/tumbler-design-1.jpg', group: 1, hasSize: false, shipFeeItem: true },
-            { id: 'keychain', name: 'Key to Memories พวงกุญแจคล้องใจไว้ที่แคแสด', price: 99, img: 'image/keychain-design.jpg', group: 1, hasSize: false, shipFeeItem: false }
+            { id: 'totebag', name: 'Carry Your Memories Tote ถุงผ้าพกแคแสดไปด้วย', price: 199, img: 'image/tote-bag-design.jpg', group: 1, hasSize: false, shipFeeItem: false },
+            { id: 'keychain', name: 'Key to Memories พวงกุญแจคล้องใจไว้ที่แคแสด', price: 99, img: 'image/keychain-design.jpg', group: 1, hasSize: false, shipFeeItem: false },
+            { id: 'opener', name: 'Cheers Opener ที่เปิดขวดเปิดบทสนทนา', price: 79, img: 'image/bottle-opener-design-1.jpg', group: 1, hasSize: false, shipFeeItem: false }
         ];
 
         var sizes = [
@@ -439,6 +453,7 @@
         var cart = [];
         var slipBase64Data = "";
         var storeStatus = "OPEN";
+        var isAdminMode = new URLSearchParams(window.location.search).get('admin') === 'true';
 
         // --- UI Elements ---
         var cartBadge = document.getElementById('cart-badge');
@@ -460,6 +475,25 @@
         setupEventListeners();
         setupSlipUpload();
         updateCartUI();
+        
+        if (isAdminMode) {
+            var bankSection = document.querySelector('.bg-navy.text-white.p-4.rounded-xl.mb-4');
+            if (bankSection) bankSection.style.display = 'none';
+            
+            var dropZone = document.getElementById('drop-zone');
+            if (dropZone) dropZone.style.display = 'none';
+            
+            var slipUpload = document.getElementById('slip-upload');
+            if (slipUpload) slipUpload.removeAttribute('required');
+            
+            var paymentContainer = document.getElementById('co-subtotal').parentNode.parentNode;
+            var adminAuthHtml = '<div class="mb-4 p-4 border-2 border-gold/50 rounded-xl bg-gold/10"><label class="block text-sm font-bold text-navy mb-2"><i class="ph ph-key text-gold"></i> รหัสผ่าน Admin (สปอนเซอร์ฟรี)</label><input type="password" id="admin-pwd" placeholder="กรอกรหัสผ่านแอดมิน" class="w-full p-3 border border-gold rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-gold text-center tracking-widest font-mono" required></div>';
+            var bankSectionRef = paymentContainer.querySelector('.bg-navy.text-white');
+            if (bankSectionRef) {
+                bankSectionRef.insertAdjacentHTML('afterend', adminAuthHtml);
+            }
+        }
+        
         fetchProducts();
 
         // --- Fetch Products ---
@@ -491,6 +525,14 @@
                                 name: frontP.name || p.name
                             });
                         });
+                        
+                        var orderPriority = { "shirt": 1, "tumbler": 2, "totebag": 3, "keychain": 4, "opener": 5 };
+                        products.sort(function(a, b) {
+                            var pA = orderPriority[a.id] || 99;
+                            var pB = orderPriority[b.id] || 99;
+                            return pA - pB;
+                        });
+                        
                         renderProducts();
                     }
                     if (data.storeStatus === 'CLOSED') {
@@ -652,6 +694,12 @@
             var shipping = 0, note = "";
             if (opt === 'pickup_all') { custAddress.classList.add('hidden'); custAddress.removeAttribute('required'); note = "(รับหน้างาน)"; }
             else { custAddress.classList.remove('hidden'); custAddress.setAttribute('required', 'required'); shipping = calculateBoxShipping(cart); note = "(1 กล่อง)"; }
+            
+            if (isAdminMode) {
+                subtotal = 0;
+                shipping = 0;
+                note = "(Admin Free Order)";
+            }
             document.getElementById('co-subtotal').textContent = '฿' + subtotal.toLocaleString();
             document.getElementById('co-shipping').textContent = '฿' + shipping.toLocaleString();
             document.getElementById('co-shipping-note').textContent = note;
@@ -696,7 +744,7 @@
         document.getElementById('checkout-form').addEventListener('submit', function(e) {
             e.preventDefault();
             if (cart.length === 0) return;
-            if (!slipBase64Data) { showToast("กรุณาอัปโหลดสลิปการโอนเงิน", "warning"); return; }
+            if (!isAdminMode && !slipBase64Data) { showToast("กรุณาอัปโหลดสลิปการโอนเงิน", "warning"); return; }
             var custName = document.getElementById('cust-name').value.trim();
             var custPhone = document.getElementById('cust-phone').value.trim();
             if (!custName || !custPhone) { showToast("กรุณากรอกชื่อและเบอร์โทรศัพท์", "warning"); return; }
@@ -715,6 +763,10 @@
                 items: cart.map(function(i) { return { id: i.id, size: i.size, quantity: i.quantity }; }),
                 slipBase64: slipBase64Data
             };
+            
+            if (isAdminMode) {
+                payload.adminPassword = document.getElementById('admin-pwd').value.trim();
+            }
 
             fetch(API_URL, { method: 'POST', redirect: 'follow', body: JSON.stringify(payload) })
             .then(function(res) { return res.json(); })
