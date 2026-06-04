@@ -9,7 +9,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Prompt:wght@300;400;500;600&family=Pridi:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -102,7 +102,7 @@
         <main class="flex-1 overflow-y-auto" id="main-content">
 
             <!-- Hero Carousel -->
-            <section id="home" class="relative w-full aspect-[4/3] bg-navy overflow-hidden">
+            <section id="home" class="relative w-full aspect-[5/4] bg-navy overflow-hidden">
                 <div id="carousel-inner" class="flex transition-transform duration-500 ease-out h-full">
                     <img src="image/promo-image-1.png" class="w-full h-full object-cover shrink-0" alt="Promo 1" onerror="this.src='https://placehold.co/800x600/1E2A38/C8A96B?text=Alumni+Store'">
                     <img src="image/promo-image-2.jpg" class="w-full h-full object-cover shrink-0" alt="Promo 2" onerror="this.src='https://placehold.co/800x600/1E2A38/C8A96B?text=Exclusive+Collection'">
@@ -117,8 +117,9 @@
             <section id="catalog" class="px-4 py-8">
                 <div class="flex justify-between items-end mb-6">
                     <div>
-                        <h2 class="text-2xl font-heading font-bold text-navy">คอลเลกชัน</h2>
-                        <div class="w-10 h-1 bg-gold mt-1"></div>
+                        <h2 class="text-xl md:text-2xl font-heading font-bold text-navy">💙🧡 แคแสด x Kapi Collection</h2>
+                        <p class="text-sm text-charcoal/60 mt-1 font-medium">“เก็บความทรงจำแคแสดไว้ใกล้ตัว”</p>
+                        <div class="w-10 h-1 bg-gold mt-2"></div>
                     </div>
                 </div>
                 <div id="product-grid" class="flex flex-col gap-4"></div>
@@ -243,7 +244,7 @@
                         <h3 class="text-base font-bold text-navy mb-4 flex items-center gap-2"><i class="ph ph-user text-gold text-xl"></i> ข้อมูลติดต่อ</h3>
                         <div class="space-y-3">
                             <input type="text" id="cust-name" required placeholder="ชื่อ-นามสกุล *" class="w-full p-3 border border-beige rounded-xl bg-gray-50 focus:bg-white text-sm focus:outline-none focus:border-gold">
-                            <input type="tel" id="cust-phone" required placeholder="เบอร์โทรศัพท์ *" class="w-full p-3 border border-beige rounded-xl bg-gray-50 focus:bg-white text-sm focus:outline-none focus:border-gold">
+                            <input type="tel" id="cust-phone" required placeholder="เบอร์โทรศัพท์ 10 หลัก *" maxlength="10" class="w-full p-3 border border-beige rounded-xl bg-gray-50 focus:bg-white text-sm focus:outline-none focus:border-gold">
                         </div>
                     </div>
                     <div class="bg-white p-5 rounded-2xl border border-beige/50 shadow-sm">
@@ -265,10 +266,16 @@
                     </div>
                     <div class="bg-white p-5 rounded-2xl border border-beige/50 shadow-sm">
                         <h3 class="text-base font-bold text-navy mb-4 flex items-center gap-2"><i class="ph ph-credit-card text-gold text-xl"></i> ชำระเงิน</h3>
-                        <div class="bg-navy text-white p-4 rounded-xl mb-4 text-center">
-                            <div class="text-xs text-beige mb-1">ธนาคารกสิกรไทย (KBank)</div>
-                            <div class="text-xl font-mono tracking-widest font-bold">123-4-56789-0</div>
-                            <div class="text-[10px] text-beige/80 mt-1">สมาคมศิษย์เก่า</div>
+                        <div class="bg-navy text-white p-4 rounded-xl mb-4 shadow-md text-left relative overflow-hidden">
+                            <div class="absolute -right-10 -top-10 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
+                            <div class="text-[13px] font-bold text-white/90 mb-3 border-b border-white/10 pb-2">ธนาคารออมสิน</div>
+                            <div class="flex items-center justify-between bg-white/10 border border-white/20 py-2.5 px-3 rounded-lg mb-3">
+                                <div class="text-[17px] font-mono tracking-widest font-bold">020-4-24234-159</div>
+                                <button type="button" onclick="copyAccountNumber()" class="w-8 h-8 flex items-center justify-center bg-white text-navy rounded hover:bg-gold transition-colors duration-200 shadow-sm">
+                                    <i class="ph ph-copy text-lg"></i>
+                                </button>
+                            </div>
+                            <div class="text-[11px] text-white/80 font-medium">ศิษย์เก่า รร.วิทยาศาสตร์จุฬาภรณราชวิทยาลัย นศ.</div>
                         </div>
                         <div class="flex justify-between items-center mb-1 text-sm"><span class="text-charcoal/70">ยอดรวมสินค้า:</span><span id="co-subtotal" class="font-medium text-navy">฿0</span></div>
                         <div class="flex justify-between items-center mb-3 text-sm pb-3 border-b border-beige/50">
@@ -356,13 +363,69 @@
 
         var API_URL = "https://script.google.com/macros/s/AKfycbw2kOjC60iW9gZltuEg_seerk0tJ6dP4V2YSd5-Fhuk3As06G7zhzYtuQYpoAW2WqKG/exec";
 
+        // --- Toast Notification System ---
+        function showToast(message, type) {
+            type = type || 'error';
+            var container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                container.className = 'fixed top-safe pt-6 left-1/2 -translate-x-1/2 z-[150] flex flex-col gap-3 items-center w-full px-4 pointer-events-none';
+                document.body.appendChild(container);
+            }
+            var toast = document.createElement('div');
+            var bgColor = type === 'success' ? 'bg-navy' : 'bg-[#C8A96B]'; 
+            if (type === 'error') bgColor = 'bg-red-500/95 backdrop-blur-md';
+            if (type === 'warning') bgColor = 'bg-navy/95 backdrop-blur-md border border-gold/30';
+            
+            var icon = type === 'success' ? 'ph-check-circle' : (type === 'error' ? 'ph-warning-circle' : 'ph-info');
+            var iconColor = type === 'warning' ? 'text-gold' : 'text-white';
+            
+            toast.className = bgColor + ' text-white px-5 py-3 rounded-2xl shadow-[0_8px_30px_-10px_rgba(0,0,0,0.3)] flex items-center gap-3 transform transition-all duration-300 -translate-y-[150%] opacity-0 w-max max-w-[90vw] text-center';
+            toast.innerHTML = '<i class="ph ' + icon + ' text-xl ' + iconColor + '"></i><span class="font-medium text-[13px] sm:text-sm" style="font-family: \'Prompt\', sans-serif;">' + message + '</span>';
+            container.appendChild(toast);
+            
+            requestAnimationFrame(function() {
+                requestAnimationFrame(function() {
+                    toast.classList.remove('-translate-y-[150%]', 'opacity-0');
+                });
+            });
+            
+            setTimeout(function() {
+                toast.classList.add('-translate-y-[150%]', 'opacity-0');
+                setTimeout(function() { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
+            }, 3000);
+        }
+
+        // --- Copy Account Number ---
+        function copyAccountNumber() {
+            var accNo = "020424234159"; // Without dashes for easy pasting in banking apps
+            navigator.clipboard.writeText(accNo).then(function() {
+                showToast("คัดลอกเลขบัญชีแล้ว", "success");
+            }).catch(function(err) {
+                console.error('Copy error:', err);
+                // Fallback for older browsers
+                var textArea = document.createElement("textarea");
+                textArea.value = accNo;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast("คัดลอกเลขบัญชีแล้ว", "success");
+                } catch (err) {
+                    showToast("ไม่สามารถคัดลอกได้", "error");
+                }
+                document.body.removeChild(textArea);
+            });
+        }
+
         // --- ข้อมูลสินค้า (Fallback) ---
         var products = [
-            { id: 'shirt', name: 'เสื้อ', price: 419, img: 'image/t-shirt-design-1.jpg', group: 1, hasSize: true, shipFeeItem: true },
-            { id: 'opener', name: 'ที่เปิดขวด', price: 79, img: 'image/bottle-opener-design-1.jpg', group: 1, hasSize: false, shipFeeItem: false },
-            { id: 'totebag', name: 'ถุงผ้า', price: 199, img: 'image/tote-bag-design.jpg', group: 1, hasSize: false, shipFeeItem: false },
-            { id: 'tumbler', name: 'แก้วเก็บความเย็น', price: 349, img: 'image/tumbler-design-1.jpg', group: 1, hasSize: false, shipFeeItem: true },
-            { id: 'keychain', name: 'พวงกุญแจ', price: 99, img: 'image/keychain-design.jpg', group: 1, hasSize: false, shipFeeItem: false }
+            { id: 'shirt', name: 'The Reunion Polo เสื้อใส่แล้วคิดถึง', price: 419, img: 'image/t-shirt-design-1.jpg', group: 1, hasSize: true, shipFeeItem: true },
+            { id: 'opener', name: 'Cheers Opener ที่เปิดขวดเปิดบทสนทนา', price: 79, img: 'image/bottle-opener-design-1.jpg', group: 1, hasSize: false, shipFeeItem: false },
+            { id: 'totebag', name: 'Carry Your Memories Tote ถุงผ้าพกแคแสดไปด้วย', price: 199, img: 'image/tote-bag-design.jpg', group: 1, hasSize: false, shipFeeItem: false },
+            { id: 'tumbler', name: 'Memory Tumbler แก้วจิบความทรงจำ', price: 349, img: 'image/tumbler-design-1.jpg', group: 1, hasSize: false, shipFeeItem: true },
+            { id: 'keychain', name: 'Key to Memories พวงกุญแจคล้องใจไว้ที่แคแสด', price: 99, img: 'image/keychain-design.jpg', group: 1, hasSize: false, shipFeeItem: false }
         ];
 
         var sizes = [
@@ -411,10 +474,22 @@
             .then(function(data) {
                 if (data.success) {
                     if (data.products && data.products.length > 0) {
-                        var imgMap = {};
-                        products.forEach(function(p) { imgMap[p.id] = p.img; imgMap[p.name] = p.img; });
+                        var frontendMap = {};
+                        products.forEach(function(p) {
+                            frontendMap[p.id] = p;
+                            if (p.name.indexOf("เสื้อ") !== -1) frontendMap["เสื้อ"] = p;
+                            if (p.name.indexOf("เปิดขวด") !== -1) frontendMap["ที่เปิดขวด"] = p;
+                            if (p.name.indexOf("ถุงผ้า") !== -1) frontendMap["ถุงผ้า"] = p;
+                            if (p.name.indexOf("แก้ว") !== -1) { frontendMap["แก้วเก็บความเย็น"] = p; frontendMap["แก้ว"] = p; }
+                            if (p.name.indexOf("พวงกุญแจ") !== -1) frontendMap["พวงกุญแจ"] = p;
+                        });
                         products = data.products.map(function(p) {
-                            return Object.assign({}, p, { img: imgMap[p.id] || imgMap[p.name] || p.img || 'https://placehold.co/200x200/F6F1E9/1E2A38?text=Image' });
+                            var frontP = frontendMap[p.id] || frontendMap[p.name.trim()] || {};
+                            return Object.assign({}, p, { 
+                                id: frontP.id || p.id,
+                                img: frontP.img || p.img || 'https://placehold.co/200x200/F6F1E9/1E2A38?text=Image',
+                                name: frontP.name || p.name
+                            });
                         });
                         renderProducts();
                     }
@@ -455,15 +530,23 @@
                         sizes.map(function(s) { return '<option value="' + s.val + '">' + s.label + '</option>'; }).join('') +
                     '</select>';
                 }
+                var nameDisplay = '<h3 class="text-[18px] font-bold text-navy leading-normal line-clamp-2" style="font-family: \'Prompt\', sans-serif;">' + p.name + '</h3>';
+                var match = p.name.match(/^([\w\s\-]+?)\s*([ก-๙].*)$/u);
+                if (match) {
+                    nameDisplay = '<div class="leading-normal mb-1 py-0.5">' +
+                                  '<div style="color: #FF6600;" class="text-[12px] font-bold uppercase tracking-widest line-clamp-1">' + match[1].trim() + '</div>' +
+                                  '<div style="color: #003366; font-family: \'Prompt\', sans-serif;" class="text-[18px] font-medium mt-0.5 line-clamp-2">"' + match[2].trim() + '"</div>' +
+                                  '</div>';
+                }
+
                 var card = '<div class="bg-white border border-beige/40 rounded-2xl overflow-hidden shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-10px_rgba(0,0,0,0.1)] transition-all duration-300 flex flex-row items-stretch group relative">' +
                     '<div class="w-32 h-32 shrink-0 bg-[#fbf9f6] overflow-hidden p-2 relative flex items-center justify-center cursor-pointer" onclick="openLightbox(\'' + p.img + '\')">' +
                         '<img src="' + p.img + '" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 drop-shadow-sm" alt="' + p.name + '" loading="lazy" onerror="this.onerror=null; this.src=\'https://placehold.co/200x200/F6F1E9/1E2A38?text=Image\'">' +
                     '</div>' +
                     '<div class="flex-1 p-3.5 flex flex-col justify-between min-w-0 border-l border-beige/20">' +
                         '<div>' +
-                            '<div class="text-[9px] tracking-widest text-gold uppercase font-bold mb-1">IN STOCK</div>' +
-                            '<h3 class="text-[13px] font-bold text-navy leading-snug line-clamp-2">' + p.name + '</h3>' +
-                            '<div class="text-gold font-bold text-lg mt-0.5 tracking-tight">฿' + p.price.toLocaleString() + '</div>' +
+                            nameDisplay +
+                            '<div class="text-gold font-bold text-[15px] mt-0.5 tracking-tight">฿' + p.price.toLocaleString() + '</div>' +
                         '</div>' +
                         '<div class="flex items-center gap-2 mt-2 w-full">' +
                             (sizeSelectHTML ? '<div class="flex-1 min-w-0">' + sizeSelectHTML + '</div>' : '<div class="flex-1"></div>') +
@@ -484,7 +567,7 @@
             var selectedSize = size || (product.hasSize ? document.getElementById('size-' + productId).value : null);
             
             if (product.hasSize && !selectedSize) {
-                alert("กรุณาเลือกไซส์ก่อนเพิ่มสินค้าลงตะกร้า");
+                showToast("กรุณาเลือกไซส์ก่อนเพิ่มสินค้า", "warning");
                 return;
             }
 
@@ -613,13 +696,13 @@
         document.getElementById('checkout-form').addEventListener('submit', function(e) {
             e.preventDefault();
             if (cart.length === 0) return;
-            if (!slipBase64Data) { alert("กรุณาอัปโหลดสลิปการโอนเงิน"); return; }
+            if (!slipBase64Data) { showToast("กรุณาอัปโหลดสลิปการโอนเงิน", "warning"); return; }
             var custName = document.getElementById('cust-name').value.trim();
             var custPhone = document.getElementById('cust-phone').value.trim();
-            if (!custName || !custPhone) { alert("กรุณากรอกชื่อและเบอร์โทรศัพท์"); return; }
-            if (!/^0[0-9]{8,9}$/.test(custPhone)) { alert("กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (เริ่มด้วย 0 ตามด้วย 9 หลัก)"); return; }
+            if (!custName || !custPhone) { showToast("กรุณากรอกชื่อและเบอร์โทรศัพท์", "warning"); return; }
+            if (!/^0[0-9]{9}$/.test(custPhone)) { showToast("กรุณากรอกเบอร์โทรศัพท์ 10 หลัก (เช่น 0812345678)", "warning"); return; }
             var selShip = document.querySelector('input[name="shipping-option"]:checked').value;
-            if (selShip !== 'pickup_all' && !document.getElementById('cust-address').value.trim()) { alert("กรุณากรอกที่อยู่จัดส่ง"); return; }
+            if (selShip !== 'pickup_all' && !document.getElementById('cust-address').value.trim()) { showToast("กรุณากรอกที่อยู่จัดส่ง", "warning"); return; }
 
             var submitBtn = document.getElementById('submit-order-btn');
             var loadingOverlay = document.getElementById('loading-overlay');
@@ -647,9 +730,9 @@
                     document.getElementById('success-modal').classList.remove('hidden');
                     document.getElementById('success-modal').classList.add('flex');
                     cart = []; slipBase64Data = ""; updateCartUI();
-                } else { alert(result.message || "เกิดข้อผิดพลาด"); submitBtn.disabled = false; }
+                } else { showToast(result.message || "เกิดข้อผิดพลาด", "error"); submitBtn.disabled = false; }
             })
-            .catch(function(err) { console.error('Order error:', err); alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้"); submitBtn.disabled = false; })
+            .catch(function(err) { console.error('Order error:', err); showToast("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้", "error"); submitBtn.disabled = false; })
             .finally(function() { loadingOverlay.classList.add('hidden'); loadingOverlay.classList.remove('flex'); });
         });
 
