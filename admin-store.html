@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Admin | Alumni Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: { navy: '#1E2A38', gold: '#C8A96B', cream: '#F6F1E9' },
+                fontFamily: { heading: ['"Playfair Display"', 'serif'], body: ['"Prompt"', 'sans-serif'] }
+            }
+        }
+    }
+    </script>
+    <style>
+        body { font-family: 'Prompt', sans-serif; background: #f8fafc; }
+        .font-heading { font-family: 'Playfair Display', serif; }
+        #view-login { display: flex; }
+        #view-dashboard { display: none; }
+        .nav-link.active { background: rgba(255,255,255,0.15); color: #C8A96B !important; }
+        .content-tab { display: none; }
+        .content-tab.active { display: block; }
+        .toggle-switch { position: relative; width: 56px; height: 28px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: #94a3b8; border-radius: 9999px; transition: 0.3s; }
+        .toggle-slider::before { content: ''; position: absolute; height: 22px; width: 22px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
+        .toggle-switch input:checked + .toggle-slider { background: #22c55e; }
+        .toggle-switch input:checked + .toggle-slider::before { transform: translateX(28px); }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- ==================== LOGIN ==================== -->
+    <section id="view-login" class="min-h-screen items-center justify-center bg-navy">
+        <div class="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl text-center">
+            <h2 class="text-3xl font-heading text-navy mb-2">Admin Portal</h2>
+            <p class="text-sm text-gray-500 mb-8">Alumni Reunion Store</p>
+            <input type="password" id="adminPwd" placeholder="Enter Password"
+                   class="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 focus:ring-2 focus:ring-gold outline-none text-center tracking-widest">
+            <button id="loginBtn" type="button" class="w-full bg-gold text-navy font-bold py-3 rounded-lg hover:bg-[#b59858] transition-colors">
+                เข้าสู่ระบบ
+            </button>
+            <p class="text-[10px] text-gray-300 mt-4" id="versionLabel">v3.0</p>
+        </div>
+    </section>
+
+    <!-- ==================== DASHBOARD ==================== -->
+    <section id="view-dashboard" class="min-h-screen flex flex-col md:flex-row">
+        <!-- Sidebar -->
+        <aside class="w-full md:w-64 bg-navy text-cream flex-shrink-0 md:min-h-screen flex flex-col">
+            <div class="p-6 border-b border-white/10">
+                <h2 class="text-xl font-heading text-gold">Alumni Admin</h2>
+                <p class="text-xs text-cream/50 mt-1">Store Management</p>
+            </div>
+            <nav class="flex-grow p-4 space-y-1">
+                <a href="#" class="nav-link active block px-4 py-3 rounded-lg hover:bg-white/10 transition-colors text-cream/80" data-tab="overview">
+                    <i class="bi bi-grid-1x2 mr-3"></i> ภาพรวม
+                </a>
+                <a href="#" class="nav-link block px-4 py-3 rounded-lg hover:bg-white/10 transition-colors text-cream/80" data-tab="orders">
+                    <i class="bi bi-box-seam mr-3"></i> คำสั่งซื้อ
+                </a>
+                <a href="#" class="nav-link block px-4 py-3 rounded-lg hover:bg-white/10 transition-colors text-cream/80" data-tab="settings">
+                    <i class="bi bi-gear mr-3"></i> ตั้งค่า
+                </a>
+                <a href="#" id="logoutBtn" class="block px-4 py-3 rounded-lg hover:bg-red-500/20 text-red-400 mt-10 transition-colors">
+                    <i class="bi bi-box-arrow-right mr-3"></i> ออกจากระบบ
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-grow p-6 md:p-8 overflow-y-auto">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-2xl md:text-3xl font-heading text-navy" id="pageTitle">ภาพรวม</h1>
+                <button id="refreshBtn" class="bg-white border shadow-sm px-4 py-2 rounded-lg text-sm hover:bg-gray-50 transition-colors">
+                    <i class="bi bi-arrow-clockwise"></i> รีเฟรช
+                </button>
+            </div>
+
+            <!-- Tab: Overview -->
+            <div id="tab-overview" class="content-tab active">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 border-l-4 border-l-navy">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="text-sm text-gray-500">รายได้รวม</div>
+                            <div class="w-10 h-10 bg-navy/10 rounded-xl flex items-center justify-center"><i class="bi bi-currency-exchange text-navy text-lg"></i></div>
+                        </div>
+                        <div class="text-2xl font-bold text-navy" id="statRevenue">0 ฿</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 border-l-4 border-l-gold">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="text-sm text-gray-500">คำสั่งซื้อทั้งหมด</div>
+                            <div class="w-10 h-10 bg-gold/10 rounded-xl flex items-center justify-center"><i class="bi bi-bag-check text-gold text-lg"></i></div>
+                        </div>
+                        <div class="text-2xl font-bold text-navy" id="statOrders">0</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 border-l-4 border-l-amber-400">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="text-sm text-gray-500">รอชำระเงิน</div>
+                            <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center"><i class="bi bi-hourglass-split text-amber-500 text-lg"></i></div>
+                        </div>
+                        <div class="text-2xl font-bold text-navy" id="statPending">0</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 border-l-4 border-l-emerald-400" id="statStoreCard">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="text-sm text-gray-500">สถานะร้านค้า</div>
+                            <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center" id="statStoreIconWrap"><i class="bi bi-shop text-emerald-500 text-lg"></i></div>
+                        </div>
+                        <div id="statStoreStatus" class="mt-1">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-gray-100 text-gray-500">
+                                <span class="w-2 h-2 rounded-full bg-gray-400"></span> กำลังโหลด...
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Orders -->
+            <div id="tab-orders" class="content-tab">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-50 border-b text-gray-600">
+                                <tr>
+                                    <th class="p-4 font-medium">เลขออเดอร์</th>
+                                    <th class="p-4 font-medium">ลูกค้า</th>
+                                    <th class="p-4 font-medium">วิธีรับสินค้า</th>
+                                    <th class="p-4 font-medium">ยอดรวม</th>
+                                    <th class="p-4 font-medium">ชำระเงิน</th>
+                                    <th class="p-4 font-medium">สถานะจัดส่ง</th>
+                                    <th class="p-4 font-medium">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersBody" class="divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Settings -->
+            <div id="tab-settings" class="content-tab">
+                <div class="max-w-2xl space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-navy mb-1">เปิด/ปิดร้านค้า</h3>
+                                <p class="text-sm text-gray-500 mb-3">เมื่อปิดร้าน ลูกค้าจะเห็นหน้าแจ้งเตือนว่าร้านปิดชั่วคราว</p>
+                            </div>
+                            <label class="toggle-switch flex-shrink-0 ml-4">
+                                <input type="checkbox" id="storeToggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="flex items-center gap-2 mt-2 pt-3 border-t border-gray-100">
+                            <span class="text-sm text-gray-500">สถานะปัจจุบัน:</span>
+                            <span id="settingsStoreBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">
+                                <span class="w-2 h-2 rounded-full bg-gray-400"></span> กำลังโหลด...
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <!-- ==================== ORDER MODAL ==================== -->
+    <div id="orderModal" class="fixed inset-0 bg-navy/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[92vh] overflow-hidden flex flex-col shadow-2xl relative">
+            <button id="modalCloseBtn" class="absolute top-4 right-4 text-gray-400 hover:text-navy z-10"><i class="bi bi-x-lg text-xl"></i></button>
+
+            <!-- Header -->
+            <div class="p-6 border-b bg-gray-50">
+                <h3 class="text-2xl font-heading text-navy" id="omId">รายละเอียดออเดอร์</h3>
+                <div class="text-sm text-gray-500 mt-1" id="omDate">วันที่</div>
+            </div>
+
+            <!-- Body -->
+            <div class="p-6 overflow-y-auto flex-grow">
+                <div class="flex flex-col lg:flex-row gap-6">
+                    <!-- Left Column -->
+                    <div class="flex-grow space-y-6 min-w-0">
+                        <!-- Customer -->
+                        <div>
+                            <h4 class="text-xs uppercase tracking-widest text-gray-400 font-bold mb-3"><i class="bi bi-person mr-1"></i> ข้อมูลลูกค้า</h4>
+                            <div class="bg-gray-50 rounded-xl p-4 space-y-2">
+                                <div class="flex items-center gap-2"><span class="text-sm text-gray-500 w-16">ชื่อ</span><span class="font-medium text-navy" id="omName">-</span></div>
+                                <div class="flex items-center gap-2"><span class="text-sm text-gray-500 w-16">โทรศัพท์</span><span class="text-gray-700" id="omPhone">-</span></div>
+                                <div class="flex items-start gap-2"><span class="text-sm text-gray-500 w-16 pt-0.5">ที่อยู่</span><span class="text-gray-700 text-sm" id="omAddress">-</span></div>
+                            </div>
+                        </div>
+                        <!-- Items -->
+                        <div>
+                            <h4 class="text-xs uppercase tracking-widest text-gray-400 font-bold mb-3"><i class="bi bi-cart3 mr-1"></i> รายการสินค้า</h4>
+                            <div id="omItems" class="bg-gray-50 rounded-xl p-4 space-y-2 text-sm"></div>
+                        </div>
+                        <!-- Financial -->
+                        <div>
+                            <h4 class="text-xs uppercase tracking-widest text-gray-400 font-bold mb-3"><i class="bi bi-receipt mr-1"></i> สรุปยอด</h4>
+                            <div class="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
+                                <div class="flex justify-between"><span class="text-gray-500">ราคาสินค้า</span><span class="text-navy" id="omSubtotal">0 ฿</span></div>
+                                <div class="flex justify-between"><span class="text-gray-500">ค่าจัดส่ง</span><span class="text-navy" id="omShipping">0 ฿</span></div>
+                                <div class="flex justify-between border-t border-gray-200 pt-2 mt-2"><span class="font-semibold text-navy">ยอดรวม</span><span class="text-xl font-bold text-gold" id="omTotal">0 ฿</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="lg:w-80 space-y-6 flex-shrink-0">
+                        <!-- Payment -->
+                        <div>
+                            <h4 class="text-xs uppercase tracking-widest text-gray-400 font-bold mb-3"><i class="bi bi-credit-card mr-1"></i> การชำระเงิน</h4>
+                            <div class="mb-4">
+                                <div class="text-xs font-bold text-gray-500 mb-2">หลักฐานการโอนเงิน</div>
+                                <div id="omSlipBox" class="hidden">
+                                    <img id="omSlipImg" src="" alt="Slip" class="w-full max-w-xs rounded-xl border border-gray-200 mb-3 shadow-sm">
+                                    <a id="omSlipLink" href="#" target="_blank" class="text-sm text-navy underline mb-3 inline-block">เปิดรูปเต็ม</a>
+                                    <button id="verifySlipBtn" class="ml-3 px-3 py-1 bg-gray-100 text-gray-600 rounded-md text-xs hover:bg-gray-200 transition-colors">
+                                        <i class="bi bi-shield-check"></i> ตรวจสอบสลิป
+                                    </button>
+                                    <div id="omSlipResult" class="hidden mt-3 p-3 bg-gray-50 rounded-lg text-sm border border-gray-100">
+                                        <div class="font-bold text-navy mb-1"><i class="bi bi-info-circle"></i> ข้อมูลจาก SlipOK</div>
+                                        <div class="grid grid-cols-2 gap-2 text-xs">
+                                            <div class="text-gray-500">ยอดเงิน:</div><div id="slipAmount" class="font-medium"></div>
+                                            <div class="text-gray-500">ผู้โอน:</div><div id="slipSender" class="font-medium truncate"></div>
+                                            <div class="text-gray-500">ธนาคาร:</div><div id="slipBank" class="font-medium"></div>
+                                            <div class="text-gray-500">วันเวลา:</div><div id="slipDate" class="font-medium"></div>
+                                            <div class="text-gray-500">อ้างอิง:</div><div id="slipRef" class="font-medium text-[10px] break-all"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="omNoSlip" class="text-sm text-gray-400 hidden">ไม่มีสลิป</div>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-500 mb-1">สถานะการชำระเงิน</label>
+                                <select id="omPayStatus" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-gold outline-none">
+                                    <option value="PENDING">รอชำระ (Pending)</option>
+                                    <option value="PAID">ชำระแล้ว (Paid)</option>
+                                    <option value="REJECTED">ปฏิเสธ (Rejected)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Fulfillment -->
+                        <div>
+                            <h4 class="text-xs uppercase tracking-widest text-gray-400 font-bold mb-3"><i class="bi bi-truck mr-1"></i> การจัดส่ง</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">สถานะการจัดส่ง</label>
+                                    <select id="omFulStatus" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-gold outline-none">
+                                        <option value="UNFULFILLED">ยังไม่จัดส่ง</option>
+                                        <option value="FULFILLED">จัดส่งแล้ว</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">เลขพัสดุ (Tracking Number)</label>
+                                    <input type="text" id="omTracking" placeholder="เช่น TH12345678" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-gold outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">ขนส่ง (Carrier)</label>
+                                    <input type="text" id="omCarrier" placeholder="เช่น Kerry Express" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-gold outline-none" list="carrierList">
+                                    <datalist id="carrierList">
+                                        <option value="Kerry Express">
+                                        <option value="Flash Express">
+                                        <option value="J&T Express">
+                                        <option value="Thailand Post">
+                                        <option value="DHL">
+                                        <option value="Shopee Express">
+                                    </datalist>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Buttons -->
+                        <div class="flex gap-3">
+                            <button id="printLabelBtn" class="flex-1 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg font-bold hover:bg-gray-50 transition-colors text-sm">
+                                <i class="bi bi-printer"></i> พิมพ์ใบปะหน้า
+                            </button>
+                            <button id="saveStatusBtn" class="flex-1 py-2 bg-gold text-navy rounded-lg font-bold hover:bg-[#b59858] transition-colors text-sm">
+                                บันทึกการแก้ไข
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== JAVASCRIPT ==================== -->
+    <script>
+    (function() {
+        "use strict";
+
+        // ===== ERROR CATCHER (ย้ายมาบนสุดเพื่อดัก Error ตั้งแต่เริ่ม) =====
+        window.onerror = function(msg, url, line) {
+            var el = document.getElementById("versionLabel");
+            if (el) el.innerText = "ERROR: " + msg + " (line " + line + ")";
+            console.error("JS Error:", msg, "at line", line);
+        };
+
+        var API_URL = "https://script.google.com/macros/s/AKfycbw2kOjC60iW9gZltuEg_seerk0tJ6dP4V2YSd5-Fhuk3As06G7zhzYtuQYpoAW2WqKG/exec";
+        var pwd = "";
+        var currentOrders = [];
+        var activeOrderId = null;
+        var storeStatus = "CLOSED";
+
+        // ===== API Helper (เพิ่ม redirect: 'follow' สำหรับ GAS) =====
+        function apiCall(payload) {
+            console.log("Calling API with action:", payload.action);
+            return fetch(API_URL, {
+                method: "POST",
+                mode: "cors",
+                redirect: "follow",
+                body: JSON.stringify(payload)
+            })
+            .then(function(res) {
+                if (!res.ok) throw new Error("Network response was not ok (" + res.status + ")");
+                return res.json();
+            })
+            .catch(function(err) {
+                console.error("apiCall error:", err);
+                throw err;
+            });
+        }
+
+        // ===== LOGIN =====
+        function doLogin() {
+            console.log("doLogin triggered");
+            var val = document.getElementById("adminPwd").value;
+            if (!val) { alert("กรุณาใส่รหัสผ่าน"); return; }
+            pwd = val;
+            
+            // เปลี่ยนหน้าจอก่อนเรียก API เพื่อให้ User รู้ว่ามีการตอบสนอง
+            document.getElementById("view-login").style.display = "none";
+            document.getElementById("view-dashboard").style.display = "flex";
+            fetchData();
+        }
+
+        document.getElementById("loginBtn").addEventListener("click", doLogin);
+        document.getElementById("adminPwd").addEventListener("keydown", function(e) {
+            if (e.key === "Enter") doLogin();
+        });
+
+        // ===== LOGOUT =====
+        document.getElementById("logoutBtn").addEventListener("click", function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: "ออกจากระบบ?",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonColor: "#C8A96B",
+                cancelButtonColor: "#94a3b8",
+                confirmButtonText: "ออกจากระบบ",
+                cancelButtonText: "ยกเลิก"
+            }).then(function(result) {
+                if (result.isConfirmed) {
+                    pwd = "";
+                    currentOrders = [];
+                    document.getElementById("view-dashboard").style.display = "none";
+                    document.getElementById("view-login").style.display = "flex";
+                    document.getElementById("adminPwd").value = "";
+                    switchTab("overview");
+                }
+            });
+        });
+
+        // ===== NAV TABS =====
+        var tabTitles = { overview: "ภาพรวม", orders: "จัดการคำสั่งซื้อ", settings: "ตั้งค่าร้านค้า" };
+
+        document.querySelectorAll(".nav-link[data-tab]").forEach(function(link) {
+            link.addEventListener("click", function(e) {
+                e.preventDefault();
+                switchTab(this.getAttribute("data-tab"));
+            });
+        });
+
+        function switchTab(tabId) {
+            document.querySelectorAll(".content-tab").forEach(function(el) { el.classList.remove("active"); });
+            var target = document.getElementById("tab-" + tabId);
+            if (target) target.classList.add("active");
+            document.querySelectorAll(".nav-link").forEach(function(el) { el.classList.remove("active"); });
+            var navLink = document.querySelector('.nav-link[data-tab="' + tabId + '"]');
+            if (navLink) navLink.classList.add("active");
+            document.getElementById("pageTitle").innerText = tabTitles[tabId] || "Dashboard";
+        }
+
+        // ===== REFRESH =====
+        document.getElementById("refreshBtn").addEventListener("click", function() { fetchData(); });
+
+        // ===== FETCH DATA =====
+        function fetchData() {
+            if (!pwd) return;
+
+            var statusText = document.getElementById("versionLabel");
+            statusText.innerText = "v3.0 — กำลังเชื่อมต่อ API...";
+
+            Swal.fire({ title: "กำลังโหลดข้อมูล...", allowOutsideClick: false, didOpen: function() { Swal.showLoading(); } });
+
+            apiCall({ action: "getAdminData", password: pwd })
+            .then(function(data) {
+                if (data.success) {
+                    Swal.close();
+                    statusText.innerText = "v3.0 — โหลดสำเร็จ!";
+                    currentOrders = data.orders || [];
+                    storeStatus = data.storeStatus || "CLOSED";
+
+                    document.getElementById("statRevenue").innerText = (data.stats.totalRevenue || 0).toLocaleString() + " ฿";
+                    document.getElementById("statOrders").innerText = data.stats.totalOrders || 0;
+                    document.getElementById("statPending").innerText = data.stats.pendingPayments || 0;
+
+                    updateStoreUI();
+                    renderTable();
+                } else {
+                    Swal.fire("ผิดพลาด", data.message || "ไม่สามารถโหลดข้อมูลได้", "error");
+                    statusText.innerText = "v3.0 — ERROR: " + (data.message || "unknown");
+                    if (data.message && data.message.indexOf("รหัสผ่าน") !== -1) {
+                        pwd = "";
+                        document.getElementById("view-dashboard").style.display = "none";
+                        document.getElementById("view-login").style.display = "flex";
+                    }
+                }
+            })
+            .catch(function(e) {
+                console.error("fetchData error:", e);
+                Swal.fire("เชื่อมต่อไม่ได้", e.message, "error");
+                statusText.innerText = "v3.0 — CATCH: " + e.message;
+                if (currentOrders.length === 0) {
+                    pwd = "";
+                    document.getElementById("view-dashboard").style.display = "none";
+                    document.getElementById("view-login").style.display = "flex";
+                }
+            });
+        }
+
+        // ===== STORE STATUS UI =====
+        function updateStoreUI() {
+            var isOpen = storeStatus === "OPEN";
+
+            // Overview card
+            var statusEl = document.getElementById("statStoreStatus");
+            var iconWrap = document.getElementById("statStoreIconWrap");
+            var card = document.getElementById("statStoreCard");
+
+            if (isOpen) {
+                statusEl.innerHTML = '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-emerald-100 text-emerald-700"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> เปิดให้บริการ</span>';
+                iconWrap.className = "w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center";
+                card.className = "bg-white rounded-2xl p-6 shadow-sm border border-gray-100 border-l-4 border-l-emerald-400";
+            } else {
+                statusEl.innerHTML = '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-red-100 text-red-700"><span class="w-2 h-2 rounded-full bg-red-500"></span> ปิดชั่วคราว</span>';
+                iconWrap.className = "w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center";
+                card.className = "bg-white rounded-2xl p-6 shadow-sm border border-gray-100 border-l-4 border-l-red-400";
+            }
+
+            // Settings
+            document.getElementById("storeToggle").checked = isOpen;
+            var badge = document.getElementById("settingsStoreBadge");
+            if (isOpen) {
+                badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> เปิดให้บริการ';
+                badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700";
+            } else {
+                badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> ปิดชั่วคราว';
+                badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700";
+            }
+        }
+
+        // ===== STORE TOGGLE =====
+        document.getElementById("storeToggle").addEventListener("change", function() {
+            var checkbox = this;
+            var newStatus = checkbox.checked ? "OPEN" : "CLOSED";
+            var actionText = checkbox.checked ? "เปิดร้านค้า" : "ปิดร้านค้า";
+
+            Swal.fire({
+                title: "ยืนยัน" + actionText + "?",
+                text: checkbox.checked ? "ลูกค้าจะสามารถสั่งซื้อสินค้าได้ตามปกติ" : "ลูกค้าจะเห็นหน้าแจ้งเตือนว่าร้านปิดชั่วคราว",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: checkbox.checked ? "#22c55e" : "#ef4444",
+                cancelButtonColor: "#94a3b8",
+                confirmButtonText: "ยืนยัน" + actionText,
+                cancelButtonText: "ยกเลิก"
+            }).then(function(result) {
+                if (!result.isConfirmed) {
+                    checkbox.checked = !checkbox.checked;
+                    return;
+                }
+                Swal.fire({ title: "กำลังดำเนินการ...", allowOutsideClick: false, didOpen: function() { Swal.showLoading(); } });
+
+                apiCall({ action: "toggleStore", password: pwd, status: newStatus })
+                .then(function(data) {
+                    if (data.success) {
+                        storeStatus = newStatus;
+                        updateStoreUI();
+                        Swal.fire({ icon: "success", title: actionText + "สำเร็จ", timer: 1500, showConfirmButton: false });
+                    } else {
+                        checkbox.checked = !checkbox.checked;
+                        Swal.fire("ผิดพลาด", data.message || "ไม่สามารถเปลี่ยนสถานะได้", "error");
+                    }
+                })
+                .catch(function(e) {
+                    checkbox.checked = !checkbox.checked;
+                    Swal.fire("เชื่อมต่อไม่ได้", e.message, "error");
+                });
+            });
+        });
+
+        // ===== ORDERS TABLE =====
+        function renderTable() {
+            var tbody = document.getElementById("ordersBody");
+            tbody.innerHTML = "";
+
+            if (currentOrders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-gray-400"><i class="bi bi-inbox text-3xl block mb-2"></i>ยังไม่มีคำสั่งซื้อ</td></tr>';
+                return;
+            }
+
+            currentOrders.forEach(function(o) {
+                var payBadge = o.paymentStatus === "PAID" ? "bg-green-100 text-green-700" : (o.paymentStatus === "REJECTED" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700");
+                var payLabel = o.paymentStatus === "PAID" ? "ชำระแล้ว" : (o.paymentStatus === "REJECTED" ? "ปฏิเสธ" : "รอชำระ");
+                var fulBadge = o.fulfillmentStatus === "FULFILLED" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600";
+                var fulLabel = o.fulfillmentStatus === "FULFILLED" ? "จัดส่งแล้ว" : "ยังไม่จัดส่ง";
+
+                var deliveryLabel = "-";
+                switch (o.deliveryMethod) {
+                    case "pickup_all": deliveryLabel = "รับหน้างาน"; break;
+                    case "ship_once": deliveryLabel = "จัดส่งพร้อมกัน"; break;
+                    case "ship_split": deliveryLabel = "จัดส่งแยก"; break;
+                    case "ship_instock_pickup_preorder": deliveryLabel = "ส่ง+รับหน้างาน"; break;
+                    default: deliveryLabel = o.deliveryMethod || "-";
+                }
+
+                var tr = document.createElement("tr");
+                tr.className = "hover:bg-gray-50 transition-colors";
+                tr.innerHTML =
+                    '<td class="p-4 font-mono text-sm text-navy">' + (o.orderId || "-") + '</td>' +
+                    '<td class="p-4"><div class="font-medium text-navy">' + (o.name || "-") + '</div><div class="text-xs text-gray-500">' + (o.phone || "") + '</div></td>' +
+                    '<td class="p-4 text-xs">' + deliveryLabel + '</td>' +
+                    '<td class="p-4 font-bold text-gold">' + (o.total || 0).toLocaleString() + ' ฿</td>' +
+                    '<td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold ' + payBadge + '">' + payLabel + '</span></td>' +
+                    '<td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold ' + fulBadge + '">' + fulLabel + '</span></td>' +
+                    '<td class="p-4"><button class="text-navy hover:text-gold transition-colors p-1 edit-order-btn" data-id="' + o.orderId + '" title="แก้ไข"><i class="bi bi-pencil-square text-lg"></i></button></td>';
+                tbody.appendChild(tr);
+            });
+
+            // Bind edit buttons
+            tbody.querySelectorAll(".edit-order-btn").forEach(function(btn) {
+                btn.addEventListener("click", function() { openModal(this.getAttribute("data-id")); });
+            });
+        }
+
+        // ===== ORDER MODAL =====
+        function openModal(orderId) {
+            var o = currentOrders.find(function(x) { return x.orderId === orderId; });
+            if (!o) return;
+
+            activeOrderId = o.orderId;
+            document.getElementById("omId").innerText = o.orderId;
+            document.getElementById("omDate").innerText = o.date ? new Date(o.date).toLocaleString("th-TH") : "-";
+            document.getElementById("omName").innerText = o.name || "-";
+            document.getElementById("omPhone").innerText = o.phone || "-";
+            document.getElementById("omAddress").innerText = (o.deliveryMethod === "pickup_all") ? "รับสินค้าที่งาน (ไม่มีที่อยู่จัดส่ง)" : (o.address || "-");
+            document.getElementById("omTotal").innerText = (o.total || 0).toLocaleString() + " ฿";
+            document.getElementById("omSubtotal").innerText = (o.subtotal || o.total || 0).toLocaleString() + " ฿";
+            document.getElementById("omShipping").innerText = (o.shippingFee || 0).toLocaleString() + " ฿";
+
+            // Items
+            var itemsEl = document.getElementById("omItems");
+            if (o.items && o.items.length > 0) {
+                itemsEl.innerHTML = o.items.map(function(i) {
+                    return '<div class="flex justify-between items-center border-b border-gray-200 pb-2 mb-2 last:border-0 last:pb-0 last:mb-0">' +
+                        '<div><span class="text-navy font-medium">' + (i.name || "-") + '</span>' +
+                        (i.size ? '<span class="text-gray-400 text-xs ml-1">(' + i.size + ')</span>' : '') + '</div>' +
+                        '<div class="text-right flex-shrink-0 ml-4"><span class="text-gray-500">x' + (i.qty || 1) + '</span>' +
+                        '<span class="text-navy font-semibold ml-2">' + (i.price || 0).toLocaleString() + ' ฿</span></div></div>';
+                }).join("");
+            } else {
+                itemsEl.innerHTML = '<div class="text-gray-400 text-center py-2">ไม่มีรายการ</div>';
+            }
+
+            // Slip
+            var slipBox = document.getElementById("omSlipBox");
+            var noSlip = document.getElementById("omNoSlip");
+            var slipResult = document.getElementById("omSlipResult");
+
+            if (o.slipUrl) {
+                slipBox.classList.remove("hidden");
+                noSlip.classList.add("hidden");
+                document.getElementById("omSlipImg").src = o.slipUrl;
+                document.getElementById("omSlipLink").href = o.slipUrl;
+
+                if (o.slipVerifyData) {
+                    try {
+                        var d = typeof o.slipVerifyData === "string" ? JSON.parse(o.slipVerifyData) : o.slipVerifyData;
+                        document.getElementById("slipAmount").innerText = d.amount ? parseFloat(d.amount).toLocaleString() + " ฿" : "-";
+                        document.getElementById("slipBank").innerText = d.sendingBank || "-";
+                        document.getElementById("slipSender").innerText = d.sender || "-";
+                        document.getElementById("slipDate").innerText = d.transDate || "-";
+                        document.getElementById("slipRef").innerText = d.transRef || "-";
+                        slipResult.classList.remove("hidden");
+                    } catch (e) { slipResult.classList.add("hidden"); }
+                } else {
+                    slipResult.classList.add("hidden");
+                }
+            } else {
+                slipBox.classList.add("hidden");
+                noSlip.classList.remove("hidden");
+                slipResult.classList.add("hidden");
+            }
+
+            // Dropdowns
+            document.getElementById("omPayStatus").value = o.paymentStatus || "PENDING";
+            document.getElementById("omFulStatus").value = o.fulfillmentStatus || "UNFULFILLED";
+            document.getElementById("omTracking").value = o.trackingNumber || "";
+            document.getElementById("omCarrier").value = o.carrier || "";
+
+            document.getElementById("orderModal").classList.remove("hidden");
+        }
+
+        function closeModal() {
+            document.getElementById("orderModal").classList.add("hidden");
+            activeOrderId = null;
+        }
+
+        document.getElementById("modalCloseBtn").addEventListener("click", closeModal);
+        document.getElementById("orderModal").addEventListener("click", function(e) { if (e.target === this) closeModal(); });
+        document.addEventListener("keydown", function(e) { if (e.key === "Escape") closeModal(); });
+
+        // ===== VERIFY SLIP =====
+        document.getElementById("verifySlipBtn").addEventListener("click", function() {
+            var o = currentOrders.find(function(x) { return x.orderId === activeOrderId; });
+            if (!o || !o.slipUrl) return;
+
+            Swal.fire({ title: "กำลังตรวจสอบสลิป...", allowOutsideClick: false, didOpen: function() { Swal.showLoading(); } });
+
+            apiCall({ action: "verifySlip", password: pwd, orderId: activeOrderId, slipUrl: o.slipUrl })
+            .then(function(data) {
+                if (data.success && data.data) {
+                    Swal.close();
+                    var d = data.data;
+                    document.getElementById("slipAmount").innerText = d.amount ? parseFloat(d.amount).toLocaleString() + " ฿" : "-";
+                    document.getElementById("slipBank").innerText = d.sendingBank || "-";
+                    document.getElementById("slipSender").innerText = d.sender || "-";
+                    document.getElementById("slipDate").innerText = d.transDate || "-";
+                    document.getElementById("slipRef").innerText = d.transRef || "-";
+                    document.getElementById("omSlipResult").classList.remove("hidden");
+                } else {
+                    Swal.fire("ตรวจสอบไม่สำเร็จ", data.message || "ไม่สามารถอ่านข้อมูลสลิปได้", "warning");
+                }
+            })
+            .catch(function(e) { Swal.fire("เชื่อมต่อไม่ได้", e.message, "error"); });
+        });
+
+        // ===== UPDATE STATUS =====
+        document.getElementById("saveStatusBtn").addEventListener("click", function() {
+            if (!activeOrderId || !pwd) return;
+
+            var payStatus = document.getElementById("omPayStatus").value;
+            var fulStatus = document.getElementById("omFulStatus").value;
+            var tracking = document.getElementById("omTracking").value.trim();
+            var carrier = document.getElementById("omCarrier").value.trim();
+
+            Swal.fire({ title: "กำลังบันทึก...", allowOutsideClick: false, didOpen: function() { Swal.showLoading(); } });
+
+            apiCall({
+                action: "updateOrderStatus",
+                password: pwd,
+                orderId: activeOrderId,
+                paymentStatus: payStatus,
+                fulfillmentStatus: fulStatus,
+                trackingNumber: tracking,
+                carrier: carrier
+            })
+            .then(function(data) {
+                if (data.success) {
+                    Swal.fire({ icon: "success", title: "บันทึกสำเร็จ", timer: 1500, showConfirmButton: false });
+                    closeModal();
+                    fetchData();
+                } else {
+                    Swal.fire("ผิดพลาด", data.message || "ไม่สามารถบันทึกได้", "error");
+                }
+            })
+            .catch(function(e) { Swal.fire("เชื่อมต่อไม่ได้", e.message, "error"); });
+        });
+
+        // ===== PRINT SHIPPING LABEL =====
+        document.getElementById("printLabelBtn").addEventListener("click", function() {
+            if (!activeOrderId) return;
+            var o = currentOrders.find(function(x) { return x.orderId === activeOrderId; });
+            if (!o) return;
+
+            var addrText = (o.deliveryMethod === "pickup_all") ? "*** รับสินค้าหน้างาน ***" : (o.address || "-");
+            var itemsHtml = (o.items || []).map(function(i) {
+                return i.name + (i.size ? " (" + i.size + ")" : "") + " x " + (i.qty || 1);
+            }).join("<br>");
+
+            var w = window.open("", "_blank");
+            w.document.write(
+                "<html><head><title>ใบปะหน้า</title>" +
+                "<style>body{font-family:sans-serif;padding:20px;line-height:1.6}" +
+                ".label{border:2px solid #000;padding:20px;max-width:400px;margin:0 auto;border-radius:8px}" +
+                ".hdr{font-size:18px;font-weight:bold;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:15px;text-align:center}" +
+                ".snd{font-size:12px;margin-bottom:20px;color:#444}" +
+                ".rcv{font-size:16px;margin-bottom:20px}" +
+                ".nm{font-size:20px;font-weight:bold;margin-bottom:5px}" +
+                ".ref{font-size:14px;text-align:right;margin-top:20px;color:#666}" +
+                ".itm{font-size:14px;margin-top:15px;border-top:1px dashed #ccc;padding-top:10px}" +
+                "</style></head><body>" +
+                '<div class="label">' +
+                '<div class="hdr">ใบปะหน้าพัสดุ</div>' +
+                '<div class="snd"><b>ผู้ส่ง:</b> Alumni Reunion Store</div>' +
+                '<div class="rcv"><b>ผู้รับ:</b><br>' +
+                '<div class="nm">' + (o.name || "-") + "</div>" +
+                "<div>โทร: " + (o.phone || "-") + "</div>" +
+                "<div>" + addrText + "</div></div>" +
+                '<div class="itm"><b>รายการ:</b><br>' + itemsHtml + "</div>" +
+                '<div class="ref">Ref: ' + o.orderId + "</div>" +
+                "</div></body></html>"
+            );
+            w.document.close();
+            w.onload = function() { setTimeout(function() { w.print(); }, 500); };
+        });
+
+    })();
+    </script>
+</body>
+</html>

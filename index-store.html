@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="th" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>Alumni Store | Exclusive Collection</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: '#1E2A38',
+                        cream: '#F6F1E9',
+                        gold: '#C8A96B',
+                        charcoal: '#2B2B2B',
+                        beige: '#D9CFC1',
+                        'primary-orange': '#FF6600'
+                    },
+                    fontFamily: {
+                        heading: ['"Playfair Display"', 'serif'],
+                        body: ['"Prompt"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Inline CSS (was style.css) -->
+    <style>
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Prompt', sans-serif; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #D9CFC1; border-radius: 4px; }
+        .sheet-open { transform: translateY(0) !important; }
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .nav-item.active { color: #1E2A38; }
+        .dragover { background-color: #F6F1E9; border-color: #FF6600 !important; }
+        select {
+            -webkit-appearance: none; -moz-appearance: none; appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C8A96B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1em;
+        }
+        .order-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .order-card:active { transform: scale(0.98); }
+        #store-closed-overlay { display: flex; animation: fadeInOverlay 0.5s ease-out; }
+        #store-closed-overlay.hidden { display: none !important; }
+        .store-closed-content { animation: slideUpContent 0.6s ease-out 0.2s both; }
+        @keyframes fadeInOverlay { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUpContent { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .slide-up { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        #tracking-results .order-card { animation: cardFadeIn 0.3s ease-out both; }
+        #tracking-results .order-card:nth-child(1) { animation-delay: 0ms; }
+        #tracking-results .order-card:nth-child(2) { animation-delay: 80ms; }
+        #tracking-results .order-card:nth-child(3) { animation-delay: 160ms; }
+        #tracking-results .order-card:nth-child(4) { animation-delay: 240ms; }
+        #tracking-results .order-card:nth-child(5) { animation-delay: 320ms; }
+        @keyframes cardFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .border-3 { border-width: 3px; }
+    </style>
+</head>
+<body class="bg-gray-200 text-charcoal font-body antialiased flex justify-center">
+
+    <!-- Store Closed Overlay -->
+    <div id="store-closed-overlay" class="fixed inset-0 z-[90] hidden items-center justify-center bg-navy/95 backdrop-blur-md">
+        <div class="text-center px-8 store-closed-content">
+            <div class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="ph ph-storefront text-5xl text-gold"></i>
+            </div>
+            <h2 class="text-2xl font-heading font-bold text-white mb-3">ร้านค้าปิดชั่วคราว</h2>
+            <p class="text-beige text-sm mb-2">ขออภัย ระบบร้านค้าปิดให้บริการชั่วคราว</p>
+            <p class="text-beige/60 text-xs">กรุณาติดตามข่าวสารเพื่อรับทราบกำหนดเปิดให้บริการ</p>
+            <div class="mt-8 w-16 h-0.5 bg-gold/50 mx-auto"></div>
+        </div>
+    </div>
+
+    <!-- Mobile App Container -->
+    <div class="w-full max-w-md bg-cream min-h-screen relative shadow-2xl flex flex-col pb-16 overflow-x-hidden">
+
+        <!-- Top App Bar -->
+        <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-beige px-4 py-3 flex justify-center items-center">
+            <div class="text-xl font-heading font-bold text-navy tracking-widest uppercase">
+                Alumni <span class="text-gold italic font-normal">Store</span>
+            </div>
+        </header>
+
+        <!-- Main Scrollable Content -->
+        <main class="flex-1 overflow-y-auto" id="main-content">
+
+            <!-- Hero Carousel -->
+            <section id="home" class="relative w-full aspect-[4/3] bg-navy overflow-hidden">
+                <div id="carousel-inner" class="flex transition-transform duration-500 ease-out h-full">
+                    <img src="image/promo-image-1.jpg" class="w-full h-full object-cover shrink-0" alt="Promo 1" onerror="this.src='https://placehold.co/800x600/1E2A38/C8A96B?text=Alumni+Store'">
+                    <img src="image/promo-image-2.jpg" class="w-full h-full object-cover shrink-0" alt="Promo 2" onerror="this.src='https://placehold.co/800x600/1E2A38/C8A96B?text=Exclusive+Collection'">
+                </div>
+                <div class="absolute bottom-4 left-0 w-full flex justify-center gap-2" id="carousel-dots">
+                    <div class="w-2 h-2 rounded-full bg-white opacity-100 transition-opacity" data-index="0"></div>
+                    <div class="w-2 h-2 rounded-full bg-white opacity-50 transition-opacity" data-index="1"></div>
+                </div>
+            </section>
+
+            <!-- Catalog Section -->
+            <section id="catalog" class="px-4 py-8">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <h2 class="text-2xl font-heading font-bold text-navy">คอลเลกชัน</h2>
+                        <div class="w-10 h-1 bg-gold mt-1"></div>
+                    </div>
+                </div>
+                <div id="product-grid" class="flex flex-col gap-4"></div>
+            </section>
+
+            <!-- Designer Profile Section -->
+            <section id="designer" class="bg-white px-4 py-5 border-t border-beige">
+                <div class="bg-gray-50 rounded-2xl p-4 flex gap-4 items-center border border-beige/50 shadow-sm relative overflow-hidden">
+                    <i class="ph-fill ph-paint-brush absolute -right-4 -bottom-4 text-7xl text-gold/10"></i>
+                    <div class="shrink-0 relative">
+                        <img src="image/designer-profile.jpg" alt="Kapi Designer" class="w-20 h-20 rounded-full object-cover shadow-md border-2 border-white" onerror="this.src='https://placehold.co/100x100/F6F1E9/1E2A38?text=Kapi'">
+                    </div>
+                    <div class="flex-1 relative z-10">
+                        <h2 class="text-[10px] tracking-widest text-gold uppercase font-bold mb-0.5">Meet The Designer</h2>
+                        <h3 class="text-lg font-heading font-bold text-navy mb-1 leading-tight">กะปิ-ปิยนาฏ</h3>
+                        <p class="text-[11px] text-charcoal/70 line-clamp-2 leading-snug mb-2 font-light">นักวาดภาพประกอบอิสระแถวหน้าของไทย เจ้าของลายเส้นที่สดใสและทันสมัย</p>
+                        <button onclick="document.getElementById('designer-modal').classList.remove('hidden')" class="text-[10px] text-navy font-bold flex items-center gap-1 hover:text-gold transition-colors">
+                            อ่านประวัติเต็ม <i class="ph ph-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="text-center py-8 text-xs text-charcoal/40">
+                &copy; 2026 Alumni Store. All rights reserved.
+            </footer>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="fixed bottom-0 w-full max-w-md bg-white border-t border-beige flex justify-around items-center h-16 z-40 pb-[env(safe-area-inset-bottom)] shadow-[0_-5px_15px_-10px_rgba(0,0,0,0.1)]">
+            <a href="#home" onclick="app.setActiveNav(0)" class="flex flex-col items-center justify-center w-full h-full text-navy hover:text-gold transition-colors nav-item active">
+                <i class="ph ph-house text-2xl mb-1"></i>
+                <span class="text-[10px] font-medium">หน้าแรก</span>
+            </a>
+            <button onclick="app.openTracking(); app.setActiveNav(1)" class="flex flex-col items-center justify-center w-full h-full text-charcoal/50 hover:text-navy transition-colors nav-item">
+                <i class="ph ph-magnifying-glass text-2xl mb-1"></i>
+                <span class="text-[10px] font-medium">ตรวจสอบ</span>
+            </button>
+            <button onclick="app.openCart(); app.setActiveNav(2)" class="flex flex-col items-center justify-center w-full h-full text-charcoal/50 hover:text-navy transition-colors relative nav-item">
+                <div class="relative">
+                    <i class="ph ph-shopping-bag text-2xl mb-1"></i>
+                    <span id="cart-badge" class="absolute -top-1 -right-2 bg-primary-orange text-white text-[9px] font-bold h-4 w-4 rounded-full flex items-center justify-center scale-0 transition-transform duration-300">0</span>
+                </div>
+                <span class="text-[10px] font-medium">ตะกร้า</span>
+            </button>
+        </nav>
+
+        <!-- Designer Full Profile Modal -->
+        <div id="designer-modal" class="fixed inset-0 z-50 hidden">
+            <div class="absolute inset-0 bg-navy/60 backdrop-blur-sm" onclick="this.parentElement.classList.add('hidden')"></div>
+            <div class="absolute bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-white rounded-t-3xl h-[85vh] flex flex-col shadow-2xl transform transition-transform duration-300 slide-up">
+                <div class="flex justify-center pt-3 pb-2"><div class="w-12 h-1.5 bg-beige rounded-full"></div></div>
+                <div class="px-6 py-4 border-b border-beige flex justify-between items-center">
+                    <h2 class="text-xl font-heading font-bold text-navy">ประวัติผู้ออกแบบ</h2>
+                    <button onclick="document.getElementById('designer-modal').classList.add('hidden')" class="p-1 text-charcoal"><i class="ph ph-x text-xl"></i></button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-6 text-sm text-charcoal/80 space-y-4 font-light pb-24">
+                    <img src="image/designer-pic-1.jpg" alt="Designer Art 1" class="w-full rounded-xl shadow-md object-cover aspect-video mb-4" onerror="this.style.display='none'">
+                    <p><strong class="font-medium text-navy">ผลงานและการร่วมงานกับแบรนด์ดัง (Collaborations)</strong><br>
+                    กะปิเป็นศิลปินที่แบรนด์ระดับประเทศและระดับโลกนิยมดึงตัวมาร่วมออกแบบสินค้าและแคมเปญพิเศษ (Special Collections) มากมาย ตัวอย่างผลงานที่โดดเด่น เช่น:</p>
+                    <ul class="list-disc pl-4 space-y-2">
+                        <li><strong>Inthanin Coffee:</strong> ออกแบบลวดลายบนแก้วเครื่องดื่มร้อน-เย็น และสินค้าที่ระลึกในแคมเปญใหญ่ "Everywhere THAILAND"</li>
+                        <li><strong>AP Thailand:</strong> เป็น 1 ใน 30 ศิลปินแถวหน้าของไทยที่ได้รับเชิญมาร่วมสร้างสรรค์ผลงานในนิทรรศการระดับใหญ่ "AP 30 x 30 HOME IS EMPOWERING YOU" ณ MOCA Bangkok</li>
+                        <li><strong>Bitkub Academy:</strong> ออกแบบแก้ว Tumbler คอลเลกชันพิเศษ "Bullkub"</li>
+                        <li><strong>ภาพประกอบหนังสือและสื่อต่างๆ:</strong> งานวาดภาพประกอบหนังสือ นิตยสาร การออกแบบอัตลักษณ์องค์กร งานวาดภาพฝาผนังขนาดใหญ่ และลายผ้าพันคอแฟชั่น</li>
+                        <li><strong>ภาพวาดสายมูร่วมสมัย:</strong> ประยุกต์ลายเส้นโมเดิร์นวาดองค์เทพ เช่น องค์พระพิฆเนศ และองค์แม่ลักษมี ซึ่งได้รับความนิยมอย่างมาก</li>
+                    </ul>
+                    <img src="image/designer-pic-2.jpg" alt="Designer Art 2" class="w-full rounded-xl shadow-md object-cover aspect-[4/3] my-6" onerror="this.style.display='none'">
+                    <p>ปัจจุบัน เธอยังคงสร้างสรรค์ผลงานอย่างต่อเนื่อง ทั้งงานวาดภาพประกอบเชิงพาณิชย์ และการเปิดคลาสเวิร์กชอปสอนศิลปะ เพื่อแบ่งปันเทคนิคและแรงบันดาลใจ<br>
+                    <br>ติดตามผลงานของเธอได้ที่<br>Instagram: @kapiz<br>Facebook: Kapi</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart Bottom Sheet Modal -->
+        <div id="cart-modal" class="fixed inset-0 z-50 hidden">
+            <div class="absolute inset-0 bg-navy/60 backdrop-blur-sm" onclick="app.closeCart()"></div>
+            <div class="absolute bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-cream rounded-t-3xl h-[90vh] flex flex-col shadow-2xl transform transition-transform duration-300 translate-y-full" id="cart-sheet">
+                <div class="flex justify-center pt-3 pb-2"><div class="w-12 h-1.5 bg-beige rounded-full"></div></div>
+                <div class="px-6 py-4 border-b border-beige flex justify-between items-center bg-white rounded-t-3xl">
+                    <h2 class="text-xl font-heading font-bold text-navy">ตะกร้าสินค้า <span id="cart-sheet-count" class="text-sm font-body text-charcoal/50 ml-2">(0 ชิ้น)</span></h2>
+                    <button onclick="app.closeCart()" class="p-1 text-charcoal hover:text-primary-orange"><i class="ph ph-x text-xl"></i></button>
+                </div>
+                <div id="cart-items" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+                <div class="p-6 bg-white border-t border-beige shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)] pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+                    <div class="flex justify-between mb-4">
+                        <span class="text-charcoal font-medium">ยอดรวมสินค้า</span>
+                        <span id="cart-total" class="font-bold text-navy text-lg">฿0</span>
+                    </div>
+                    <button id="checkout-btn" class="w-full bg-navy hover:bg-gold text-white py-4 rounded-xl font-medium transition-colors disabled:opacity-50 shadow-md">
+                        ดำเนินการสั่งซื้อ
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Checkout Bottom Sheet Modal -->
+        <div id="checkout-modal" class="fixed inset-0 z-[60] hidden">
+            <div class="absolute inset-0 bg-navy/80 backdrop-blur-sm" onclick="app.closeCheckout()"></div>
+            <div class="absolute bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-cream rounded-t-3xl h-[95vh] flex flex-col shadow-2xl transform transition-transform duration-300 translate-y-full" id="checkout-sheet">
+                <div class="flex justify-center pt-3 pb-2 bg-white rounded-t-3xl"><div class="w-12 h-1.5 bg-beige rounded-full"></div></div>
+                <div class="px-6 py-4 border-b border-beige flex justify-between items-center bg-white">
+                    <h2 class="text-xl font-heading font-bold text-navy">การจัดส่งและชำระเงิน</h2>
+                    <button onclick="app.closeCheckout()" class="p-1 text-charcoal hover:text-primary-orange"><i class="ph ph-x text-xl"></i></button>
+                </div>
+                <form id="checkout-form" class="flex-1 overflow-y-auto p-5 space-y-6 pb-24">
+                    <div class="bg-white p-5 rounded-2xl border border-beige/50 shadow-sm">
+                        <h3 class="text-base font-bold text-navy mb-4 flex items-center gap-2"><i class="ph ph-user text-gold text-xl"></i> ข้อมูลติดต่อ</h3>
+                        <div class="space-y-3">
+                            <input type="text" id="cust-name" required placeholder="ชื่อ-นามสกุล *" class="w-full p-3 border border-beige rounded-xl bg-gray-50 focus:bg-white text-sm focus:outline-none focus:border-gold">
+                            <input type="tel" id="cust-phone" required placeholder="เบอร์โทรศัพท์ *" class="w-full p-3 border border-beige rounded-xl bg-gray-50 focus:bg-white text-sm focus:outline-none focus:border-gold">
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-beige/50 shadow-sm">
+                        <h3 class="text-base font-bold text-navy mb-4 flex items-center gap-2"><i class="ph ph-truck text-gold text-xl"></i> วิธีรับสินค้า</h3>
+                        <div class="space-y-2 text-sm">
+                            <label class="flex items-start gap-3 p-3 border border-beige rounded-xl cursor-pointer bg-gray-50">
+                                <input type="radio" name="shipping-option" value="pickup_all" class="mt-0.5 text-gold" checked>
+                                <div><div class="font-medium">รับหน้างาน (ฟรี)</div></div>
+                            </label>
+                            <label class="flex items-start gap-3 p-3 border border-beige rounded-xl cursor-pointer bg-gray-50">
+                                <input type="radio" name="shipping-option" value="ship_once" class="mt-0.5 text-gold">
+                                <div>
+                                    <div class="font-medium">จัดส่งทางไปรษณีย์</div>
+                                    <div class="text-[10px] text-charcoal/60">ค่าส่งคำนวณตามจำนวนสินค้า</div>
+                                </div>
+                            </label>
+                        </div>
+                        <textarea id="cust-address" rows="2" class="w-full mt-3 p-3 border border-beige rounded-xl bg-gray-50 text-sm focus:bg-white focus:outline-none focus:border-gold hidden" placeholder="ที่อยู่จัดส่ง..."></textarea>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-beige/50 shadow-sm">
+                        <h3 class="text-base font-bold text-navy mb-4 flex items-center gap-2"><i class="ph ph-credit-card text-gold text-xl"></i> ชำระเงิน</h3>
+                        <div class="bg-navy text-white p-4 rounded-xl mb-4 text-center">
+                            <div class="text-xs text-beige mb-1">ธนาคารกสิกรไทย (KBank)</div>
+                            <div class="text-xl font-mono tracking-widest font-bold">123-4-56789-0</div>
+                            <div class="text-[10px] text-beige/80 mt-1">สมาคมศิษย์เก่า</div>
+                        </div>
+                        <div class="flex justify-between items-center mb-1 text-sm"><span class="text-charcoal/70">ยอดรวมสินค้า:</span><span id="co-subtotal" class="font-medium text-navy">฿0</span></div>
+                        <div class="flex justify-between items-center mb-3 text-sm pb-3 border-b border-beige/50">
+                            <span class="text-charcoal/70">ค่าจัดส่ง: <span id="co-shipping-note" class="text-[10px] block"></span></span>
+                            <span id="co-shipping" class="font-medium text-navy">฿0</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-4"><span class="font-bold text-navy">ยอดสุทธิ:</span><span id="co-total" class="text-2xl font-bold text-primary-orange">฿0</span></div>
+                        <div class="relative border-2 border-dashed border-gold/50 rounded-xl bg-gray-50 p-6 text-center" id="drop-zone">
+                            <input type="file" id="slip-upload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
+                            <i class="ph ph-image text-3xl text-gold mb-1"></i>
+                            <p class="text-xs text-charcoal/70 font-medium" id="file-name-display">แตะเพื่ออัปโหลดสลิป</p>
+                        </div>
+                        <img id="slip-preview" src="" alt="Slip Preview" class="hidden w-full max-h-48 object-contain rounded-xl border border-beige mt-3">
+                        <div id="slip-status" class="mt-2 text-[10px] text-center hidden"></div>
+                    </div>
+                    <button type="submit" id="submit-order-btn" class="w-full bg-navy text-white py-4 rounded-xl font-bold transition-colors shadow-lg shadow-navy/20 disabled:opacity-50 mt-4">
+                        ยืนยันการชำระเงิน
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Order Tracking Bottom Sheet Modal -->
+        <div id="tracking-modal" class="fixed inset-0 z-50 hidden">
+            <div class="absolute inset-0 bg-navy/60 backdrop-blur-sm" onclick="app.closeTracking()"></div>
+            <div class="absolute bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-cream rounded-t-3xl h-[90vh] flex flex-col shadow-2xl transform transition-transform duration-300 translate-y-full" id="tracking-sheet">
+                <div class="flex justify-center pt-3 pb-2"><div class="w-12 h-1.5 bg-beige rounded-full"></div></div>
+                <div class="px-6 py-4 border-b border-beige flex justify-between items-center bg-white rounded-t-3xl">
+                    <h2 class="text-xl font-heading font-bold text-navy flex items-center gap-2">
+                        <i class="ph ph-magnifying-glass text-gold"></i> ติดตามออเดอร์
+                    </h2>
+                    <button onclick="app.closeTracking()" class="p-1 text-charcoal hover:text-primary-orange"><i class="ph ph-x text-xl"></i></button>
+                </div>
+                <div class="px-5 py-4 bg-white border-b border-beige">
+                    <div class="flex gap-2">
+                        <input type="tel" id="track-phone" placeholder="เบอร์โทรศัพท์ที่ใช้สั่งซื้อ" class="flex-1 p-3 border border-beige rounded-xl bg-gray-50 focus:bg-white text-sm focus:outline-none focus:border-gold">
+                        <button onclick="app.searchOrders()" id="track-search-btn" class="bg-navy text-white px-4 rounded-xl text-sm font-medium active:scale-95 transition-transform flex items-center gap-1.5 whitespace-nowrap shadow-md shadow-navy/20">
+                            <i class="ph ph-magnifying-glass"></i> ค้นหา
+                        </button>
+                    </div>
+                </div>
+                <div id="tracking-results" class="flex-1 overflow-y-auto p-4 space-y-3">
+                    <div class="flex flex-col items-center justify-center h-full text-charcoal/30">
+                        <i class="ph ph-package text-6xl mb-3"></i>
+                        <p class="text-sm font-medium">ค้นหาด้วยเบอร์โทรศัพท์</p>
+                        <p class="text-[11px] mt-1">เพื่อดูสถานะออเดอร์ของคุณ</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="fixed inset-0 z-[80] hidden flex-col items-center justify-center bg-white/90 backdrop-blur-sm">
+            <div class="w-12 h-12 border-4 border-beige border-t-gold rounded-full animate-spin mb-3"></div>
+            <p class="text-navy text-sm font-medium animate-pulse">กำลังประมวลผล...</p>
+        </div>
+
+        <!-- Success Modal -->
+        <div id="success-modal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4 max-w-md mx-auto">
+            <div class="absolute inset-0 bg-navy/90 backdrop-blur-md"></div>
+            <div class="relative bg-white p-8 rounded-3xl shadow-2xl w-[90%] text-center">
+                <i class="ph-fill ph-check-circle text-6xl text-green-500 mb-4 inline-block"></i>
+                <h2 class="text-2xl font-heading font-bold text-navy mb-2">สั่งซื้อสำเร็จ</h2>
+                <p class="text-sm text-charcoal/70 mb-2">เลขออเดอร์: <br><span id="order-number" class="font-bold text-navy text-xl mt-1 inline-block"></span></p>
+                <p id="payment-status-text" class="text-sm text-amber-600 font-medium mt-1">⏳ รอตรวจสอบการชำระเงิน</p>
+                <button onclick="location.reload()" class="w-full bg-gold text-white py-3 rounded-xl font-medium mt-6">กลับสู่หน้าหลัก</button>
+            </div>
+        </div>
+
+        <!-- Image Lightbox Modal -->
+        <div id="image-lightbox" class="fixed inset-0 z-[100] hidden flex-col items-center justify-center p-4 max-w-md mx-auto" onclick="this.classList.add('hidden'); this.classList.remove('flex')">
+            <div class="absolute inset-0 bg-navy/90 backdrop-blur-md"></div>
+            <button class="absolute top-4 right-4 z-10 w-10 h-10 bg-white/10 text-white rounded-full flex items-center justify-center backdrop-blur-sm">
+                <i class="ph ph-x text-xl"></i>
+            </button>
+            <img id="lightbox-img" src="" alt="Full view" class="relative z-10 max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl">
+        </div>
+
+    </div>
+
+    <!-- ==================== JAVASCRIPT (was app.js) ==================== -->
+    <script>
+    (function() {
+        "use strict";
+
+        var API_URL = "https://script.google.com/macros/s/AKfycbw2kOjC60iW9gZltuEg_seerk0tJ6dP4V2YSd5-Fhuk3As06G7zhzYtuQYpoAW2WqKG/exec";
+
+        // --- ข้อมูลสินค้า (Fallback) ---
+        var products = [
+            { id: 'shirt', name: 'เสื้อ', price: 419, img: 'image/t-shirt-design-1.jpg', group: 1, hasSize: true, shipFeeItem: true },
+            { id: 'opener', name: 'ที่เปิดขวด', price: 79, img: 'image/bottle-opener-design-1.jpg', group: 1, hasSize: false, shipFeeItem: false },
+            { id: 'totebag', name: 'ถุงผ้า', price: 199, img: 'image/tote-bag-design.jpg', group: 1, hasSize: false, shipFeeItem: false },
+            { id: 'tumbler', name: 'แก้วเก็บความเย็น', price: 349, img: 'image/tumbler-design-1.jpg', group: 1, hasSize: false, shipFeeItem: true },
+            { id: 'keychain', name: 'พวงกุญแจ', price: 99, img: 'image/keychain-design.jpg', group: 1, hasSize: false, shipFeeItem: false }
+        ];
+
+        var sizes = [
+            { label: 'SS (34")', val: 'SS' }, { label: 'S (36")', val: 'S' },
+            { label: 'M (38")', val: 'M' }, { label: 'L (40")', val: 'L' },
+            { label: 'XL (42")', val: 'XL' }, { label: '2XL (44")', val: '2XL' },
+            { label: '3XL (46")', val: '3XL' }, { label: '4XL (48")', val: '4XL' },
+            { label: '5XL (50")', val: '5XL' }, { label: '6XL (52")', val: '6XL' }
+        ];
+
+        var cart = [];
+        var slipBase64Data = "";
+        var storeStatus = "OPEN";
+
+        // --- UI Elements ---
+        var cartBadge = document.getElementById('cart-badge');
+        var cartModal = document.getElementById('cart-modal');
+        var cartSheet = document.getElementById('cart-sheet');
+        var cartItemsContainer = document.getElementById('cart-items');
+        var cartTotalEl = document.getElementById('cart-total');
+        var cartSheetCount = document.getElementById('cart-sheet-count');
+        var checkoutBtn = document.getElementById('checkout-btn');
+        var checkoutModal = document.getElementById('checkout-modal');
+        var checkoutSheet = document.getElementById('checkout-sheet');
+        var productGrid = document.getElementById('product-grid');
+        var shippingOptions = document.getElementsByName('shipping-option');
+        var custAddress = document.getElementById('cust-address');
+
+        // --- Init ---
+        renderProducts();
+        setupCarousel();
+        setupEventListeners();
+        setupSlipUpload();
+        updateCartUI();
+        fetchProducts();
+
+        // --- Fetch Products ---
+        function fetchProducts() {
+            fetch(API_URL, {
+                method: 'POST',
+                mode: 'cors',
+                redirect: 'follow',
+                body: JSON.stringify({ action: 'getProducts' })
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    if (data.products && data.products.length > 0) {
+                        var imgMap = {};
+                        products.forEach(function(p) { imgMap[p.id] = p.img; imgMap[p.name] = p.img; });
+                        products = data.products.map(function(p) {
+                            return Object.assign({}, p, { img: imgMap[p.id] || imgMap[p.name] || p.img || 'https://placehold.co/200x200/F6F1E9/1E2A38?text=Image' });
+                        });
+                        renderProducts();
+                    }
+                    if (data.storeStatus === 'CLOSED') {
+                        storeStatus = 'CLOSED';
+                        var overlay = document.getElementById('store-closed-overlay');
+                        if (overlay) overlay.classList.remove('hidden');
+                    }
+                }
+            })
+            .catch(function(e) { console.warn('ใช้ข้อมูล Fallback:', e.message); });
+        }
+
+        // --- Carousel ---
+        function setupCarousel() {
+            var inner = document.getElementById('carousel-inner');
+            var dots = document.querySelectorAll('#carousel-dots div');
+            var currentIndex = 0;
+            var total = dots.length || 2;
+            setInterval(function() {
+                currentIndex = (currentIndex + 1) % total;
+                inner.style.transform = 'translateX(-' + (currentIndex * 100) + '%)';
+                dots.forEach(function(dot, idx) {
+                    dot.classList.toggle('opacity-50', idx !== currentIndex);
+                    dot.classList.toggle('opacity-100', idx === currentIndex);
+                });
+            }, 4000);
+        }
+
+        // --- Render Products ---
+        function renderProducts() {
+            productGrid.innerHTML = '';
+            products.forEach(function(p) {
+                var sizeSelectHTML = '';
+                if (p.hasSize) {
+                    sizeSelectHTML = '<select id="size-' + p.id + '" class="w-full p-2 border border-beige/60 rounded-lg bg-gray-50/50 text-xs text-navy focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all">' +
+                        '<option value="" disabled selected>เลือกไซส์</option>' +
+                        sizes.map(function(s) { return '<option value="' + s.val + '">' + s.label + '</option>'; }).join('') +
+                    '</select>';
+                }
+                var card = '<div class="bg-white border border-beige/40 rounded-2xl overflow-hidden shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-10px_rgba(0,0,0,0.1)] transition-all duration-300 flex flex-row items-stretch group relative">' +
+                    '<div class="w-32 h-32 shrink-0 bg-[#fbf9f6] overflow-hidden p-2 relative flex items-center justify-center cursor-pointer" onclick="openLightbox(\'' + p.img + '\')">' +
+                        '<img src="' + p.img + '" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 drop-shadow-sm" alt="' + p.name + '" loading="lazy" onerror="this.onerror=null; this.src=\'https://placehold.co/200x200/F6F1E9/1E2A38?text=Image\'">' +
+                    '</div>' +
+                    '<div class="flex-1 p-3.5 flex flex-col justify-between min-w-0 border-l border-beige/20">' +
+                        '<div>' +
+                            '<div class="text-[9px] tracking-widest text-gold uppercase font-bold mb-1">IN STOCK</div>' +
+                            '<h3 class="text-[13px] font-bold text-navy leading-snug line-clamp-2">' + p.name + '</h3>' +
+                            '<div class="text-gold font-bold text-lg mt-0.5 tracking-tight">฿' + p.price.toLocaleString() + '</div>' +
+                        '</div>' +
+                        '<div class="flex items-center gap-2 mt-2 w-full">' +
+                            (sizeSelectHTML ? '<div class="flex-1 min-w-0">' + sizeSelectHTML + '</div>' : '<div class="flex-1"></div>') +
+                            '<button onclick="app.addToCart(\'' + p.id + '\')" class="shrink-0 w-9 h-9 bg-navy text-white rounded-lg flex items-center justify-center hover:bg-gold hover:text-navy active:scale-90 transition-all duration-300 shadow-md shadow-navy/20">' +
+                                '<i class="ph ph-plus text-lg"></i>' +
+                            '</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+                productGrid.innerHTML += card;
+            });
+        }
+
+        // --- Cart Logic ---
+        function addToCart(productId, size) {
+            var product = products.find(function(p) { return p.id === productId; });
+            if (!product) return;
+            var selectedSize = size || (product.hasSize ? document.getElementById('size-' + productId).value : null);
+            var cartItemId = productId + '-' + (selectedSize || 'none');
+            var existing = cart.find(function(item) { return item.cartItemId === cartItemId; });
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push(Object.assign({}, product, { cartItemId: cartItemId, size: selectedSize, quantity: 1 }));
+            }
+            updateCartUI();
+            if (window.navigator && window.navigator.vibrate) navigator.vibrate(50);
+        }
+
+        function removeFromCart(cartItemId) {
+            var found = cart.find(function(item) { return item.cartItemId === cartItemId; });
+            if (found && found.quantity > 1) {
+                cart = cart.map(function(item) { return item.cartItemId === cartItemId ? Object.assign({}, item, { quantity: item.quantity - 1 }) : item; });
+            } else {
+                cart = cart.filter(function(item) { return item.cartItemId !== cartItemId; });
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            var totalQty = cart.reduce(function(s, i) { return s + i.quantity; }, 0);
+            cartSheetCount.textContent = '(' + totalQty + ' ชิ้น)';
+            if (totalQty > 0) { cartBadge.textContent = totalQty; cartBadge.classList.remove('scale-0'); cartBadge.classList.add('scale-100'); }
+            else { cartBadge.classList.add('scale-0'); cartBadge.classList.remove('scale-100'); }
+
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-charcoal/40"><i class="ph ph-shopping-cart text-6xl mb-2"></i><p class="text-sm">ตะกร้าว่างเปล่า</p></div>';
+                checkoutBtn.disabled = true;
+            } else {
+                cartItemsContainer.innerHTML = cart.map(function(item) {
+                    return '<div class="flex gap-3 p-3 bg-white border border-beige/50 rounded-xl">' +
+                        '<img src="' + item.img + '" class="w-16 h-16 object-cover rounded-md bg-cream">' +
+                        '<div class="flex-1"><h4 class="font-bold text-navy text-xs">' + item.name + '</h4>' +
+                        (item.size ? '<p class="text-[10px] text-charcoal/60">ไซส์: ' + item.size + '</p>' : '') +
+                        '<div class="text-gold font-bold text-xs mt-1">฿' + item.price + '</div></div>' +
+                        '<div class="flex flex-col items-end justify-between"><div class="flex items-center bg-gray-50 rounded-lg border border-beige">' +
+                        '<button onclick="app.removeFromCart(\'' + item.cartItemId + '\')" class="px-2.5 py-1 text-charcoal active:bg-gray-200 rounded-l-lg">-</button>' +
+                        '<span class="text-xs font-medium w-4 text-center">' + item.quantity + '</span>' +
+                        '<button onclick="app.addToCart(\'' + item.id + '\', \'' + (item.size || '') + '\')" class="px-2.5 py-1 text-charcoal active:bg-gray-200 rounded-r-lg">+</button>' +
+                        '</div></div></div>';
+                }).join('');
+                checkoutBtn.disabled = false;
+            }
+            var subtotal = cart.reduce(function(s, i) { return s + (i.price * i.quantity); }, 0);
+            cartTotalEl.textContent = '฿' + subtotal.toLocaleString();
+            if (!checkoutModal.classList.contains('hidden')) updateCheckoutCalculation();
+        }
+
+        // --- Bottom Sheet Modals ---
+        function openCart() { cartModal.classList.remove('hidden'); setTimeout(function() { cartSheet.classList.add('sheet-open'); }, 10); }
+        function closeCart() { cartSheet.classList.remove('sheet-open'); setTimeout(function() { cartModal.classList.add('hidden'); }, 300); }
+        function openCheckout() { closeCart(); updateCheckoutCalculation(); checkoutModal.classList.remove('hidden'); setTimeout(function() { checkoutSheet.classList.add('sheet-open'); }, 10); }
+        function closeCheckout() { checkoutSheet.classList.remove('sheet-open'); setTimeout(function() { checkoutModal.classList.add('hidden'); }, 300); }
+        function openTracking() { var m = document.getElementById('tracking-modal'); var s = document.getElementById('tracking-sheet'); m.classList.remove('hidden'); setTimeout(function() { s.classList.add('sheet-open'); }, 10); }
+        function closeTracking() { var s = document.getElementById('tracking-sheet'); var m = document.getElementById('tracking-modal'); s.classList.remove('sheet-open'); setTimeout(function() { m.classList.add('hidden'); }, 300); }
+
+        // --- Shipping Logic ---
+        function calculateBoxShipping(items) {
+            if (items.length === 0) return 0;
+            var totalQty = items.reduce(function(s, i) { return s + i.quantity; }, 0);
+            var shipFeeQty = items.reduce(function(s, i) { return s + (i.shipFeeItem ? i.quantity : 0); }, 0);
+            if (totalQty === 0) return 0;
+            return 50 + (shipFeeQty > 0 ? (shipFeeQty - 1) * 10 : 0);
+        }
+
+        function updateCheckoutCalculation() {
+            var opt = document.querySelector('input[name="shipping-option"]:checked').value;
+            var subtotal = cart.reduce(function(s, i) { return s + (i.price * i.quantity); }, 0);
+            var shipping = 0, note = "";
+            if (opt === 'pickup_all') { custAddress.classList.add('hidden'); custAddress.removeAttribute('required'); note = "(รับหน้างาน)"; }
+            else { custAddress.classList.remove('hidden'); custAddress.setAttribute('required', 'required'); shipping = calculateBoxShipping(cart); note = "(1 กล่อง)"; }
+            document.getElementById('co-subtotal').textContent = '฿' + subtotal.toLocaleString();
+            document.getElementById('co-shipping').textContent = '฿' + shipping.toLocaleString();
+            document.getElementById('co-shipping-note').textContent = note;
+            document.getElementById('co-total').textContent = '฿' + (subtotal + shipping).toLocaleString();
+        }
+
+        // --- Slip Upload ---
+        function setupSlipUpload() { document.getElementById('slip-upload').addEventListener('change', handleSlipUpload); }
+
+        function handleSlipUpload() {
+            var fileInput = document.getElementById('slip-upload');
+            var nameDisplay = document.getElementById('file-name-display');
+            var status = document.getElementById('slip-status');
+            var preview = document.getElementById('slip-preview');
+            if (!fileInput.files.length) return;
+            var file = fileInput.files[0];
+            nameDisplay.textContent = file.name;
+            status.classList.remove('hidden');
+            status.className = 'mt-2 text-[10px] text-gold animate-pulse text-center';
+            status.innerHTML = '<i class="ph ph-spinner animate-spin"></i> กำลังประมวลผล...';
+            var reader = new FileReader();
+            reader.onerror = function() { status.className = 'mt-2 text-[10px] text-red-500 font-bold text-center'; status.innerHTML = '<i class="ph-fill ph-warning-circle"></i> อ่านไฟล์ไม่สำเร็จ'; };
+            reader.onload = function(e) {
+                var img = new Image();
+                img.onerror = function() { status.className = 'mt-2 text-[10px] text-red-500 font-bold text-center'; status.innerHTML = '<i class="ph-fill ph-warning-circle"></i> ไฟล์ภาพไม่ถูกต้อง'; };
+                img.onload = function() {
+                    var canvas = document.createElement('canvas'), ctx = canvas.getContext('2d'), MAX_W = 800, w = img.width, h = img.height;
+                    if (w > MAX_W) { h = Math.round((h * MAX_W) / w); w = MAX_W; }
+                    canvas.width = w; canvas.height = h; ctx.drawImage(img, 0, 0, w, h);
+                    var b64url = canvas.toDataURL('image/jpeg', 0.6);
+                    slipBase64Data = b64url.split(',')[1];
+                    if (preview) { preview.src = b64url; preview.classList.remove('hidden'); }
+                    status.className = 'mt-2 text-[10px] text-green-600 font-bold text-center';
+                    status.innerHTML = '<i class="ph-fill ph-check-circle"></i> อัปโหลดสลิปเรียบร้อย';
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- Form Submission ---
+        document.getElementById('checkout-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (cart.length === 0) return;
+            if (!slipBase64Data) { alert("กรุณาอัปโหลดสลิปการโอนเงิน"); return; }
+            var custName = document.getElementById('cust-name').value.trim();
+            var custPhone = document.getElementById('cust-phone').value.trim();
+            if (!custName || !custPhone) { alert("กรุณากรอกชื่อและเบอร์โทรศัพท์"); return; }
+            if (!/^0[0-9]{8,9}$/.test(custPhone)) { alert("กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (เริ่มด้วย 0 ตามด้วย 9 หลัก)"); return; }
+            var selShip = document.querySelector('input[name="shipping-option"]:checked').value;
+            if (selShip !== 'pickup_all' && !document.getElementById('cust-address').value.trim()) { alert("กรุณากรอกที่อยู่จัดส่ง"); return; }
+
+            var submitBtn = document.getElementById('submit-order-btn');
+            var loadingOverlay = document.getElementById('loading-overlay');
+            submitBtn.disabled = true;
+            loadingOverlay.classList.remove('hidden'); loadingOverlay.classList.add('flex');
+
+            var payload = {
+                action: 'createOrder', name: custName, phone: custPhone,
+                deliveryMethod: selShip, address: document.getElementById('cust-address').value,
+                items: cart.map(function(i) { return { id: i.id, size: i.size, quantity: i.quantity }; }),
+                slipBase64: slipBase64Data
+            };
+
+            fetch(API_URL, { method: 'POST', redirect: 'follow', body: JSON.stringify(payload) })
+            .then(function(res) { return res.json(); })
+            .then(function(result) {
+                if (result.success) {
+                    document.getElementById('order-number').textContent = result.orderId || 'N/A';
+                    var pEl = document.getElementById('payment-status-text');
+                    if (pEl) {
+                        var ps = result.paymentStatus || 'PENDING';
+                        pEl.textContent = ps === 'PAID' ? '✅ ชำระเงินเรียบร้อย' : '⏳ รอตรวจสอบการชำระเงิน';
+                        pEl.className = ps === 'PAID' ? 'text-sm text-green-600 font-medium mt-1' : 'text-sm text-amber-600 font-medium mt-1';
+                    }
+                    document.getElementById('success-modal').classList.remove('hidden');
+                    document.getElementById('success-modal').classList.add('flex');
+                    cart = []; slipBase64Data = ""; updateCartUI();
+                } else { alert(result.message || "เกิดข้อผิดพลาด"); submitBtn.disabled = false; }
+            })
+            .catch(function(err) { console.error('Order error:', err); alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้"); submitBtn.disabled = false; })
+            .finally(function() { loadingOverlay.classList.add('hidden'); loadingOverlay.classList.remove('flex'); });
+        });
+
+        // --- Order Tracking ---
+        function searchOrders() {
+            var phone = document.getElementById('track-phone').value.trim();
+            var results = document.getElementById('tracking-results');
+            var btn = document.getElementById('track-search-btn');
+            if (!/^0[0-9]{8,9}$/.test(phone)) {
+                results.innerHTML = '<div class="text-center py-8 text-red-500"><i class="ph ph-warning text-3xl mb-2"></i><p class="text-sm">กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง</p></div>';
+                return;
+            }
+            btn.disabled = true; btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> กำลังค้นหา...';
+            results.innerHTML = '<div class="flex flex-col items-center justify-center py-12 text-charcoal/40"><div class="w-8 h-8 border-3 border-beige border-t-gold rounded-full animate-spin mb-3"></div><p class="text-sm">กำลังค้นหาออเดอร์...</p></div>';
+
+            fetch(API_URL, {
+                method: 'POST',
+                mode: 'cors',
+                redirect: 'follow',
+                body: JSON.stringify({ action: 'searchOrders', phone: phone })
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.success && data.orders && data.orders.length > 0) {
+                    results.innerHTML = data.orders.map(function(o) { return renderOrderCard(o); }).join('');
+                } else {
+                    results.innerHTML = '<div class="text-center py-8 text-charcoal/40"><i class="ph ph-package text-5xl mb-3"></i><p class="text-sm font-medium">ไม่พบรายการสั่งซื้อ</p><p class="text-[11px] mt-1">ตรวจสอบเบอร์โทรศัพท์แล้วลองอีกครั้ง</p></div>';
+                }
+            })
+            .catch(function(err) { console.error('Search error:', err); results.innerHTML = '<div class="text-center py-8 text-red-500"><i class="ph ph-wifi-slash text-4xl mb-2"></i><p class="text-sm">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้</p></div>'; })
+            .finally(function() { btn.disabled = false; btn.innerHTML = '<i class="ph ph-magnifying-glass"></i> ค้นหา'; });
+        }
+
+        function renderOrderCard(order) {
+            var payBadge = getStatusBadge(order.paymentStatus, 'payment');
+            var fulBadge = getStatusBadge(order.fulfillmentStatus, 'fulfillment');
+            var itemsSummary = (order.items || []).map(function(i) { return (i.name || i.id) + (i.size ? ' (' + i.size + ')' : '') + ' x' + i.quantity; }).join(', ') || 'ไม่มีข้อมูลสินค้า';
+            var trackHTML = order.trackingNumber ? '<div class="flex items-center gap-2 mt-2 bg-blue-50 px-3 py-1.5 rounded-lg"><i class="ph ph-package text-blue-600"></i><span class="text-[11px] text-blue-700 font-medium">เลขพัสดุ: ' + order.trackingNumber + '</span></div>' : '';
+            var dateStr = order.date ? new Date(order.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+            return '<div class="bg-white border border-beige/50 rounded-2xl p-4 shadow-sm order-card">' +
+                '<div class="flex justify-between items-start mb-3"><div><div class="text-[10px] text-charcoal/50 uppercase tracking-wider">ออเดอร์</div><div class="font-bold text-navy text-sm">' + (order.orderId || 'N/A') + '</div></div><div class="text-[10px] text-charcoal/50 text-right">' + dateStr + '</div></div>' +
+                '<div class="text-[11px] text-charcoal/70 mb-3 line-clamp-2"><i class="ph ph-shopping-bag text-gold"></i> ' + itemsSummary + '</div>' +
+                '<div class="flex items-center justify-between mb-2"><div class="text-gold font-bold">฿' + (order.total || 0).toLocaleString() + '</div><div class="flex gap-1.5">' + payBadge + fulBadge + '</div></div>' + trackHTML + '</div>';
+        }
+
+        function getStatusBadge(status, type) {
+            var configs = {
+                payment: { PAID: { t: 'ชำระแล้ว', bg: 'bg-green-100 text-green-700', i: 'ph-fill ph-check-circle' }, PENDING: { t: 'รอตรวจสอบ', bg: 'bg-amber-100 text-amber-700', i: 'ph-fill ph-clock' }, REJECTED: { t: 'ไม่ผ่าน', bg: 'bg-red-100 text-red-700', i: 'ph-fill ph-x-circle' } },
+                fulfillment: { FULFILLED: { t: 'จัดส่งแล้ว', bg: 'bg-green-100 text-green-700', i: 'ph-fill ph-check-circle' }, PENDING: { t: 'รอจัดส่ง', bg: 'bg-amber-100 text-amber-700', i: 'ph-fill ph-clock' }, UNFULFILLED: { t: 'รอจัดส่ง', bg: 'bg-amber-100 text-amber-700', i: 'ph-fill ph-clock' } }
+            };
+            var c = (configs[type] && configs[type][status]) || { t: status || '-', bg: 'bg-gray-100 text-gray-600', i: 'ph ph-question' };
+            return '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold ' + c.bg + '"><i class="' + c.i + '"></i> ' + c.t + '</span>';
+        }
+
+        // --- Event Listeners ---
+        function setupEventListeners() {
+            checkoutBtn.addEventListener('click', openCheckout);
+            Array.from(shippingOptions).forEach(function(opt) { opt.addEventListener('change', updateCheckoutCalculation); });
+            var trackPhone = document.getElementById('track-phone');
+            if (trackPhone) { trackPhone.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); searchOrders(); } }); }
+        }
+
+        // --- Nav Active State ---
+        function setActiveNav(idx) {
+            document.querySelectorAll('.nav-item').forEach(function(el, i) {
+                if (i === idx) { el.classList.add('active'); el.classList.remove('text-charcoal/50'); el.classList.add('text-navy'); }
+                else { el.classList.remove('active'); }
+            });
+        }
+
+        // --- Global Access ---
+        window.app = { addToCart: addToCart, removeFromCart: removeFromCart, openCart: openCart, closeCart: closeCart, closeCheckout: closeCheckout, openTracking: openTracking, closeTracking: closeTracking, searchOrders: searchOrders, setActiveNav: setActiveNav };
+
+        // --- Lightbox ---
+        window.openLightbox = function(imgSrc) {
+            var lb = document.getElementById('image-lightbox');
+            var img = document.getElementById('lightbox-img');
+            if (lb && img) { img.src = imgSrc; lb.classList.remove('hidden'); lb.classList.add('flex'); }
+        };
+    })();
+    </script>
+</body>
+</html>
