@@ -465,6 +465,7 @@
         if (company && batch && batch.includes("สปอนเซอร์")) {
             document.getElementById('t_company').innerText = company;
             document.getElementById('companyRow').style.display = "flex";
+            document.getElementById('followerRow').style.display = "none";
             // Premium Gold + Lighter Brown for Sponsor (135deg like index.html)
             ticketHeader.style.background = 'linear-gradient(135deg, #F3D289, #8C5523)';
             ticketHeader.style.color = '#fff'; 
@@ -483,17 +484,15 @@
             document.querySelector('.ticket-id').style.color = '#fff';
             document.querySelector('.ticket-id').style.border = '1px solid rgba(255,255,255,0.4)';
             document.querySelector('.ticket-id').style.background = 'rgba(255,255,255,0.25)';
-        } else {
+        } else if (!batch || !batch.includes("สปอนเซอร์")) {
             document.getElementById('followerRow').style.display = "flex";
-            if (!batch || !batch.includes("สปอนเซอร์")) {
-                 // Default style
+            // Default style
                  ticketHeader.style.background = 'linear-gradient(135deg, var(--primary-blue), var(--accent-sky))';
                  ticketHeader.style.color = '#fff';
                  document.querySelector('.ticket-id').style.color = '#fff';
                  document.querySelector('.ticket-id').style.border = '1px solid rgba(255,255,255,0.3)';
                  document.querySelector('.ticket-id').style.background = 'rgba(255,255,255,0.25)';
             }
-        }
 
         document.getElementById('qrcode').innerHTML = "";
         new QRCode(document.getElementById("qrcode"), {
