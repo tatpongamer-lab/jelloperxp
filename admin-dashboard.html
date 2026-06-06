@@ -886,7 +886,7 @@
                 <!-- Trend Line Chart -->
                 <div class="card p-0 mb-4">
                     <div class="p-3 border-bottom border-secondary" style="border-color: var(--border) !important;">
-                        <h4 class="mb-0 text-info">แนวโน้มการลงทะเบียน (รายวัน)</h4>
+                        <h4 class="mb-0 text-info">แนวโน้มการลงทะเบียน (รายวัน) <span id="trendTotalCount" class="badge bg-info text-dark ms-2"></span></h4>
                     </div>
                     <div class="p-3" style="height: 300px;">
                         <canvas id="trendChart"></canvas>
@@ -1515,6 +1515,13 @@
                     return `${day}/${m}/${y.substring(2)}`;
                 });
                 const trendData = sortedDates.map(d => trendMapISO[d]);
+
+                // Display Total Trend Count
+                const trendTotal = trendData.reduce((sum, count) => sum + count, 0);
+                const trendTotalEl = document.getElementById('trendTotalCount');
+                if (trendTotalEl) {
+                    trendTotalEl.innerText = `รวม: ${trendTotal} รายการ`;
+                }
 
                 // Night Event logic (DAY_NIGHT or NIGHT_ONLY)
                 let nightAdult = 0, nightChildO12 = 0, nightChildU12 = 0;
