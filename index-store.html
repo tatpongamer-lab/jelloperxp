@@ -103,7 +103,7 @@
 
             <!-- Hero Carousel -->
             <section id="home" class="relative w-full aspect-[5/4] bg-navy overflow-hidden">
-                <div id="carousel-inner" class="flex transition-transform duration-500 ease-out h-full">
+                <div id="carousel-inner" class="flex h-full w-full">
                     <img src="image/promo-image-1.png" class="w-full h-full object-cover shrink-0" alt="Promo 1">
                     <img src="image/promo-image-2.png" class="w-full h-full object-cover shrink-0" alt="Promo 2">
                     <img src="image/promo-image-3.jpg" class="w-full h-full object-cover shrink-0" alt="Promo 3">
@@ -112,7 +112,10 @@
                     <img src="image/promo-image-6.png" class="w-full h-full object-cover shrink-0" alt="Promo 6">
                     <img src="image/promo-image-7.png" class="w-full h-full object-cover shrink-0" alt="Promo 7">
                     <img src="image/promo-image-8.jpg" class="w-full h-full object-cover shrink-0" alt="Promo 8">
+                    <img src="image/promo-image-9.png" class="w-full h-full object-cover shrink-0" alt="Promo 9">
                 </div>
+                <button id="carousel-prev" class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/20 hover:bg-black/40 rounded-full flex items-center justify-center text-white backdrop-blur-sm transition-colors z-10" onclick="app.prevSlide()"><i class="ph ph-caret-left text-xl"></i></button>
+                <button id="carousel-next" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/20 hover:bg-black/40 rounded-full flex items-center justify-center text-white backdrop-blur-sm transition-colors z-10" onclick="app.nextSlide()"><i class="ph ph-caret-right text-xl"></i></button>
                 <div class="absolute bottom-4 left-0 w-full flex justify-center gap-2" id="carousel-dots">
                     <div class="w-2 h-2 rounded-full bg-white opacity-100 transition-opacity" data-index="0"></div>
                     <div class="w-2 h-2 rounded-full bg-white opacity-50 transition-opacity" data-index="1"></div>
@@ -122,6 +125,7 @@
                     <div class="w-2 h-2 rounded-full bg-white opacity-50 transition-opacity" data-index="5"></div>
                     <div class="w-2 h-2 rounded-full bg-white opacity-50 transition-opacity" data-index="6"></div>
                     <div class="w-2 h-2 rounded-full bg-white opacity-50 transition-opacity" data-index="7"></div>
+                    <div class="w-2 h-2 rounded-full bg-white opacity-50 transition-opacity" data-index="8"></div>
                 </div>
             </section>
 
@@ -138,25 +142,25 @@
             </section>
 
             <!-- Designer Profile Section -->
-            <section id="designer" class="bg-white px-4 py-5 border-t border-beige">
-                <div class="bg-gray-50 rounded-2xl p-4 flex gap-4 items-center border border-beige/50 shadow-sm relative overflow-hidden">
-                    <i class="ph-fill ph-paint-brush absolute -right-4 -bottom-4 text-7xl text-gold/10"></i>
+            <section id="designer" class="bg-white px-4 pt-5 pb-2 border-t border-beige">
+                <div onclick="document.getElementById('designer-modal').classList.remove('hidden')" class="bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer rounded-2xl p-4 flex gap-4 items-center border border-beige/50 shadow-sm relative overflow-hidden group">
+                    <i class="ph-fill ph-paint-brush absolute -right-4 -bottom-4 text-7xl text-gold/10 group-hover:text-gold/20 transition-colors"></i>
                     <div class="shrink-0 relative">
                         <img src="image/designer-profile.jpg" alt="Kapi Designer" class="w-20 h-20 rounded-full object-cover shadow-md border-2 border-white" onerror="this.src='https://placehold.co/100x100/F6F1E9/1E2A38?text=Kapi'">
                     </div>
                     <div class="flex-1 relative z-10">
                         <h2 class="text-[10px] tracking-widest text-gold uppercase font-bold mb-0.5">Meet The Designer</h2>
-                        <h3 class="text-lg font-heading font-bold text-navy mb-1 leading-tight">กะปิ-ปิยนาฏ</h3>
+                        <h3 class="text-lg font-heading font-bold text-navy mb-1 leading-tight group-hover:text-gold transition-colors">กะปิ-ปิยนาฏ</h3>
                         <p class="text-[11px] text-charcoal/70 line-clamp-2 leading-snug mb-2 font-light">นักวาดภาพประกอบอิสระแถวหน้าของไทย เจ้าของลายเส้นที่สดใสและทันสมัย</p>
-                        <button onclick="document.getElementById('designer-modal').classList.remove('hidden')" class="text-[10px] text-navy font-bold flex items-center gap-1 hover:text-gold transition-colors">
+                        <div class="text-[10px] text-navy font-bold flex items-center gap-1 group-hover:text-gold transition-colors">
                             อ่านประวัติเต็ม <i class="ph ph-arrow-right"></i>
-                        </button>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <footer class="text-center py-4 bg-gray-50/50 mt-4 rounded-t-3xl">
-                <a href="https://www.facebook.com/KhaesadNST" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 0; margin: 0 auto; text-decoration: none; width: 100%; max-width: 400px; box-sizing: border-box; -webkit-tap-highlight-color: transparent;">
+            <footer class="text-center py-2 bg-gray-50/50 mt-0 rounded-t-3xl">
+                <a href="https://www.facebook.com/KhaesadNST" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 4px 0; margin: 0 auto; text-decoration: none; width: 100%; max-width: 400px; box-sizing: border-box; -webkit-tap-highlight-color: transparent;">
                     <span style="color: #FF6600; font-weight: 500; font-size: 1rem; white-space: nowrap;">
                         ติดต่อ :
                     </span>
@@ -297,12 +301,15 @@
                             <span id="co-shipping" class="font-medium text-navy">฿0</span>
                         </div>
                         <div class="flex justify-between items-center mb-4"><span class="font-bold text-navy">ยอดสุทธิ:</span><span id="co-total" class="text-2xl font-bold text-primary-orange">฿0</span></div>
-                        <div class="relative border-2 border-dashed border-gold/50 rounded-xl bg-gray-50 p-6 text-center" id="drop-zone">
+                        <div class="relative border-2 border-dashed border-gold/50 rounded-xl bg-gray-50 p-6 text-center transition-all" id="drop-zone">
                             <input type="file" id="slip-upload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
                             <i class="ph ph-image text-3xl text-gold mb-1"></i>
                             <p class="text-xs text-charcoal/70 font-medium" id="file-name-display">แตะเพื่ออัปโหลดสลิป</p>
                         </div>
-                        <img id="slip-preview" src="" alt="Slip Preview" class="hidden w-full max-h-48 object-contain rounded-xl border border-beige mt-3">
+                        <div id="slip-preview-container" class="hidden relative mt-3">
+                            <button type="button" onclick="app.removeSlip()" class="absolute -top-2 -right-2 z-10 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md hover:bg-red-600 transition-colors"><i class="ph ph-x text-sm"></i></button>
+                            <img id="slip-preview" src="" alt="Slip Preview" class="w-full max-h-48 object-contain rounded-xl border border-beige bg-white">
+                        </div>
                         <div id="slip-status" class="mt-2 text-[10px] text-center hidden"></div>
                     </div>
                     <button type="submit" id="submit-order-btn" class="w-full bg-navy text-white py-4 rounded-xl font-bold transition-colors shadow-lg shadow-navy/20 disabled:opacity-50 mt-4">
@@ -436,11 +443,32 @@
         // --- ข้อมูลสินค้า (Fallback) ---
         var products = [
             { id: 'shirt', name: 'The Reunion Polo เสื้อใส่แล้วคิดถึง', price: 419, img: 'image/t-shirt-design-1.jpg', group: 1, hasSize: true, shipFeeItem: true },
-            { id: 'tumbler', name: 'Memory Tumbler แก้วจิบความทรงจำ', price: 349, img: 'image/tumbler-design-1.jpg', group: 1, hasSize: false, shipFeeItem: true },
-            { id: 'totebag', name: 'Carry Your Memories Tote ถุงผ้าพกแคแสดไปด้วย', price: 199, img: 'image/tote-bag-design.jpg', group: 1, hasSize: false, shipFeeItem: false },
+            { id: 'shirt_kids', name: 'The Little Bloom ดอกแคแสดน้อย', price: 199, img: 'image/t-shirt-design-1.jpg', group: 1, hasSize: true, shipFeeItem: true },
+            { id: 'tumbler', name: 'Memory Tumbler แก้วจิบความทรงจำ', price: 389, img: 'image/tumbler-design-1.jpg', group: 1, hasSize: false, shipFeeItem: true },
+            { id: 'totebag', name: 'Carry Your Memories Tote ถุงผ้าพกแคแสดไปด้วย', price: 199, img: 'image/tote-bag-design.png', group: 1, hasSize: false, shipFeeItem: false },
             { id: 'keychain', name: 'Key to Memories พวงกุญแจคล้องใจไว้ที่แคแสด', price: 99, img: 'image/keychain-design.jpg', group: 1, hasSize: false, shipFeeItem: false },
-            { id: 'opener', name: 'Cheers Opener ที่เปิดขวดเปิดบทสนทนา', price: 79, img: 'image/bottle-opener-design-1.jpg', group: 1, hasSize: false, shipFeeItem: false }
+            { id: 'opener', name: 'Cheers Opener ที่เปิดขวดเปิดบทสนทนา', price: 79, img: 'image/bottle-opener-design-1.jpg', group: 1, hasSize: false, shipFeeItem: false },
+
+            // Promo Bundles
+            { id: "promo_ultimate", name: "ULTIMATE COLLECTION สายใยไม่เคยเลือน", price: 1579, group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 2, tumbler: 1, totebag: 1, opener: 1, keychain: 1 }, img: 'https://placehold.co/400x400/FF6600/FFFFFF?text=Ultimate+Collection' },
+            { id: "promo_alumni",   name: "ALUMNI BUNDLE แทนความคิดถึงที่รอคอย",                  price: 1169, group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 1, tumbler: 1, totebag: 1, opener: 1, keychain: 1 }, img: 'https://placehold.co/400x400/FF6600/FFFFFF?text=Alumni+Bundle' },
+            { id: "promo_family",   name: "THE HAPPY FAMILY แฟมิลี่สีน้ำเงิน-แสด",               price: 999,  group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 2, shirt_kids: 1 }, img: 'https://placehold.co/400x400/FF6600/FFFFFF?text=Happy+Family' },
+            { id: "promo_essential",name: "REUNION ESSENTIAL ของขวัญแห่งวันวาน",              price: 889,  group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 1, tumbler: 1, keychain: 1 }, img: 'https://placehold.co/400x400/FF6600/FFFFFF?text=Reunion+Essential' },
+            { id: "promo_together", name: "TOGETHER AGAIN คู่หูวันคืนถิ่น",                 price: 799,  group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 2 }, img: 'https://placehold.co/400x400/FF6600/FFFFFF?text=Together+Again' },
+            { id: "promo_everyday", name: "EVERYDAY KHAESAD แคแสดเคียงกาย",               price: 569,  group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { tumbler: 1, totebag: 1 }, img: 'https://placehold.co/400x400/FF6600/FFFFFF?text=Everyday+Khaesad' },
+            { id: "promo_first",    name: "FIRST MEMORY เริ่มต้นแห่งความผูกพัน",                   price: 499,  group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 1, keychain: 1 }, img: 'https://placehold.co/400x400/FF6600/FFFFFF?text=First+Memory' }
         ];
+
+        var orderPriority = { 
+            "promo_ultimate": 1, "promo_alumni": 2, "promo_family": 3, "promo_essential": 4, 
+            "promo_together": 5, "promo_everyday": 6, "promo_first": 7,
+            "shirt": 10, "shirt_kids": 11, "tumbler": 12, "totebag": 13, "keychain": 14, "opener": 15 
+        };
+        products.sort(function(a, b) {
+            var pA = orderPriority[a.id] || 99;
+            var pB = orderPriority[b.id] || 99;
+            return pA - pB;
+        });
 
         var sizes = [
             { label: 'SS (34")', val: 'SS' }, { label: 'S (36")', val: 'S' },
@@ -448,6 +476,12 @@
             { label: 'XL (42")', val: 'XL' }, { label: '2XL (44")', val: '2XL' },
             { label: '3XL (46")', val: '3XL' }, { label: '4XL (48")', val: '4XL' },
             { label: '5XL (50")', val: '5XL' }, { label: '6XL (52")', val: '6XL' }
+        ];
+
+        var sizesKids = [
+            { label: 'เด็ก SS (26")', val: 'เด็ก SS' }, { label: 'เด็ก S (28")', val: 'เด็ก S' },
+            { label: 'เด็ก M (30")', val: 'เด็ก M' }, { label: 'เด็ก L (32")', val: 'เด็ก L' },
+            { label: 'เด็ก XL (34")', val: 'เด็ก XL' }
         ];
 
         var cart = [];
@@ -520,18 +554,29 @@
                         products = data.products.map(function(p) {
                             var frontP = frontendMap[p.id] || frontendMap[p.name.trim()] || {};
                             return Object.assign({}, p, { 
-                                id: frontP.id || p.id,
+                                id: p.id, // ใช้ ID จาก backend เสมอ ป้องกัน Unknown product
+                                _frontId: frontP.id || p.id,
                                 img: frontP.img || p.img || 'https://placehold.co/200x200/F6F1E9/1E2A38?text=Image',
-                                name: frontP.name || p.name
+                                name: frontP.name || p.name,
+                                isBundle: frontP.isBundle || p.isBundle || false,
+                                items: frontP.items || p.items || null
                             });
                         });
                         
-                        var orderPriority = { "shirt": 1, "tumbler": 2, "totebag": 3, "keychain": 4, "opener": 5 };
+                        var orderPriority = { 
+                            "promo_ultimate": 1, "promo_alumni": 2, "promo_family": 3, "promo_essential": 4, 
+                            "promo_together": 5, "promo_everyday": 6, "promo_first": 7,
+                            "shirt": 10, "shirt_kids": 11, "tumbler": 12, "totebag": 13, "keychain": 14, "opener": 15 
+                        };
                         products.sort(function(a, b) {
-                            var pA = orderPriority[a.id] || 99;
-                            var pB = orderPriority[b.id] || 99;
+                            var pA = orderPriority[a._frontId] || orderPriority[a.id] || 99;
+                            var pB = orderPriority[b._frontId] || orderPriority[b.id] || 99;
                             return pA - pB;
                         });
+
+                        if (data.meta) {
+                            window.metaData = data.meta;
+                        }
                         
                         renderProducts();
                     }
@@ -546,32 +591,135 @@
         }
 
         // --- Carousel ---
-        function setupCarousel() {
+        var carouselInterval;
+        var currentSlideIndex = 0;
+        var isCarouselAnimating = false;
+        
+        function updateCarouselDots() {
+            var dots = document.querySelectorAll('#carousel-dots div');
+            dots.forEach(function(dot, idx) {
+                dot.classList.toggle('opacity-50', idx !== currentSlideIndex);
+                dot.classList.toggle('opacity-100', idx === currentSlideIndex);
+            });
+        }
+        
+        function nextSlide() {
+            if (isCarouselAnimating) return;
+            isCarouselAnimating = true;
             var inner = document.getElementById('carousel-inner');
             var dots = document.querySelectorAll('#carousel-dots div');
-            var currentIndex = 0;
             var total = dots.length || 2;
-            setInterval(function() {
-                currentIndex = (currentIndex + 1) % total;
-                inner.style.transform = 'translateX(-' + (currentIndex * 100) + '%)';
-                dots.forEach(function(dot, idx) {
-                    dot.classList.toggle('opacity-50', idx !== currentIndex);
-                    dot.classList.toggle('opacity-100', idx === currentIndex);
-                });
-            }, 4000);
+            
+            inner.style.transition = 'transform 0.5s ease-out';
+            inner.style.transform = 'translateX(-100%)';
+            
+            currentSlideIndex = (currentSlideIndex + 1) % total;
+            updateCarouselDots();
+            
+            setTimeout(function() {
+                inner.style.transition = 'none';
+                inner.appendChild(inner.firstElementChild);
+                inner.style.transform = 'translateX(0)';
+                isCarouselAnimating = false;
+            }, 500);
+        }
+        
+        function prevSlide() {
+            if (isCarouselAnimating) return;
+            isCarouselAnimating = true;
+            var inner = document.getElementById('carousel-inner');
+            var dots = document.querySelectorAll('#carousel-dots div');
+            var total = dots.length || 2;
+            
+            currentSlideIndex = (currentSlideIndex - 1 + total) % total;
+            updateCarouselDots();
+
+            inner.style.transition = 'none';
+            inner.prepend(inner.lastElementChild);
+            inner.style.transform = 'translateX(-100%)';
+            
+            // force reflow
+            void inner.offsetWidth;
+            
+            inner.style.transition = 'transform 0.5s ease-out';
+            inner.style.transform = 'translateX(0)';
+            
+            setTimeout(function() {
+                isCarouselAnimating = false;
+            }, 500);
+        }
+        
+        function startCarousel() {
+            stopCarousel();
+            carouselInterval = setInterval(nextSlide, 4000);
+        }
+        function stopCarousel() {
+            if (carouselInterval) clearInterval(carouselInterval);
+        }
+        function setupCarousel() {
+            startCarousel();
+            var homeSection = document.getElementById('home');
+            if (homeSection) {
+                homeSection.addEventListener('mouseenter', stopCarousel);
+                homeSection.addEventListener('mouseleave', startCarousel);
+                homeSection.addEventListener('touchstart', stopCarousel, {passive: true});
+                homeSection.addEventListener('touchend', startCarousel, {passive: true});
+                
+                // Add swipe support
+                var touchstartX = 0;
+                var touchendX = 0;
+                homeSection.addEventListener('touchstart', function(e) { touchstartX = e.changedTouches[0].screenX; }, {passive: true});
+                homeSection.addEventListener('touchend', function(e) { 
+                    touchendX = e.changedTouches[0].screenX;
+                    if (touchendX < touchstartX - 30) nextSlide();
+                    if (touchendX > touchstartX + 30) prevSlide();
+                    startCarousel();
+                }, {passive: true});
+            }
         }
 
         // --- Render Products ---
         function renderProducts() {
             productGrid.innerHTML = '';
+            var meta = window.metaData || {};
+            var limitKc = parseInt(meta["LIMIT_keychain"]) || 100;
+            var soldKc = parseInt(meta["SOLD_keychain"]) || 0;
+            var remainKc = Math.max(0, limitKc - soldKc);
+            
+            var limitTb = parseInt(meta["LIMIT_tumbler"]) || 100;
+            var soldTb = parseInt(meta["SOLD_tumbler"]) || 0;
+            var remainTb = Math.max(0, limitTb - soldTb);
+
             products.forEach(function(p) {
+                // Check stock limits
+                var isSoldOut = false;
+                var stockText = '';
+                if (p.id === 'keychain') {
+                    if (remainKc <= 0) isSoldOut = true;
+                    stockText = '<span class="text-[10px] text-red-500 font-bold ml-2">(เหลือ ' + remainKc + ')</span>';
+                } else if (p.id === 'tumbler') {
+                    if (remainTb <= 0) isSoldOut = true;
+                    stockText = '<span class="text-[10px] text-red-500 font-bold ml-2">(เหลือ ' + remainTb + ')</span>';
+                }
+                
+                // For bundles, disable if any limited item is out of stock
+                if (p.isBundle && p.items) {
+                    if (p.items.keychain && remainKc < p.items.keychain) isSoldOut = true;
+                    if (p.items.tumbler && remainTb < p.items.tumbler) isSoldOut = true;
+                }
+
+                var safeId = p.id.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                var safeName = p.name.replace(/"/g, "&quot;");
+                
                 var sizeSelectHTML = '';
-                if (p.hasSize) {
-                    sizeSelectHTML = '<select id="size-' + p.id + '" class="w-full p-2 border border-beige/60 rounded-lg bg-gray-50/50 text-xs text-navy focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all">' +
+                if (p.hasSize && !p.isBundle) {
+                    var sizesList = (p.id === 'shirt_kids') ? sizesKids : sizes;
+                    sizeSelectHTML = '<select id="size-' + p.id + '" class="w-full p-2 border border-beige/60 rounded-lg bg-gray-50/50 text-xs text-navy focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all" ' + (isSoldOut ? 'disabled' : '') + '>' +
                         '<option value="" disabled selected>เลือกไซส์</option>' +
-                        sizes.map(function(s) { return '<option value="' + s.val + '">' + s.label + '</option>'; }).join('') +
+                        sizesList.map(function(s) { return '<option value="' + s.val + '">' + s.label + '</option>'; }).join('') +
                     '</select>';
                 }
+                
                 var nameDisplay = '<h3 class="text-[18px] font-bold text-navy leading-normal line-clamp-2" style="font-family: \'Prompt\', sans-serif;">' + p.name + '</h3>';
                 var match = p.name.match(/^([\w\s\-]+?)\s*([ก-๙].*)$/u);
                 if (match) {
@@ -581,21 +729,40 @@
                                   '</div>';
                 }
 
-                var card = '<div class="bg-white border border-beige/40 rounded-2xl overflow-hidden shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-10px_rgba(0,0,0,0.1)] transition-all duration-300 flex flex-row items-stretch group relative">' +
+                var actionArea = '';
+                if (isSoldOut) {
+                    actionArea = '<div class="w-full text-center py-2 bg-red-50 text-red-600 text-xs font-bold rounded-lg border border-red-100">SOLD OUT</div>';
+                } else if (p.isBundle) {
+                    var hasShirts = p.items && (p.items.shirt || p.items.shirt_kids);
+                    if (hasShirts) {
+                        actionArea = '<button onclick="openBundleModal(\'' + safeId + '\')" class="w-full py-2 bg-navy text-white font-bold text-xs rounded-lg border border-navy hover:bg-gold hover:border-gold hover:text-navy transition-all flex justify-center items-center gap-1.5 shadow-md shadow-navy/20"><i class="ph ph-plus text-sm"></i> เลือกไซส์ & ใส่ตะกร้า</button>';
+                    } else {
+                        actionArea = '<div class="flex items-center gap-2 w-full">' +
+                            '<div class="flex-1"></div>' +
+                            '<button onclick="addBundleDirectly(\'' + safeId + '\')" class="shrink-0 w-9 h-9 bg-navy text-white rounded-lg flex items-center justify-center hover:bg-gold hover:text-navy active:scale-90 transition-all duration-300 shadow-md shadow-navy/20">' +
+                                '<i class="ph ph-plus text-lg"></i>' +
+                            '</button>' +
+                        '</div>';
+                    }
+                } else {
+                    actionArea = '<div class="flex items-center gap-2 w-full">' +
+                        (sizeSelectHTML ? '<div class="flex-1 min-w-0">' + sizeSelectHTML + '</div>' : '<div class="flex-1"></div>') +
+                        '<button onclick="app.addToCart(\'' + safeId + '\')" class="shrink-0 w-9 h-9 bg-navy text-white rounded-lg flex items-center justify-center hover:bg-gold hover:text-navy active:scale-90 transition-all duration-300 shadow-md shadow-navy/20">' +
+                            '<i class="ph ph-plus text-lg"></i>' +
+                        '</button>' +
+                    '</div>';
+                }
+
+                var card = '<div class="bg-white border border-beige/40 rounded-2xl overflow-hidden shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-10px_rgba(0,0,0,0.1)] transition-all duration-300 flex flex-row items-stretch group relative ' + (isSoldOut ? 'opacity-70 grayscale-[50%]' : '') + '">' +
                     '<div class="w-32 h-32 shrink-0 bg-[#fbf9f6] overflow-hidden p-2 relative flex items-center justify-center cursor-pointer" onclick="openLightbox(\'' + p.img + '\')">' +
-                        '<img src="' + p.img + '" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 drop-shadow-sm" alt="' + p.name + '" loading="lazy" onerror="this.onerror=null; this.src=\'https://placehold.co/200x200/F6F1E9/1E2A38?text=Image\'">' +
+                        '<img src="' + p.img + '" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 drop-shadow-sm" alt="' + safeName + '" loading="lazy" onerror="this.onerror=null; this.src=\'https://placehold.co/200x200/F6F1E9/1E2A38?text=Image\'">' +
                     '</div>' +
                     '<div class="flex-1 p-3.5 flex flex-col justify-between min-w-0 border-l border-beige/20">' +
                         '<div>' +
                             nameDisplay +
-                            '<div class="text-gold font-bold text-[15px] mt-0.5 tracking-tight">฿' + p.price.toLocaleString() + '</div>' +
+                            '<div class="text-gold font-bold text-[15px] mt-0.5 tracking-tight">฿' + p.price.toLocaleString() + stockText + '</div>' +
                         '</div>' +
-                        '<div class="flex items-center gap-2 mt-2 w-full">' +
-                            (sizeSelectHTML ? '<div class="flex-1 min-w-0">' + sizeSelectHTML + '</div>' : '<div class="flex-1"></div>') +
-                            '<button onclick="app.addToCart(\'' + p.id + '\')" class="shrink-0 w-9 h-9 bg-navy text-white rounded-lg flex items-center justify-center hover:bg-gold hover:text-navy active:scale-90 transition-all duration-300 shadow-md shadow-navy/20">' +
-                                '<i class="ph ph-plus text-lg"></i>' +
-                            '</button>' +
-                        '</div>' +
+                        '<div class="mt-2 w-full">' + actionArea + '</div>' +
                     '</div>' +
                 '</div>';
                 productGrid.innerHTML += card;
@@ -653,10 +820,33 @@
                 checkoutBtn.disabled = true;
             } else {
                 cartItemsContainer.innerHTML = cart.map(function(item) {
+                    var itemsHtml = '';
+                    if (item.isBundle && item.items) {
+                        var mapping = { "shirt": "เสื้อผู้ใหญ่", "shirt_kids": "เสื้อเด็ก", "tumbler": "แก้ว", "totebag": "ถุงผ้า", "keychain": "พวงกุญแจ", "opener": "ที่เปิดขวด" };
+                        var sizesArr = item.size ? item.size.split(', ') : [];
+                        var sizeIndex = 0;
+                        itemsHtml += '<ul class="text-[10px] text-charcoal/60 mt-1 pl-2 border-l border-beige space-y-0.5">';
+                        for (var k in item.items) {
+                            var bq = item.items[k];
+                            var bName = mapping[k] || k;
+                            if (k === 'shirt' || k === 'shirt_kids') {
+                                for(var c=0; c<bq; c++) {
+                                    var sz = sizesArr[sizeIndex] || "N/A";
+                                    sizeIndex++;
+                                    itemsHtml += '<li>- ' + bName + ' (' + sz + ')</li>';
+                                }
+                            } else {
+                                itemsHtml += '<li>- ' + bName + ' x' + bq + '</li>';
+                            }
+                        }
+                        itemsHtml += '</ul>';
+                    }
+
                     return '<div class="flex gap-3 p-3 bg-white border border-beige/50 rounded-xl">' +
                         '<img src="' + item.img + '" class="w-16 h-16 object-cover rounded-md bg-cream">' +
                         '<div class="flex-1"><h4 class="font-bold text-navy text-xs">' + item.name + '</h4>' +
                         (item.size ? '<p class="text-[10px] text-charcoal/60">ไซส์: ' + item.size + '</p>' : '') +
+                        itemsHtml +
                         '<div class="text-gold font-bold text-xs mt-1">฿' + item.price + '</div></div>' +
                         '<div class="flex flex-col items-end justify-between"><div class="flex items-center bg-gray-50 rounded-lg border border-beige">' +
                         '<button onclick="app.removeFromCart(\'' + item.cartItemId + '\')" class="px-2.5 py-1 text-charcoal active:bg-gray-200 rounded-l-lg">-</button>' +
@@ -682,9 +872,20 @@
         // --- Shipping Logic ---
         function calculateBoxShipping(items) {
             if (items.length === 0) return 0;
-            var totalQty = items.reduce(function(s, i) { return s + i.quantity; }, 0);
-            var shipFeeQty = items.reduce(function(s, i) { return s + (i.shipFeeItem ? i.quantity : 0); }, 0);
-            if (totalQty === 0) return 0;
+            var shipFeeQty = 0;
+            
+            items.forEach(function(item) {
+                if (item.isBundle && item.items) {
+                    var bundlePieces = (item.items.shirt || 0) + (item.items.shirt_kids || 0) + (item.items.tumbler || 0);
+                    shipFeeQty += (bundlePieces * item.quantity);
+                } else {
+                    if (item.id === 'shirt' || item.id === 'shirt_kids' || item.id === 'tumbler' || item.shipFeeItem) {
+                        shipFeeQty += item.quantity;
+                    }
+                }
+            });
+
+            if (shipFeeQty === 0) return 50; // มีสินค้าที่ไม่เสียค่าส่งเพิ่ม แต่ต้องคิดค่าส่งตั้งต้น 50
             return 50 + (shipFeeQty > 0 ? (shipFeeQty - 1) * 10 : 0);
         }
 
@@ -714,6 +915,8 @@
             var nameDisplay = document.getElementById('file-name-display');
             var status = document.getElementById('slip-status');
             var preview = document.getElementById('slip-preview');
+            var previewContainer = document.getElementById('slip-preview-container');
+            var dropZone = document.getElementById('drop-zone');
             if (!fileInput.files.length) return;
             var file = fileInput.files[0];
             nameDisplay.textContent = file.name;
@@ -723,21 +926,49 @@
             var reader = new FileReader();
             reader.onerror = function() { status.className = 'mt-2 text-[10px] text-red-500 font-bold text-center'; status.innerHTML = '<i class="ph-fill ph-warning-circle"></i> อ่านไฟล์ไม่สำเร็จ'; };
             reader.onload = function(e) {
+                var rawDataUrl = e.target.result;
                 var img = new Image();
-                img.onerror = function() { status.className = 'mt-2 text-[10px] text-red-500 font-bold text-center'; status.innerHTML = '<i class="ph-fill ph-warning-circle"></i> ไฟล์ภาพไม่ถูกต้อง'; };
+                img.onerror = function() { 
+                    // Fallback to raw data url if image object fails to load (Android WebView bug)
+                    slipBase64Data = rawDataUrl.split(',')[1];
+                    if (preview && previewContainer) { preview.src = rawDataUrl; previewContainer.classList.remove('hidden'); dropZone.classList.add('hidden'); }
+                    status.className = 'mt-2 text-[10px] text-green-600 font-bold text-center';
+                    status.innerHTML = '<i class="ph-fill ph-check-circle"></i> อัปโหลดสลิปเรียบร้อย (Fallback)';
+                };
                 img.onload = function() {
-                    var canvas = document.createElement('canvas'), ctx = canvas.getContext('2d'), MAX_W = 800, w = img.width, h = img.height;
-                    if (w > MAX_W) { h = Math.round((h * MAX_W) / w); w = MAX_W; }
-                    canvas.width = w; canvas.height = h; ctx.drawImage(img, 0, 0, w, h);
-                    var b64url = canvas.toDataURL('image/jpeg', 0.6);
-                    slipBase64Data = b64url.split(',')[1];
-                    if (preview) { preview.src = b64url; preview.classList.remove('hidden'); }
+                    try {
+                        var canvas = document.createElement('canvas'), ctx = canvas.getContext('2d'), MAX_W = 800, w = img.width, h = img.height;
+                        if (w > MAX_W) { h = Math.round((h * MAX_W) / w); w = MAX_W; }
+                        canvas.width = w; canvas.height = h; ctx.drawImage(img, 0, 0, w, h);
+                        var b64url = canvas.toDataURL('image/jpeg', 0.6);
+                        slipBase64Data = b64url.split(',')[1];
+                        if (preview && previewContainer) { preview.src = b64url; previewContainer.classList.remove('hidden'); dropZone.classList.add('hidden'); }
+                    } catch (err) {
+                        // Fallback if canvas fails (Android in-app browser issue)
+                        slipBase64Data = rawDataUrl.split(',')[1];
+                        if (preview && previewContainer) { preview.src = rawDataUrl; previewContainer.classList.remove('hidden'); dropZone.classList.add('hidden'); }
+                    }
                     status.className = 'mt-2 text-[10px] text-green-600 font-bold text-center';
                     status.innerHTML = '<i class="ph-fill ph-check-circle"></i> อัปโหลดสลิปเรียบร้อย';
                 };
-                img.src = e.target.result;
+                img.src = rawDataUrl;
             };
             reader.readAsDataURL(file);
+        }
+
+        function removeSlip() {
+            var fileInput = document.getElementById('slip-upload');
+            var nameDisplay = document.getElementById('file-name-display');
+            var status = document.getElementById('slip-status');
+            var previewContainer = document.getElementById('slip-preview-container');
+            var dropZone = document.getElementById('drop-zone');
+            
+            fileInput.value = '';
+            slipBase64Data = '';
+            nameDisplay.textContent = 'แตะเพื่ออัปโหลดสลิป';
+            status.classList.add('hidden');
+            if (previewContainer) previewContainer.classList.add('hidden');
+            if (dropZone) dropZone.classList.remove('hidden');
         }
 
         // --- Form Submission ---
@@ -820,7 +1051,12 @@
 
         function renderOrderCard(order) {
             var payBadge = getStatusBadge(order.paymentStatus, 'payment');
-            var fulBadge = getStatusBadge(order.fulfillmentStatus, 'fulfillment');
+            
+            var isPickup = order.deliveryMethod && (order.deliveryMethod.indexOf("pickup") !== -1 || order.deliveryMethod.indexOf("รับ") !== -1);
+            var curFul = order.fulfillmentStatus || 'UNFULFILLED';
+            if (isPickup && curFul !== 'FULFILLED') curFul = 'NOT_REQUIRED';
+            var fulBadge = getStatusBadge(curFul, 'fulfillment');
+            
             var itemsSummary = (order.items || []).map(function(i) { return (i.name || i.id) + (i.size ? ' (' + i.size + ')' : '') + ' x' + i.quantity; }).join(', ') || 'ไม่มีข้อมูลสินค้า';
             var trackHTML = order.trackingNumber ? '<div class="flex items-center gap-2 mt-2 bg-blue-50 px-3 py-1.5 rounded-lg"><i class="ph ph-package text-blue-600"></i><span class="text-[11px] text-blue-700 font-medium">เลขพัสดุ: ' + order.trackingNumber + '</span></div>' : '';
             var dateStr = order.date ? new Date(order.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
@@ -833,11 +1069,141 @@
         function getStatusBadge(status, type) {
             var configs = {
                 payment: { PAID: { t: 'ชำระแล้ว', bg: 'bg-green-100 text-green-700', i: 'ph-fill ph-check-circle' }, PENDING: { t: 'รอตรวจสอบ', bg: 'bg-amber-100 text-amber-700', i: 'ph-fill ph-clock' }, REJECTED: { t: 'ไม่ผ่าน', bg: 'bg-red-100 text-red-700', i: 'ph-fill ph-x-circle' } },
-                fulfillment: { FULFILLED: { t: 'จัดส่งแล้ว', bg: 'bg-green-100 text-green-700', i: 'ph-fill ph-check-circle' }, PENDING: { t: 'รอจัดส่ง', bg: 'bg-amber-100 text-amber-700', i: 'ph-fill ph-clock' }, UNFULFILLED: { t: 'รอจัดส่ง', bg: 'bg-amber-100 text-amber-700', i: 'ph-fill ph-clock' } }
+                fulfillment: { FULFILLED: { t: 'จัดส่งแล้ว', bg: 'bg-green-100 text-green-700', i: 'ph-fill ph-check-circle' }, PENDING: { t: 'รอจัดส่ง', bg: 'bg-amber-100 text-amber-700', i: 'ph-fill ph-clock' }, UNFULFILLED: { t: 'รอจัดส่ง', bg: 'bg-amber-100 text-amber-700', i: 'ph-fill ph-clock' }, NOT_REQUIRED: { t: 'รับหน้างาน', bg: 'bg-blue-100 text-blue-700', i: 'ph-fill ph-storefront' }, PICKUP: { t: 'รับหน้างาน', bg: 'bg-blue-100 text-blue-700', i: 'ph-fill ph-storefront' } }
             };
             var c = (configs[type] && configs[type][status]) || { t: status || '-', bg: 'bg-gray-100 text-gray-600', i: 'ph ph-question' };
             return '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold ' + c.bg + '"><i class="' + c.i + '"></i> ' + c.t + '</span>';
         }
+
+        // --- Bundle Modal UI ---
+        var bundleModal = document.createElement('div');
+        bundleModal.id = 'bundle-modal';
+        bundleModal.className = 'fixed inset-0 bg-navy/80 backdrop-blur-sm z-[70] hidden items-end sm:items-center justify-center transition-opacity duration-300 opacity-0';
+        bundleModal.innerHTML = '<div class="bg-[#fbf9f6] w-full sm:w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden transform translate-y-full sm:translate-y-0 transition-transform duration-300 flex flex-col max-h-[90vh]" id="bundle-sheet">' +
+            '<div class="px-5 py-4 border-b border-beige flex justify-between items-center bg-white">' +
+                '<h3 class="font-bold text-navy text-lg" id="bundle-modal-title">เลือกไซส์สำหรับแพ็กเกจ</h3>' +
+                '<button onclick="closeBundleModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-charcoal hover:bg-gray-200 transition-colors"><i class="ph ph-x"></i></button>' +
+            '</div>' +
+            '<div class="p-5 overflow-y-auto" id="bundle-modal-content"></div>' +
+            '<div class="p-5 bg-white border-t border-beige">' +
+                '<button id="bundle-add-btn" class="w-full bg-navy text-white rounded-xl py-3.5 font-bold flex items-center justify-center gap-2 hover:bg-gold hover:text-navy transition-colors shadow-lg shadow-navy/20">' +
+                    '<i class="ph ph-shopping-cart-simple"></i> หยิบใส่ตะกร้า' +
+                '</button>' +
+            '</div>' +
+        '</div>';
+        document.body.appendChild(bundleModal);
+
+        var currentBundleProduct = null;
+
+        function openBundleModal(productId) {
+            var product = products.find(function(p) { return p.id === productId; });
+            if (!product || !product.isBundle || !product.items) return;
+            currentBundleProduct = product;
+            
+            document.getElementById('bundle-modal-title').innerText = product.name;
+            var content = document.getElementById('bundle-modal-content');
+            var html = '';
+            
+            // Render adult shirts
+            if (product.items.shirt) {
+                for (var i = 1; i <= product.items.shirt; i++) {
+                    html += '<div class="mb-4"><label class="block text-xs font-bold text-navy mb-1">ไซส์เสื้อผู้ใหญ่ ตัวที่ ' + i + '</label>' +
+                        '<select id="bundle-shirt-' + i + '" class="w-full p-3 border border-beige/60 rounded-xl bg-white text-sm text-navy focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all">' +
+                        '<option value="" disabled selected>เลือกไซส์</option>' +
+                        sizes.map(function(s) { return '<option value="' + s.val + '">' + s.label + '</option>'; }).join('') +
+                        '</select></div>';
+                }
+            }
+            
+            // Render kids shirts
+            if (product.items.shirt_kids) {
+                for (var i = 1; i <= product.items.shirt_kids; i++) {
+                    html += '<div class="mb-4"><label class="block text-xs font-bold text-navy mb-1">ไซส์เสื้อเด็ก ตัวที่ ' + i + '</label>' +
+                        '<select id="bundle-shirt-kids-' + i + '" class="w-full p-3 border border-beige/60 rounded-xl bg-white text-sm text-navy focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all">' +
+                        '<option value="" disabled selected>เลือกไซส์</option>' +
+                        sizesKids.map(function(s) { return '<option value="' + s.val + '">' + s.label + '</option>'; }).join('') +
+                        '</select></div>';
+                }
+            }
+            
+            content.innerHTML = html;
+            
+            var modal = document.getElementById('bundle-modal');
+            var sheet = document.getElementById('bundle-sheet');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(function() {
+                modal.classList.add('opacity-100');
+                modal.classList.remove('opacity-0');
+                sheet.classList.remove('translate-y-full');
+            }, 10);
+        }
+
+        function addBundleDirectly(productId) {
+            var product = products.find(function(p) { return p.id === productId; });
+            if (!product || !product.isBundle) return;
+            var cartItemId = product.id + '-none';
+            var existing = cart.find(function(item) { return item.cartItemId === cartItemId; });
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push(Object.assign({}, product, { cartItemId: cartItemId, size: "", quantity: 1 }));
+            }
+            updateCartUI();
+            if (window.navigator && window.navigator.vibrate) navigator.vibrate(50);
+            showToast("เพิ่มลงตะกร้าแล้ว", "success");
+        }
+
+        function closeBundleModal() {
+            var modal = document.getElementById('bundle-modal');
+            var sheet = document.getElementById('bundle-sheet');
+            modal.classList.remove('opacity-100');
+            modal.classList.add('opacity-0');
+            sheet.classList.add('translate-y-full');
+            setTimeout(function() { 
+                modal.classList.add('hidden'); 
+                modal.classList.remove('flex');
+            }, 300);
+            currentBundleProduct = null;
+        }
+
+        document.body.addEventListener('click', function(e) {
+            if (e.target.id === 'bundle-modal') closeBundleModal();
+        });
+
+        document.getElementById('bundle-add-btn').addEventListener('click', function() {
+            if (!currentBundleProduct) return;
+            var product = currentBundleProduct;
+            var selectedSizes = [];
+            
+            if (product.items.shirt) {
+                for (var i = 1; i <= product.items.shirt; i++) {
+                    var val = document.getElementById('bundle-shirt-' + i).value;
+                    if (!val) { showToast('กรุณาเลือกไซส์เสื้อผู้ใหญ่ตัวที่ ' + i, 'warning'); return; }
+                    selectedSizes.push(val);
+                }
+            }
+            if (product.items.shirt_kids) {
+                for (var i = 1; i <= product.items.shirt_kids; i++) {
+                    var val = document.getElementById('bundle-shirt-kids-' + i).value;
+                    if (!val) { showToast('กรุณาเลือกไซส์เสื้อเด็กตัวที่ ' + i, 'warning'); return; }
+                    selectedSizes.push(val);
+                }
+            }
+            
+            var sizeString = selectedSizes.join(', ');
+            var cartItemId = product.id + '-' + (sizeString || 'none');
+            var existing = cart.find(function(item) { return item.cartItemId === cartItemId; });
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push(Object.assign({}, product, { cartItemId: cartItemId, size: sizeString, quantity: 1 }));
+            }
+            updateCartUI();
+            if (window.navigator && window.navigator.vibrate) navigator.vibrate(50);
+            closeBundleModal();
+            showToast("เพิ่มลงตะกร้าแล้ว", "success");
+        });
 
         // --- Event Listeners ---
         function setupEventListeners() {
@@ -856,7 +1222,10 @@
         }
 
         // --- Global Access ---
-        window.app = { addToCart: addToCart, removeFromCart: removeFromCart, openCart: openCart, closeCart: closeCart, closeCheckout: closeCheckout, openTracking: openTracking, closeTracking: closeTracking, searchOrders: searchOrders, setActiveNav: setActiveNav };
+        window.app = { addToCart: addToCart, removeFromCart: removeFromCart, openCart: openCart, closeCart: closeCart, closeCheckout: closeCheckout, openTracking: openTracking, closeTracking: closeTracking, searchOrders: searchOrders, setActiveNav: setActiveNav, prevSlide: prevSlide, nextSlide: nextSlide, removeSlip: removeSlip };
+        window.openBundleModal = openBundleModal;
+        window.addBundleDirectly = addBundleDirectly;
+        window.closeBundleModal = closeBundleModal;
 
         // --- Lightbox ---
         window.openLightbox = function(imgSrc) {

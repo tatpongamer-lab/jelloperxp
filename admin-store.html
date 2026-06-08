@@ -132,11 +132,18 @@
 
             <!-- Tab: Orders -->
             <div id="tab-orders" class="content-tab">
+                <div class="mb-4 flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-navy">รายการคำสั่งซื้อ</h2>
+                    <button id="batchPrintBtn" class="bg-navy text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-800 transition-colors flex items-center gap-2 hidden">
+                        <i class="bi bi-printer"></i> พิมพ์ใบปะหน้าที่เลือก (<span id="batchPrintCount">0</span>)
+                    </button>
+                </div>
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm">
                             <thead class="bg-gray-50 border-b text-gray-600">
                                 <tr>
+                                    <th class="p-4 w-12"><input type="checkbox" id="selectAllOrders" class="rounded border-gray-300 text-gold focus:ring-gold cursor-pointer"></th>
                                     <th class="p-4 font-medium">เลขออเดอร์</th>
                                     <th class="p-4 font-medium">ลูกค้า</th>
                                     <th class="p-4 font-medium">วิธีรับสินค้า</th>
@@ -288,9 +295,6 @@
                         </div>
                         <!-- Buttons -->
                         <div class="flex gap-3">
-                            <button id="printLabelBtn" class="flex-1 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg font-bold hover:bg-gray-50 transition-colors text-sm">
-                                <i class="bi bi-printer"></i> พิมพ์ใบปะหน้า
-                            </button>
                             <button id="saveStatusBtn" class="flex-1 py-2 bg-gold text-navy rounded-lg font-bold hover:bg-[#b59858] transition-colors text-sm">
                                 บันทึกการแก้ไข
                             </button>
@@ -525,37 +529,67 @@
             if (!summaryContainer) return;
             
             var productSummary = {};
+            var compMapping = { "shirt": "เสื้อผู้ใหญ่", "shirt_kids": "เสื้อเด็ก", "tumbler": "แก้วเก็บความเย็น", "totebag": "ถุงผ้า", "keychain": "พวงกุญแจ", "opener": "ที่เปิดขวด" };
+
             currentOrders.forEach(function(o) {
                 if (o.paymentStatus === "REJECTED") return; 
                 if (o.items && Array.isArray(o.items)) {
                     o.items.forEach(function(item) {
-                        var pName = item.name;
-                        if (!productSummary[pName]) productSummary[pName] = { total: 0, sizes: {} };
-                        productSummary[pName].total += item.quantity;
-                        if (item.size) {
-                            if (!productSummary[pName].sizes[item.size]) productSummary[pName].sizes[item.size] = 0;
-                            productSummary[pName].sizes[item.size] += item.quantity;
+                        if (item.isBundle && item.bundleItems) {
+                            var sizesArr = item.size ? item.size.split(', ') : [];
+                            var sizeIndex = 0;
+                            for (var k in item.bundleItems) {
+                                var bq = item.bundleItems[k];
+                                var compName = compMapping[k] || k;
+                                if (!productSummary[compName]) productSummary[compName] = { total: 0, sizes: {} };
+                                
+                                if (k === 'shirt' || k === 'shirt_kids') {
+                                    for(var c=0; c<bq; c++) {
+                                        var sz = sizesArr[sizeIndex] || "ไม่ระบุไซส์";
+                                        sizeIndex++;
+                                        productSummary[compName].total += item.quantity;
+                                        if (!productSummary[compName].sizes[sz]) productSummary[compName].sizes[sz] = 0;
+                                        productSummary[compName].sizes[sz] += item.quantity;
+                                    }
+                                } else {
+                                    productSummary[compName].total += (bq * item.quantity);
+                                }
+                            }
+                        } else {
+                            var pName = item.name;
+                            if (pName.indexOf("เสื้อ") !== -1 && pName.indexOf("เด็ก") === -1) pName = "เสื้อผู้ใหญ่";
+                            else if (pName.indexOf("เด็ก") !== -1) pName = "เสื้อเด็ก";
+                            else if (pName.indexOf("แก้ว") !== -1) pName = "แก้วเก็บความเย็น";
+                            else if (pName.indexOf("ถุงผ้า") !== -1) pName = "ถุงผ้า";
+                            else if (pName.indexOf("พวงกุญแจ") !== -1) pName = "พวงกุญแจ";
+                            else if (pName.indexOf("เปิดขวด") !== -1) pName = "ที่เปิดขวด";
+
+                            if (!productSummary[pName]) productSummary[pName] = { total: 0, sizes: {} };
+                            productSummary[pName].total += item.quantity;
+                            if (item.size) {
+                                if (!productSummary[pName].sizes[item.size]) productSummary[pName].sizes[item.size] = 0;
+                                productSummary[pName].sizes[item.size] += item.quantity;
+                            }
                         }
                     });
                 }
             });
 
+            var priority = { "เสื้อผู้ใหญ่": 1, "เสื้อเด็ก": 2, "แก้วเก็บความเย็น": 3, "ถุงผ้า": 4, "พวงกุญแจ": 5, "ที่เปิดขวด": 6 };
             var pNames = Object.keys(productSummary).sort(function(a, b) {
-                var aIsShirt = a.indexOf("เสื้อ") !== -1;
-                var bIsShirt = b.indexOf("เสื้อ") !== -1;
-                if (aIsShirt && !bIsShirt) return -1;
-                if (!aIsShirt && bIsShirt) return 1;
-                return a.localeCompare(b);
+                var pA = priority[a] || 99;
+                var pB = priority[b] || 99;
+                return pA - pB;
             });
 
             if (pNames.length === 0) {
                 summaryContainer.innerHTML = '';
             } else {
-                var html = '<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6"><h3 class="text-lg font-bold text-navy mb-4"><i class="bi bi-box-seam mr-2"></i>สรุปยอดขายสินค้า (ไม่รวมบิลที่ถูกปฏิเสธ)</h3><div class="flex flex-row overflow-x-auto gap-4 pb-2" style="-webkit-overflow-scrolling: touch;">';
+                var html = '<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6"><h3 class="text-lg font-bold text-navy mb-4"><i class="bi bi-box-seam mr-2"></i>สรุปยอดสั่งผลิตแยกตามชนิดสินค้า (ไม่รวมบิลที่ถูกปฏิเสธ)</h3><div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">';
                 pNames.forEach(function(pName) {
                     var pData = productSummary[pName];
                     var hasSizes = Object.keys(pData.sizes).length > 0;
-                    html += '<div class="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col min-w-[250px] shrink-0">';
+                    html += '<div class="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col h-full">';
                     html += '  <div class="flex justify-between items-center"><span class="font-bold text-navy truncate">' + pName + '</span><span class="font-bold text-white bg-navy px-3 py-1 rounded-md text-sm">' + pData.total + '</span></div>';
                     if (hasSizes) {
                         var sKeys = Object.keys(pData.sizes).sort();
@@ -576,9 +610,12 @@
         function renderTable() {
             var tbody = document.getElementById("ordersBody");
             tbody.innerHTML = "";
+            var selectAllCb = document.getElementById("selectAllOrders");
+            if (selectAllCb) selectAllCb.checked = false;
+            if (typeof updateBatchPrintUI === "function") updateBatchPrintUI();
 
             if (currentOrders.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-gray-400"><i class="bi bi-inbox text-3xl block mb-2"></i>ยังไม่มีคำสั่งซื้อ</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="p-8 text-center text-gray-400"><i class="bi bi-inbox text-3xl block mb-2"></i>ยังไม่มีคำสั่งซื้อ</td></tr>';
                 return;
             }
 
@@ -605,6 +642,7 @@
                 var tr = document.createElement("tr");
                 tr.className = "hover:bg-gray-50 transition-colors";
                 tr.innerHTML =
+                    '<td class="p-4"><input type="checkbox" class="order-cb rounded border-gray-300 text-gold focus:ring-gold cursor-pointer" value="' + o.orderId + '"></td>' +
                     '<td class="p-4 font-mono text-sm text-navy">' + (o.orderId || "-") + '</td>' +
                     '<td class="p-4"><div class="font-medium text-navy">' + (o.name || "-") + '</div><div class="text-xs text-gray-500">' + (o.phone || "") + '</div></td>' +
                     '<td class="p-4 text-xs">' + deliveryLabel + '</td>' +
@@ -640,11 +678,33 @@
             var itemsEl = document.getElementById("omItems");
             if (o.items && o.items.length > 0) {
                 itemsEl.innerHTML = o.items.map(function(i) {
-                    return '<div class="flex justify-between items-center border-b border-gray-200 pb-2 mb-2 last:border-0 last:pb-0 last:mb-0">' +
+                    var html = '<div class="flex justify-between items-start border-b border-gray-200 pb-2 mb-2 last:border-0 last:pb-0 last:mb-0">' +
                         '<div><span class="text-navy font-medium">' + (i.name || "-") + '</span>' +
-                        (i.size ? '<span class="text-gray-400 text-xs ml-1">(' + i.size + ')</span>' : '') + '</div>' +
-                        '<div class="text-right flex-shrink-0 ml-4"><span class="text-gray-500">x' + (i.qty || 1) + '</span>' +
+                        (i.size ? '<span class="text-gray-400 text-xs ml-1">(' + i.size + ')</span>' : '');
+                    if (i.isBundle && i.bundleItems) {
+                        html += '<ul class="text-xs text-gray-500 mt-1 ml-2 list-none">';
+                        var mapping = { "shirt": "เสื้อผู้ใหญ่", "shirt_kids": "เสื้อเด็ก", "tumbler": "แก้ว", "totebag": "ถุงผ้า", "keychain": "พวงกุญแจ", "opener": "ที่เปิดขวด" };
+                        var sizesArr = i.size ? i.size.split(', ') : [];
+                        var sizeIndex = 0;
+                        for (var k in i.bundleItems) {
+                            var bq = i.bundleItems[k];
+                            var bName = mapping[k] || k;
+                            if (k === 'shirt' || k === 'shirt_kids') {
+                                for(var c=0; c<bq; c++) {
+                                    var sz = sizesArr[sizeIndex] || "N/A";
+                                    sizeIndex++;
+                                    html += '<li>- ' + bName + ' (' + sz + ')</li>';
+                                }
+                            } else {
+                                html += '<li>- ' + bName + ' x' + bq + '</li>';
+                            }
+                        }
+                        html += '</ul>';
+                    }
+                    html += '</div>' +
+                        '<div class="text-right flex-shrink-0 ml-4"><span class="text-gray-500">x' + (i.quantity || i.qty || 1) + '</span>' +
                         '<span class="text-navy font-semibold ml-2">' + (i.price || 0).toLocaleString() + ' ฿</span></div></div>';
+                    return html;
                 }).join("");
             } else {
                 itemsEl.innerHTML = '<div class="text-gray-400 text-center py-2">ไม่มีรายการ</div>';
@@ -810,43 +870,131 @@
             .catch(function(e) { Swal.fire("เชื่อมต่อไม่ได้", e.message, "error"); });
         });
 
-        // ===== PRINT SHIPPING LABEL =====
-        document.getElementById("printLabelBtn").addEventListener("click", function() {
-            if (!activeOrderId) return;
-            var o = currentOrders.find(function(x) { return x.orderId === activeOrderId; });
-            if (!o) return;
+        // ===== BATCH PRINT LOGIC =====
+        function updateBatchPrintUI() {
+            var checkedCb = document.querySelectorAll(".order-cb:checked");
+            var btn = document.getElementById("batchPrintBtn");
+            var count = document.getElementById("batchPrintCount");
+            if (btn && count) {
+                if (checkedCb.length > 0) {
+                    btn.classList.remove("hidden");
+                    count.innerText = checkedCb.length;
+                } else {
+                    btn.classList.add("hidden");
+                }
+            }
+        }
 
-            var addrText = (o.deliveryMethod === "pickup_all") ? "*** รับสินค้าหน้างาน ***" : (o.address || "-");
-            var itemsHtml = (o.items || []).map(function(i) {
-                return i.name + (i.size ? " (" + i.size + ")" : "") + " x " + (i.qty || 1);
-            }).join("<br>");
+        var selectAllOrdersEl = document.getElementById("selectAllOrders");
+        if (selectAllOrdersEl) {
+            selectAllOrdersEl.addEventListener("change", function(e) {
+                var isChecked = e.target.checked;
+                document.querySelectorAll(".order-cb").forEach(function(cb) {
+                    cb.checked = isChecked;
+                });
+                updateBatchPrintUI();
+            });
+        }
 
-            var w = window.open("", "_blank");
-            w.document.write(
-                "<html><head><title>ใบปะหน้า</title>" +
-                "<style>body{font-family:sans-serif;padding:20px;line-height:1.6}" +
-                ".label{border:2px solid #000;padding:20px;max-width:400px;margin:0 auto;border-radius:8px}" +
-                ".hdr{font-size:18px;font-weight:bold;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:15px;text-align:center}" +
-                ".snd{font-size:12px;margin-bottom:20px;color:#444}" +
-                ".rcv{font-size:16px;margin-bottom:20px}" +
-                ".nm{font-size:20px;font-weight:bold;margin-bottom:5px}" +
-                ".ref{font-size:14px;text-align:right;margin-top:20px;color:#666}" +
-                ".itm{font-size:14px;margin-top:15px;border-top:1px dashed #ccc;padding-top:10px}" +
-                "</style></head><body>" +
-                '<div class="label">' +
-                '<div class="hdr">ใบปะหน้าพัสดุ</div>' +
-                '<div class="snd"><b>ผู้ส่ง:</b> Alumni Reunion Store</div>' +
-                '<div class="rcv"><b>ผู้รับ:</b><br>' +
-                '<div class="nm">' + (o.name || "-") + "</div>" +
-                "<div>โทร: " + (o.phone || "-") + "</div>" +
-                "<div>" + addrText + "</div></div>" +
-                '<div class="itm"><b>รายการ:</b><br>' + itemsHtml + "</div>" +
-                '<div class="ref">Ref: ' + o.orderId + "</div>" +
-                "</div></body></html>"
-            );
-            w.document.close();
-            w.onload = function() { setTimeout(function() { w.print(); }, 500); };
-        });
+        var ordersBodyEl = document.getElementById("ordersBody");
+        if (ordersBodyEl) {
+            ordersBodyEl.addEventListener("change", function(e) {
+                if (e.target && e.target.classList.contains("order-cb")) {
+                    updateBatchPrintUI();
+                    var totalCb = document.querySelectorAll(".order-cb").length;
+                    var checkedCb = document.querySelectorAll(".order-cb:checked").length;
+                    if (selectAllOrdersEl) {
+                        selectAllOrdersEl.checked = (totalCb > 0 && totalCb === checkedCb);
+                    }
+                }
+            });
+        }
+
+        var batchPrintBtn = document.getElementById("batchPrintBtn");
+        if (batchPrintBtn) {
+            batchPrintBtn.addEventListener("click", function() {
+                var selectedIds = Array.from(document.querySelectorAll(".order-cb:checked")).map(function(cb) { return cb.value; });
+                if (selectedIds.length === 0) return;
+
+                var pagesHtml = "";
+                var currentLabels = [];
+
+                selectedIds.forEach(function(id) {
+                    var o = currentOrders.find(function(x) { return x.orderId === id; });
+                    if (!o) return;
+
+                    var addrText = (o.deliveryMethod === "pickup_all") ? "*** รับสินค้าหน้างาน ***" : (o.address || "-");
+                    var itemsHtml = (o.items || []).map(function(i) {
+                        var html = '<div class="itm-row">- ' + i.name + (i.size ? " (" + i.size + ")" : "") + " x " + (i.quantity || i.qty || 1) + '</div>';
+                        if (i.isBundle && i.bundleItems) {
+                            var mapping = { "shirt": "เสื้อผู้ใหญ่", "shirt_kids": "เสื้อเด็ก", "tumbler": "แก้ว", "totebag": "ถุงผ้า", "keychain": "พวงกุญแจ", "opener": "ที่เปิดขวด" };
+                            var sizesArr = i.size ? i.size.split(', ') : [];
+                            var sizeIndex = 0;
+                            for (var k in i.bundleItems) {
+                                var bq = i.bundleItems[k];
+                                var bName = mapping[k] || k;
+                                if (k === 'shirt' || k === 'shirt_kids') {
+                                    for(var c=0; c<bq; c++) {
+                                        var sz = sizesArr[sizeIndex] || "N/A";
+                                        sizeIndex++;
+                                        html += '<div class="itm-row" style="margin-left:10px; font-size:10px; color:#555;">  • ' + bName + ' (' + sz + ')</div>';
+                                    }
+                                } else {
+                                    html += '<div class="itm-row" style="margin-left:10px; font-size:10px; color:#555;">  • ' + bName + ' x' + bq + '</div>';
+                                }
+                            }
+                        }
+                        return html;
+                    }).join("");
+
+                    var labelHtml = 
+                        '<div class="label">' +
+                        '<div class="hdr">แคแสดสัมพันธ์ ครั้งที่ 4 ปี 2569</div>' +
+                        '<div class="rcv"><b>ผู้รับ:</b><br>' +
+                        '<div class="nm">' + (o.name || "-") + "</div>" +
+                        "<div>โทร: " + (o.phone || "-") + "</div>" +
+                        '<div class="addr">' + addrText + "</div></div>" +
+                        '<div class="itm"><b>รายการ:</b><div class="itm-list">' + itemsHtml + "</div></div>" +
+                        '<div class="ref">เลขออเดอร์: ' + o.orderId + "</div>" +
+                        '</div>';
+                    
+                    currentLabels.push(labelHtml);
+                });
+
+                // Group by 6 per page
+                for (var i = 0; i < currentLabels.length; i += 6) {
+                    var chunk = currentLabels.slice(i, i + 6);
+                    pagesHtml += '<div class="page">' + chunk.join("") + '</div>';
+                }
+
+                var w = window.open("", "_blank");
+                w.document.write(
+                    "<html><head><title>พิมพ์ใบปะหน้า (Batch)</title>" +
+                    "<style>" +
+                    "body { font-family: sans-serif; padding: 20px; margin: 0; background: #525659; }" +
+                    ".page { background: #fff; width: 210mm; height: 297mm; padding: 8mm; margin: 0 auto 20px auto; box-sizing: border-box; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 5mm; box-shadow: 0 0 10px rgba(0,0,0,0.1); overflow: hidden; }" +
+                    ".label { border: 1px dashed #999; padding: 5mm; display: flex; flex-direction: column; box-sizing: border-box; position: relative; overflow: hidden; }" +
+                    "@media print { " +
+                    "   @page { size: A4 portrait; margin: 0; } " +
+                    "   body { padding: 0; background: #fff; } " +
+                    "   .page { margin: 0; box-shadow: none; page-break-after: always; padding: 8mm; } " +
+                    "} " +
+                    ".hdr { font-size: 13px; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 4px; margin-bottom: 6px; text-align: center; }" +
+                    ".rcv { font-size: 12px; }" +
+                    ".nm { font-size: 14px; font-weight: bold; margin-bottom: 2px; }" +
+                    ".addr { margin-top: 2px; line-height: 1.2; }" +
+                    ".itm { font-size: 11px; margin-top: 6px; border-top: 1px dashed #ccc; padding-top: 5px; flex: 1; overflow: hidden; display: flex; flex-direction: column; }" +
+                    ".itm-list { column-count: 2; column-gap: 5px; margin-top: 3px; flex: 1; overflow: hidden; }" +
+                    ".itm-row { font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; break-inside: avoid; }" +
+                    ".ref { font-size: 11px; text-align: right; margin-top: 4px; padding-top: 4px; color: #444; font-weight: bold; }" +
+                    "</style></head><body>" +
+                    pagesHtml +
+                    "</body></html>"
+                );
+                w.document.close();
+                w.onload = function() { setTimeout(function() { w.print(); }, 500); };
+            });
+        }
 
     })();
     </script>
