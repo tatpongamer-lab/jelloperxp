@@ -450,13 +450,13 @@
             { id: 'opener', name: 'Cheers Opener ที่เปิดขวดเปิดบทสนทนา', price: 79, img: 'image/bottle-opener-design-1.jpg', group: 1, hasSize: false, shipFeeItem: false },
 
             // Promo Bundles
-            { id: "promo_ultimate", name: "ULTIMATE COLLECTION สายใยไม่เคยเลือน", price: 1579, group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 2, tumbler: 1, totebag: 1, opener: 1, keychain: 1 }, img: 'https://placehold.co/400x400/FF6600/FFFFFF?text=Ultimate+Collection' },
-            { id: "promo_alumni",   name: "ALUMNI BUNDLE แทนความคิดถึงที่รอคอย",                  price: 1169, group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 1, tumbler: 1, totebag: 1, opener: 1, keychain: 1 }, img: 'https://placehold.co/400x400/FF6600/FFFFFF?text=Alumni+Bundle' },
-            { id: "promo_family",   name: "THE HAPPY FAMILY แฟมิลี่สีน้ำเงิน-แสด",               price: 999,  group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 2, shirt_kids: 1 }, img: 'https://placehold.co/400x400/FF6600/FFFFFF?text=Happy+Family' },
-            { id: "promo_essential",name: "REUNION ESSENTIAL ของขวัญแห่งวันวาน",              price: 889,  group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 1, tumbler: 1, keychain: 1 }, img: 'https://placehold.co/400x400/FF6600/FFFFFF?text=Reunion+Essential' },
-            { id: "promo_together", name: "TOGETHER AGAIN คู่หูวันคืนถิ่น",                 price: 799,  group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 2 }, img: 'https://placehold.co/400x400/FF6600/FFFFFF?text=Together+Again' },
-            { id: "promo_everyday", name: "EVERYDAY KHAESAD แคแสดเคียงกาย",               price: 569,  group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { tumbler: 1, totebag: 1 }, img: 'https://placehold.co/400x400/FF6600/FFFFFF?text=Everyday+Khaesad' },
-            { id: "promo_first",    name: "FIRST MEMORY เริ่มต้นแห่งความผูกพัน",                   price: 499,  group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 1, keychain: 1 }, img: 'https://placehold.co/400x400/FF6600/FFFFFF?text=First+Memory' }
+            { id: "promo_ultimate", name: "ULTIMATE COLLECTION สายใยไม่เคยเลือน", price: 1579, group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 2, tumbler: 1, totebag: 1, opener: 1, keychain: 1 }, img: 'image/ULTIMATE COLLECTION.png' },
+            { id: "promo_alumni",   name: "ALUMNI BUNDLE แทนความคิดถึงที่รอคอย", price: 1169, group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 1, tumbler: 1, totebag: 1, opener: 1, keychain: 1 }, img: 'image/ALUMNI BUNDLE.png' },
+            { id: "promo_family",   name: "THE HAPPY FAMILY แฟมิลี่สีน้ำเงิน-แสด", price: 999,  group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 2, shirt_kids: 1 }, img: 'image/THE HAPPY FAMILY.png' },
+            { id: "promo_essential",name: "REUNION ESSENTIAL ของขวัญแห่งวันวาน", price: 889,  group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 1, tumbler: 1, keychain: 1 }, img: 'image/REUNION ESSENTIAL.png' },
+            { id: "promo_together", name: "TOGETHER AGAIN คู่หูวันคืนถิ่น", price: 799,  group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 2 }, img: 'image/TOGETHER AGAIN.png' },
+            { id: "promo_everyday", name: "EVERYDAY KHAESAD แคแสดเคียงกาย", price: 569,  group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { tumbler: 1, totebag: 1 }, img: 'image/EVERYDAY KHAESAD.png' },
+            { id: "promo_first",    name: "FIRST MEMORY เริ่มต้นแห่งความผูกพัน", price: 499,  group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 1, keychain: 1 }, img: 'image/FIRST MEMORY.png' }
         ];
 
         var orderPriority = { 
@@ -696,10 +696,10 @@
                 var stockText = '';
                 if (p.id === 'keychain') {
                     if (remainKc <= 0) isSoldOut = true;
-                    stockText = '<span class="text-[10px] text-red-500 font-bold ml-2">(เหลือ ' + remainKc + ')</span>';
+                    stockText = '<span class="text-[13px] text-red-500 font-bold ml-2">(Limited ' + remainKc + ' ชิ้น)</span>';
                 } else if (p.id === 'tumbler') {
                     if (remainTb <= 0) isSoldOut = true;
-                    stockText = '<span class="text-[10px] text-red-500 font-bold ml-2">(เหลือ ' + remainTb + ')</span>';
+                    stockText = '<span class="text-[13px] text-red-500 font-bold ml-2">(Limited ' + remainTb + ' ชิ้น)</span>';
                 }
                 
                 // For bundles, disable if any limited item is out of stock
