@@ -134,14 +134,21 @@
             <div id="tab-orders" class="content-tab">
                 <div class="mb-4 flex justify-between items-center">
                     <h2 class="text-xl font-bold text-navy">รายการคำสั่งซื้อ</h2>
-                    <button id="batchPrintBtn" class="bg-navy text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-800 transition-colors flex items-center gap-2 hidden">
-                        <i class="bi bi-printer"></i> พิมพ์ใบปะหน้าที่เลือก (<span id="batchPrintCount">0</span>)
-                    </button>
+                    <div class="flex items-center gap-3">
+                        <select id="filterDelivery" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold outline-none">
+                            <option value="all">วิธีรับสินค้า: ทั้งหมด</option>
+                            <option value="pickup">รับหน้างาน</option>
+                            <option value="ship">จัดส่งพัสดุ</option>
+                        </select>
+                        <button id="batchPrintBtn" class="bg-navy text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-800 transition-colors flex items-center gap-2 hidden">
+                            <i class="bi bi-printer"></i> พิมพ์ใบปะหน้าที่เลือก (<span id="batchPrintCount">0</span>)
+                        </button>
+                    </div>
                 </div>
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-gray-50 border-b text-gray-600">
+                    <div class="overflow-x-auto overflow-y-auto max-h-[75vh]">
+                        <table class="w-full text-left text-sm relative">
+                            <thead class="bg-gray-50 border-b text-gray-600 sticky top-0 z-10 shadow-sm">
                                 <tr>
                                     <th class="p-4 w-12"><input type="checkbox" id="selectAllOrders" class="rounded border-gray-300 text-gold focus:ring-gold cursor-pointer"></th>
                                     <th class="p-4 font-medium">เลขออเดอร์</th>
@@ -614,12 +621,23 @@
             if (selectAllCb) selectAllCb.checked = false;
             if (typeof updateBatchPrintUI === "function") updateBatchPrintUI();
 
-            if (currentOrders.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="p-8 text-center text-gray-400"><i class="bi bi-inbox text-3xl block mb-2"></i>ยังไม่มีคำสั่งซื้อ</td></tr>';
+            var filterDelivery = document.getElementById("filterDelivery") ? document.getElementById("filterDelivery").value : "all";
+            var filteredOrders = currentOrders.filter(function(o) {
+                if (filterDelivery === "all") return true;
+                
+                var isPickup = o.deliveryMethod && (o.deliveryMethod.indexOf("pickup") !== -1 || o.deliveryMethod.indexOf("รับ") !== -1);
+                
+                if (filterDelivery === "pickup") return isPickup;
+                if (filterDelivery === "ship") return !isPickup;
+                return true;
+            });
+
+            if (filteredOrders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="p-8 text-center text-gray-400"><i class="bi bi-inbox text-3xl block mb-2"></i>ยังไม่มีคำสั่งซื้อที่ตรงกับเงื่อนไข</td></tr>';
                 return;
             }
 
-            currentOrders.forEach(function(o) {
+            filteredOrders.forEach(function(o) {
                 var payBadge = o.paymentStatus === "PAID" ? "bg-green-100 text-green-700" : (o.paymentStatus === "REJECTED" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700");
                 var payLabel = o.paymentStatus === "PAID" ? "ชำระแล้ว" : (o.paymentStatus === "REJECTED" ? "ปฏิเสธ" : "รอตรวจสอบ");
                 
@@ -627,17 +645,32 @@
                 var curFul = o.fulfillmentStatus || "UNFULFILLED";
                 if (isPickup) curFul = "NOT_REQUIRED";
                 
-                var fulBadge = curFul === "FULFILLED" ? "bg-blue-100 text-blue-700" : (curFul === "NOT_REQUIRED" ? "bg-gray-100 text-gray-500" : "bg-gray-100 text-gray-600");
-                var fulLabel = curFul === "FULFILLED" ? "จัดส่งแล้ว" : (curFul === "NOT_REQUIRED" ? "ไม่ต้องจัดส่ง" : "ยังไม่จัดส่ง");
+                var fulBadge = curFul === "FULFILLED" ? "bg-blue-100 text-blue-700" : (curFul === "NOT_REQUIRED" ? "bg-gray-100 text-gray-500" : "bg-red-100 text-red-700");
+                var fulLabel = curFul === "FULFILLED" ? "จัดส่งแล้ว" : (curFul === "NOT_REQUIRED" ? "รับหน้างาน" : "รอจัดส่ง");
 
                 var deliveryLabel = "-";
+                var deliveryBadge = "bg-gray-100 text-gray-600";
                 switch (o.deliveryMethod) {
-                    case "pickup_all": deliveryLabel = "รับหน้างาน"; break;
-                    case "ship_once": deliveryLabel = "จัดส่งพร้อมกัน"; break;
-                    case "ship_split": deliveryLabel = "จัดส่งแยก"; break;
-                    case "ship_instock_pickup_preorder": deliveryLabel = "ส่ง+รับหน้างาน"; break;
-                    default: deliveryLabel = o.deliveryMethod || "-";
+                    case "pickup_all": 
+                        deliveryLabel = "รับหน้างาน"; 
+                        deliveryBadge = "bg-purple-100 text-purple-700";
+                        break;
+                    case "ship_once": 
+                        deliveryLabel = "จัดส่งพัสดุ"; 
+                        deliveryBadge = "bg-teal-100 text-teal-700";
+                        break;
+                    case "ship_split": 
+                        deliveryLabel = "จัดส่งแยก"; 
+                        deliveryBadge = "bg-cyan-100 text-cyan-700";
+                        break;
+                    case "ship_instock_pickup_preorder": 
+                        deliveryLabel = "ส่ง+รับหน้างาน"; 
+                        deliveryBadge = "bg-orange-100 text-orange-700";
+                        break;
+                    default: 
+                        deliveryLabel = o.deliveryMethod || "-";
                 }
+                var deliveryHtml = '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold ' + deliveryBadge + '">' + deliveryLabel + '</span>';
 
                 var tr = document.createElement("tr");
                 tr.className = "hover:bg-gray-50 transition-colors";
@@ -645,7 +678,7 @@
                     '<td class="p-4"><input type="checkbox" class="order-cb rounded border-gray-300 text-gold focus:ring-gold cursor-pointer" value="' + o.orderId + '"></td>' +
                     '<td class="p-4 font-mono text-sm text-navy">' + (o.orderId || "-") + '</td>' +
                     '<td class="p-4"><div class="font-medium text-navy">' + (o.name || "-") + '</div><div class="text-xs text-gray-500">' + (o.phone || "") + '</div></td>' +
-                    '<td class="p-4 text-xs">' + deliveryLabel + '</td>' +
+                    '<td class="p-4">' + deliveryHtml + '</td>' +
                     '<td class="p-4 font-bold text-gold">' + (o.total || 0).toLocaleString() + ' ฿</td>' +
                     '<td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold ' + payBadge + '">' + payLabel + '</span></td>' +
                     '<td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold ' + fulBadge + '">' + fulLabel + '</span></td>' +
@@ -893,6 +926,13 @@
                     cb.checked = isChecked;
                 });
                 updateBatchPrintUI();
+            });
+        }
+
+        var filterDeliveryEl = document.getElementById("filterDelivery");
+        if (filterDeliveryEl) {
+            filterDeliveryEl.addEventListener("change", function(e) {
+                renderTable();
             });
         }
 
