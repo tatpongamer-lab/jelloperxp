@@ -241,9 +241,8 @@
                             <div class="mb-4">
                                 <div class="text-xs font-bold text-gray-500 mb-2">หลักฐานการโอนเงิน</div>
                                 <div id="omSlipBox" class="hidden">
-                                    <img id="omSlipImg" src="" alt="Slip" class="w-full max-w-xs rounded-xl border border-gray-200 mb-3 shadow-sm">
-                                    <a id="omSlipLink" href="#" target="_blank" class="text-sm text-navy underline mb-3 inline-block">เปิดรูปเต็ม</a>
-                                    <button id="verifySlipBtn" class="ml-3 px-3 py-1 bg-gray-100 text-gray-600 rounded-md text-xs hover:bg-gray-200 transition-colors">
+                                    <div id="omSlipImagesContainer" class="flex flex-col gap-3 mb-3"></div>
+                                    <button id="verifySlipBtn" class="px-3 py-1 bg-gray-100 text-gray-600 rounded-md text-xs hover:bg-gray-200 transition-colors">
                                         <i class="bi bi-shield-check"></i> ตรวจสอบสลิป
                                     </button>
                                     <div id="omSlipResult" class="hidden mt-3 p-3 bg-gray-50 rounded-lg text-sm border border-gray-100">
@@ -751,8 +750,26 @@
             if (o.slipUrl) {
                 slipBox.classList.remove("hidden");
                 noSlip.classList.add("hidden");
-                document.getElementById("omSlipImg").src = o.slipUrl;
-                document.getElementById("omSlipLink").href = o.slipUrl;
+                
+                var slipUrls = o.slipUrl.split(/[\s,]+/).filter(function(url) { return url.trim() !== ''; });
+                var container = document.getElementById("omSlipImagesContainer");
+                container.innerHTML = '';
+                slipUrls.forEach(function(url) {
+                    var wrapper = document.createElement('div');
+                    wrapper.className = "mb-2";
+                    var img = document.createElement('img');
+                    img.src = url;
+                    img.alt = "Slip";
+                    img.className = "w-full max-w-xs rounded-xl border border-gray-200 shadow-sm mb-1";
+                    var link = document.createElement('a');
+                    link.href = url;
+                    link.target = "_blank";
+                    link.className = "text-sm text-navy underline inline-block";
+                    link.innerText = "เปิดรูปเต็ม";
+                    wrapper.appendChild(img);
+                    wrapper.appendChild(link);
+                    container.appendChild(wrapper);
+                });
 
                 if (o.slipVerifyData) {
                     try {
@@ -763,7 +780,8 @@
                         var amountMatched = (actualAmount === expectedAmount);
                         
                         var receiverName = d.receiver || "";
-                        var accMatched = receiverName.indexOf("ศิษย์เก่า") !== -1 || receiverName.indexOf("วิทยาศาสตร์") !== -1 || receiverName.indexOf("4159") !== -1 || receiverName.indexOf("020424234159") !== -1;
+                        var recUpper = receiverName.toUpperCase();
+                        var accMatched = recUpper.indexOf("ศิษย์เก่า") !== -1 || recUpper.indexOf("วิทยาศาสตร์") !== -1 || recUpper.indexOf("4159") !== -1 || recUpper.indexOf("020424234159") !== -1 || recUpper.indexOf("SUWIJAK") !== -1 || recUpper.indexOf("ชมรม") !== -1;
                         if (!receiverName) accMatched = false;
 
                         var amountColor = amountMatched ? "text-green-600" : "text-red-600 font-bold";
@@ -827,11 +845,39 @@
 
             Swal.fire({ title: "กำลังตรวจสอบสลิป...", allowOutsideClick: false, didOpen: function() { Swal.showLoading(); } });
 
-            apiCall({ action: "verifySlip", password: pwd, orderId: activeOrderId, slipUrl: o.slipUrl })
-            .then(function(data) {
-                if (data.success && data.data) {
-                    Swal.close();
-                    var d = data.data;
+            var slipUrls = o.slipUrl.split(/[\s,]+/).filter(function(url) { return url.trim() !== ''; });
+            if (slipUrls.length === 0) { Swal.close(); return; }
+            
+            var verifyPromises = slipUrls.map(function(url) {
+                return apiCall({ action: "verifySlip", password: pwd, orderId: activeOrderId, slipUrl: url })
+                    .catch(function(e) { return { success: false, message: e.message }; });
+            });
+
+            Promise.all(verifyPromises).then(function(results) {
+                Swal.close();
+                var combinedData = null;
+                var totalAmount = 0;
+                var anyError = null;
+
+                results.forEach(function(res) {
+                    if (res.success && res.data) {
+                        var d = res.data;
+                        if (!combinedData) {
+                            combinedData = Object.assign({}, d);
+                        } else {
+                            if (d.sender && combinedData.sender.indexOf(d.sender) === -1) combinedData.sender += ", " + d.sender;
+                            if (d.transRef && combinedData.transRef.indexOf(d.transRef) === -1) combinedData.transRef += ", " + d.transRef;
+                            if (d.sendingBank && combinedData.sendingBank.indexOf(d.sendingBank) === -1) combinedData.sendingBank += ", " + d.sendingBank;
+                        }
+                        totalAmount += parseFloat(d.amount) || 0;
+                    } else if (!anyError) {
+                        anyError = res.message || "ไม่สามารถตรวจสอบสลิปบางใบได้";
+                    }
+                });
+
+                if (combinedData) {
+                    combinedData.amount = totalAmount;
+                    var d = combinedData;
                     o.slipVerifyData = JSON.stringify(d); // Update local object so it persists in UI without refresh
                     
                     var expectedAmount = o.total || 0;
@@ -839,7 +885,8 @@
                     var amountMatched = (actualAmount === expectedAmount);
                     
                     var receiverName = d.receiver || "";
-                    var accMatched = receiverName.indexOf("ศิษย์เก่า") !== -1 || receiverName.indexOf("วิทยาศาสตร์") !== -1 || receiverName.indexOf("4159") !== -1 || receiverName.indexOf("020424234159") !== -1;
+                    var recUpper = receiverName.toUpperCase();
+                    var accMatched = recUpper.indexOf("ศิษย์เก่า") !== -1 || recUpper.indexOf("วิทยาศาสตร์") !== -1 || recUpper.indexOf("4159") !== -1 || recUpper.indexOf("020424234159") !== -1 || recUpper.indexOf("SUWIJAK") !== -1 || recUpper.indexOf("ชมรม") !== -1;
                     if (!receiverName) accMatched = false;
 
                     var amountColor = amountMatched ? "text-green-600" : "text-red-600 font-bold";
@@ -864,8 +911,11 @@
                     }
                     
                     document.getElementById("omSlipResult").classList.remove("hidden");
+                    if (anyError) {
+                        setTimeout(function() { Swal.fire("ตรวจสอบได้บางส่วน", anyError, "warning"); }, 500);
+                    }
                 } else {
-                    Swal.fire("ตรวจสอบไม่สำเร็จ", data.message || "ไม่สามารถอ่านข้อมูลสลิปได้", "warning");
+                    Swal.fire("ตรวจสอบไม่สำเร็จ", anyError || "ไม่สามารถอ่านข้อมูลสลิปได้เลย", "warning");
                 }
             })
             .catch(function(e) { Swal.fire("เชื่อมต่อไม่ได้", e.message, "error"); });

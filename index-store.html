@@ -289,7 +289,7 @@
                             <div class="text-[13px] font-bold text-white/90 mb-3 border-b border-white/10 pb-2">ธนาคารออมสิน</div>
                             <div class="flex items-center justify-between bg-white/10 border border-white/20 py-2.5 px-3 rounded-lg mb-3">
                                 <div class="text-[17px] font-mono tracking-widest font-bold">020-4-24234-159</div>
-                                <button type="button" onclick="copyAccountNumber()" class="w-8 h-8 flex items-center justify-center bg-white text-navy rounded hover:bg-gold transition-colors duration-200 shadow-sm">
+                                <button type="button" onclick="copyAccountNumber()" class="w-8 h-8 flex items-center justify-center bg-white text-navy rounded hover:bg-gold transition-colors duration-200 shadow-sm" title="คัดลอกเลขบัญชี">
                                     <i class="ph ph-copy text-lg"></i>
                                 </button>
                             </div>
@@ -302,13 +302,11 @@
                         </div>
                         <div class="flex justify-between items-center mb-4"><span class="font-bold text-navy">ยอดสุทธิ:</span><span id="co-total" class="text-2xl font-bold text-primary-orange">฿0</span></div>
                         <div class="relative border-2 border-dashed border-gold/50 rounded-xl bg-gray-50 p-6 text-center transition-all" id="drop-zone">
-                            <input type="file" id="slip-upload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
+                            <input type="file" id="slip-upload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" multiple>
                             <i class="ph ph-image text-3xl text-gold mb-1"></i>
-                            <p class="text-xs text-charcoal/70 font-medium" id="file-name-display">แตะเพื่ออัปโหลดสลิป</p>
+                            <p class="text-xs text-charcoal/70 font-medium" id="file-name-display">แตะเพื่ออัปโหลดสลิป (เลือกได้หลายรูป)</p>
                         </div>
-                        <div id="slip-preview-container" class="hidden relative mt-3">
-                            <button type="button" onclick="app.removeSlip()" class="absolute -top-2 -right-2 z-10 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md hover:bg-red-600 transition-colors"><i class="ph ph-x text-sm"></i></button>
-                            <img id="slip-preview" src="" alt="Slip Preview" class="w-full max-h-48 object-contain rounded-xl border border-beige bg-white">
+                        <div id="slip-preview-container" class="hidden mt-3 grid grid-cols-2 gap-2">
                         </div>
                         <div id="slip-status" class="mt-2 text-[10px] text-center hidden"></div>
                     </div>
@@ -421,23 +419,43 @@
         // --- Copy Account Number ---
         function copyAccountNumber() {
             var accNo = "020424234159"; // Without dashes for easy pasting in banking apps
-            navigator.clipboard.writeText(accNo).then(function() {
-                showToast("คัดลอกเลขบัญชีแล้ว", "success");
-            }).catch(function(err) {
-                console.error('Copy error:', err);
-                // Fallback for older browsers
-                var textArea = document.createElement("textarea");
-                textArea.value = accNo;
-                document.body.appendChild(textArea);
-                textArea.select();
-                try {
-                    document.execCommand('copy');
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(accNo).then(function() {
                     showToast("คัดลอกเลขบัญชีแล้ว", "success");
-                } catch (err) {
-                    showToast("ไม่สามารถคัดลอกได้", "error");
-                }
-                document.body.removeChild(textArea);
-            });
+                }).catch(function() { fallbackCopyTextToClipboard(accNo); });
+            } else {
+                fallbackCopyTextToClipboard(accNo);
+            }
+        }
+        function fallbackCopyTextToClipboard(text) {
+            var textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "-9999px";
+            textArea.style.left = "-9999px";
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            document.body.appendChild(textArea);
+            
+            if (navigator.userAgent.match(/ipad|iphone/i)) {
+                var range = document.createRange();
+                range.selectNodeContents(textArea);
+                var selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+                textArea.setSelectionRange(0, 999999);
+            } else {
+                textArea.focus();
+                textArea.select();
+            }
+
+            try {
+                var successful = document.execCommand('copy');
+                if (successful) showToast("คัดลอกเลขบัญชีแล้ว", "success");
+                else showToast("เบราว์เซอร์ไม่รองรับ กรุณาคัดลอกด้วยตัวเอง", "error");
+            } catch (err) {
+                showToast("เบราว์เซอร์ไม่รองรับ กรุณาคัดลอกด้วยตัวเอง", "error");
+            }
+            document.body.removeChild(textArea);
         }
 
         // --- ข้อมูลสินค้า (Fallback) ---
@@ -485,7 +503,7 @@
         ];
 
         var cart = [];
-        var slipBase64Data = "";
+        var slipBase64Data = [];
         var storeStatus = "OPEN";
         var isAdminMode = new URLSearchParams(window.location.search).get('admin') === 'true';
 
@@ -910,72 +928,131 @@
         // --- Slip Upload ---
         function setupSlipUpload() { document.getElementById('slip-upload').addEventListener('change', handleSlipUpload); }
 
+        var slipPreviewsSrcs = []; // Store image sources for rendering
+
         function handleSlipUpload() {
             var fileInput = document.getElementById('slip-upload');
-            var nameDisplay = document.getElementById('file-name-display');
             var status = document.getElementById('slip-status');
-            var preview = document.getElementById('slip-preview');
-            var previewContainer = document.getElementById('slip-preview-container');
-            var dropZone = document.getElementById('drop-zone');
+            
             if (!fileInput.files.length) return;
-            var file = fileInput.files[0];
-            nameDisplay.textContent = file.name;
+            var files = Array.from(fileInput.files);
+            fileInput.value = ''; // clear immediately so user can select same file again if they want
+            
             status.classList.remove('hidden');
             status.className = 'mt-2 text-[10px] text-gold animate-pulse text-center';
             status.innerHTML = '<i class="ph ph-spinner animate-spin"></i> กำลังประมวลผล...';
-            var reader = new FileReader();
-            reader.onerror = function() { status.className = 'mt-2 text-[10px] text-red-500 font-bold text-center'; status.innerHTML = '<i class="ph-fill ph-warning-circle"></i> อ่านไฟล์ไม่สำเร็จ'; };
-            reader.onload = function(e) {
-                var rawDataUrl = e.target.result;
-                var img = new Image();
-                img.onerror = function() { 
-                    // Fallback to raw data url if image object fails to load (Android WebView bug)
-                    slipBase64Data = rawDataUrl.split(',')[1];
-                    if (preview && previewContainer) { preview.src = rawDataUrl; previewContainer.classList.remove('hidden'); dropZone.classList.add('hidden'); }
-                    status.className = 'mt-2 text-[10px] text-green-600 font-bold text-center';
-                    status.innerHTML = '<i class="ph-fill ph-check-circle"></i> อัปโหลดสลิปเรียบร้อย (Fallback)';
+            
+            var loadedCount = 0;
+            var hasError = false;
+            
+            // Temporary arrays for this batch
+            var batchBase64 = new Array(files.length);
+            var batchSrcs = new Array(files.length);
+
+            files.forEach(function(file, index) {
+                var reader = new FileReader();
+                reader.onerror = function() { hasError = true; checkBatchComplete(); };
+                reader.onload = function(e) {
+                    var rawDataUrl = e.target.result;
+                    var img = new Image();
+                    img.onerror = function() { 
+                        batchBase64[index] = rawDataUrl.split(',')[1];
+                        batchSrcs[index] = rawDataUrl;
+                        loadedCount++; checkBatchComplete();
+                    };
+                    img.onload = function() {
+                        try {
+                            var canvas = document.createElement('canvas'), ctx = canvas.getContext('2d'), MAX_W = 800, w = img.width, h = img.height;
+                            if (w > MAX_W) { h = Math.round((h * MAX_W) / w); w = MAX_W; }
+                            canvas.width = w; canvas.height = h; ctx.drawImage(img, 0, 0, w, h);
+                            var b64url = canvas.toDataURL('image/jpeg', 0.6);
+                            batchBase64[index] = b64url.split(',')[1];
+                            batchSrcs[index] = b64url;
+                        } catch (err) {
+                            batchBase64[index] = rawDataUrl.split(',')[1];
+                            batchSrcs[index] = rawDataUrl;
+                        }
+                        loadedCount++; checkBatchComplete();
+                    };
+                    img.src = rawDataUrl;
                 };
-                img.onload = function() {
-                    try {
-                        var canvas = document.createElement('canvas'), ctx = canvas.getContext('2d'), MAX_W = 800, w = img.width, h = img.height;
-                        if (w > MAX_W) { h = Math.round((h * MAX_W) / w); w = MAX_W; }
-                        canvas.width = w; canvas.height = h; ctx.drawImage(img, 0, 0, w, h);
-                        var b64url = canvas.toDataURL('image/jpeg', 0.6);
-                        slipBase64Data = b64url.split(',')[1];
-                        if (preview && previewContainer) { preview.src = b64url; previewContainer.classList.remove('hidden'); dropZone.classList.add('hidden'); }
-                    } catch (err) {
-                        // Fallback if canvas fails (Android in-app browser issue)
-                        slipBase64Data = rawDataUrl.split(',')[1];
-                        if (preview && previewContainer) { preview.src = rawDataUrl; previewContainer.classList.remove('hidden'); dropZone.classList.add('hidden'); }
+                reader.readAsDataURL(file);
+            });
+
+            function checkBatchComplete() {
+                if (loadedCount === files.length) {
+                    // Append successful ones
+                    for(var i=0; i<files.length; i++) {
+                        if(batchBase64[i]) {
+                            slipBase64Data.push(batchBase64[i]);
+                            slipPreviewsSrcs.push(batchSrcs[i]);
+                        }
                     }
-                    status.className = 'mt-2 text-[10px] text-green-600 font-bold text-center';
-                    status.innerHTML = '<i class="ph-fill ph-check-circle"></i> อัปโหลดสลิปเรียบร้อย';
-                };
-                img.src = rawDataUrl;
-            };
-            reader.readAsDataURL(file);
+                    
+                    renderSlipPreviews();
+
+                    if (hasError) {
+                        status.className = 'mt-2 text-[10px] text-red-500 font-bold text-center';
+                        status.innerHTML = '<i class="ph-fill ph-warning-circle"></i> อ่านไฟล์บางส่วนไม่สำเร็จ';
+                    } else {
+                        status.className = 'mt-2 text-[10px] text-green-600 font-bold text-center';
+                        status.innerHTML = '<i class="ph-fill ph-check-circle"></i> อัปโหลดเพิ่มเรียบร้อย';
+                        setTimeout(function(){ status.classList.add("hidden"); }, 2000);
+                    }
+                }
+            }
         }
 
-        function removeSlip() {
-            var fileInput = document.getElementById('slip-upload');
-            var nameDisplay = document.getElementById('file-name-display');
-            var status = document.getElementById('slip-status');
+        function removeSlipAt(index) {
+            slipBase64Data.splice(index, 1);
+            slipPreviewsSrcs.splice(index, 1);
+            renderSlipPreviews();
+        }
+
+        function renderSlipPreviews() {
             var previewContainer = document.getElementById('slip-preview-container');
-            var dropZone = document.getElementById('drop-zone');
+            var nameDisplay = document.getElementById('file-name-display');
+            previewContainer.innerHTML = '';
             
-            fileInput.value = '';
-            slipBase64Data = '';
-            nameDisplay.textContent = 'แตะเพื่ออัปโหลดสลิป';
-            status.classList.add('hidden');
-            if (previewContainer) previewContainer.classList.add('hidden');
-            if (dropZone) dropZone.classList.remove('hidden');
+            if (slipBase64Data.length > 0) {
+                previewContainer.classList.remove('hidden');
+                nameDisplay.textContent = 'อัปโหลดแล้ว ' + slipBase64Data.length + ' รูป (แตะเพื่อเพิ่มอีก)';
+                
+                slipPreviewsSrcs.forEach(function(src, index) {
+                    var wrapper = document.createElement('div');
+                    wrapper.className = "relative";
+                    
+                    var imgEl = document.createElement('img');
+                    imgEl.src = src;
+                    imgEl.className = "w-full h-24 object-cover rounded-xl border border-beige bg-white shadow-sm";
+                    
+                    var btn = document.createElement('button');
+                    btn.type = "button";
+                    btn.className = "absolute -top-2 -right-2 z-10 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md hover:bg-red-600 transition-colors";
+                    btn.innerHTML = '<i class="ph ph-x text-xs"></i>';
+                    btn.onclick = function() { removeSlipAt(index); };
+                    
+                    wrapper.appendChild(imgEl);
+                    wrapper.appendChild(btn);
+                    previewContainer.appendChild(wrapper);
+                });
+            } else {
+                previewContainer.classList.add('hidden');
+                nameDisplay.textContent = 'แตะเพื่ออัปโหลดสลิป (เลือกได้หลายรูป)';
+            }
+        }
+        
+        function removeSlip() {
+            slipBase64Data = [];
+            slipPreviewsSrcs = [];
+            renderSlipPreviews();
         }
 
         // --- Form Submission ---
         document.getElementById('checkout-form').addEventListener('submit', function(e) {
             e.preventDefault();
             if (cart.length === 0) return;
-            if (!isAdminMode && !slipBase64Data) { showToast("กรุณาอัปโหลดสลิปการโอนเงิน", "warning"); return; }
+            if (!isAdminMode && (!slipBase64Data || slipBase64Data.length === 0)) { showToast("กรุณาอัปโหลดสลิปการโอนเงิน", "warning"); return; }
             var custName = document.getElementById('cust-name').value.trim();
             var custPhone = document.getElementById('cust-phone').value.trim();
             if (!custName || !custPhone) { showToast("กรุณากรอกชื่อและเบอร์โทรศัพท์", "warning"); return; }
@@ -1012,7 +1089,7 @@
                     }
                     document.getElementById('success-modal').classList.remove('hidden');
                     document.getElementById('success-modal').classList.add('flex');
-                    cart = []; slipBase64Data = ""; updateCartUI();
+                    cart = []; slipBase64Data = []; updateCartUI();
                 } else { showToast(result.message || "เกิดข้อผิดพลาด", "error"); submitBtn.disabled = false; }
             })
             .catch(function(err) { console.error('Order error:', err); showToast("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้", "error"); submitBtn.disabled = false; })
