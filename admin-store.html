@@ -135,10 +135,12 @@
                 <div class="mb-4 flex justify-between items-center">
                     <h2 class="text-xl font-bold text-navy">รายการคำสั่งซื้อ</h2>
                     <div class="flex items-center gap-3">
-                        <select id="filterDelivery" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold outline-none">
-                            <option value="all">วิธีรับสินค้า: ทั้งหมด</option>
-                            <option value="pickup">รับหน้างาน</option>
-                            <option value="ship">จัดส่งพัสดุ</option>
+                        <select id="filterFulfillment" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold outline-none">
+                            <option value="all">สถานะจัดส่ง: ทั้งหมด</option>
+                            <option value="UNFULFILLED">รอจัดส่ง</option>
+                            <option value="PARTIAL">จัดส่งบางส่วน</option>
+                            <option value="FULFILLED">จัดส่งแล้ว</option>
+                            <option value="NOT_REQUIRED">รับหน้างาน</option>
                         </select>
                         <button id="batchPrintBtn" class="bg-navy text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-800 transition-colors flex items-center gap-2 hidden">
                             <i class="bi bi-printer"></i> พิมพ์ใบปะหน้าที่เลือก (<span id="batchPrintCount">0</span>)
@@ -626,15 +628,15 @@
             if (selectAllCb) selectAllCb.checked = false;
             if (typeof updateBatchPrintUI === "function") updateBatchPrintUI();
 
-            var filterDelivery = document.getElementById("filterDelivery") ? document.getElementById("filterDelivery").value : "all";
+            var filterFulfillment = document.getElementById("filterFulfillment") ? document.getElementById("filterFulfillment").value : "all";
             var filteredOrders = currentOrders.filter(function(o) {
-                if (filterDelivery === "all") return true;
+                if (filterFulfillment === "all") return true;
                 
                 var isPickup = o.deliveryMethod && (o.deliveryMethod.indexOf("pickup") !== -1 || o.deliveryMethod.indexOf("รับ") !== -1);
+                var curFul = o.fulfillmentStatus || "UNFULFILLED";
+                if (isPickup) curFul = "NOT_REQUIRED";
                 
-                if (filterDelivery === "pickup") return isPickup;
-                if (filterDelivery === "ship") return !isPickup;
-                return true;
+                return curFul === filterFulfillment;
             });
 
             if (filteredOrders.length === 0) {
@@ -1147,9 +1149,9 @@
             });
         }
 
-        var filterDeliveryEl = document.getElementById("filterDelivery");
-        if (filterDeliveryEl) {
-            filterDeliveryEl.addEventListener("change", function(e) {
+        var filterFulfillmentEl = document.getElementById("filterFulfillment");
+        if (filterFulfillmentEl) {
+            filterFulfillmentEl.addEventListener("change", function(e) {
                 renderTable();
             });
         }
