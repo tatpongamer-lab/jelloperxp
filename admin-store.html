@@ -277,6 +277,7 @@
                                     <label class="block text-xs text-gray-500 mb-1">สถานะการจัดส่ง</label>
                                     <select id="omFulStatus" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-gold outline-none">
                                         <option value="UNFULFILLED">ยังไม่จัดส่ง</option>
+                                        <option value="PARTIAL">จัดส่งบางส่วน</option>
                                         <option value="FULFILLED">จัดส่งแล้ว</option>
                                         <option value="NOT_REQUIRED">ไม่ต้องจัดส่ง</option>
                                     </select>
@@ -298,6 +299,11 @@
                                     </datalist>
                                 </div>
                             </div>
+                        </div>
+                        <!-- Admin Note -->
+                        <div>
+                            <h4 class="text-xs uppercase tracking-widest text-gray-400 font-bold mb-3"><i class="bi bi-journal-text mr-1"></i> บันทึกช่วยจำ (Admin Note)</h4>
+                            <textarea id="omAdminNote" rows="2" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-gold outline-none" placeholder="โน้ตเพิ่มเติมสำหรับแอดมิน..."></textarea>
                         </div>
                         <!-- Buttons -->
                         <div class="flex gap-3">
@@ -644,8 +650,58 @@
                 var curFul = o.fulfillmentStatus || "UNFULFILLED";
                 if (isPickup) curFul = "NOT_REQUIRED";
                 
-                var fulBadge = curFul === "FULFILLED" ? "bg-blue-100 text-blue-700" : (curFul === "NOT_REQUIRED" ? "bg-gray-100 text-gray-500" : "bg-red-100 text-red-700");
-                var fulLabel = curFul === "FULFILLED" ? "จัดส่งแล้ว" : (curFul === "NOT_REQUIRED" ? "รับหน้างาน" : "รอจัดส่ง");
+                var fulBadge = curFul === "FULFILLED" ? "bg-blue-100 text-blue-700" : (curFul === "PARTIAL" ? "bg-orange-100 text-orange-700" : (curFul === "NOT_REQUIRED" ? "bg-gray-100 text-gray-500" : "bg-red-100 text-red-700"));
+                var fulLabel = curFul === "FULFILLED" ? "จัดส่งแล้ว" : (curFul === "PARTIAL" ? "จัดส่งบางส่วน" : (curFul === "NOT_REQUIRED" ? "รับหน้างาน" : "รอจัดส่ง"));
+
+                var pendingHtml = "";
+                if (curFul === "PARTIAL") {
+                    var shippedItems = [];
+                    try { shippedItems = JSON.parse(o.shippedItemsData || "[]").map(String); } catch (e) {}
+                    var pendingNames = [];
+                    
+                    if (o.items && o.items.length > 0) {
+                        o.items.forEach(function(i, idx) {
+                            var qty = i.quantity || i.qty || 1;
+                            if (i.isBundle && i.bundleItems) {
+                                var mapping = { "shirt": "เสื้อผู้ใหญ่", "shirt_kids": "เสื้อเด็ก", "tumbler": "แก้ว", "totebag": "ถุงผ้า", "keychain": "พวงกุญแจ", "opener": "ที่เปิดขวด" };
+                                var sizesArr = i.size ? i.size.split(', ') : [];
+                                var sizeIndex = 0;
+                                var subIndex = 0;
+                                for (var k in i.bundleItems) {
+                                    var bq = i.bundleItems[k] * qty;
+                                    var bName = mapping[k] || k;
+                                    if (k === 'shirt' || k === 'shirt_kids') {
+                                        for(var c=0; c<bq; c++) {
+                                            var sz = sizesArr[sizeIndex] || "N/A";
+                                            sizeIndex++;
+                                            var key = idx + "-" + subIndex;
+                                            if (shippedItems.indexOf(key) === -1) pendingNames.push(bName + " (" + sz + ")");
+                                            subIndex++;
+                                        }
+                                    } else {
+                                        for(var c=0; c<bq; c++) {
+                                            var key = idx + "-" + subIndex;
+                                            if (shippedItems.indexOf(key) === -1) pendingNames.push(bName);
+                                            subIndex++;
+                                        }
+                                    }
+                                }
+                            } else {
+                                var sz = i.size ? ' (' + i.size + ')' : '';
+                                for(var q=0; q<qty; q++) {
+                                    var key = idx + "-" + q;
+                                    if (shippedItems.indexOf(key) === -1) pendingNames.push((i.name || "-") + sz);
+                                }
+                            }
+                        });
+                    }
+                    if (pendingNames.length > 0) {
+                        // limit to 2 items then add ...
+                        var displayNames = pendingNames.slice(0, 2).join(", ");
+                        if (pendingNames.length > 2) displayNames += " และอื่นๆ";
+                        pendingHtml = '<div class="text-[10px] text-red-600 mt-1 whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]" title="' + pendingNames.join(", ") + '">ค้างส่ง: ' + displayNames + '</div>';
+                    }
+                }
 
                 var deliveryLabel = "-";
                 var deliveryBadge = "bg-gray-100 text-gray-600";
@@ -680,7 +736,7 @@
                     '<td class="p-4">' + deliveryHtml + '</td>' +
                     '<td class="p-4 font-bold text-gold">' + (o.total || 0).toLocaleString() + ' ฿</td>' +
                     '<td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold ' + payBadge + '">' + payLabel + '</span></td>' +
-                    '<td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold ' + fulBadge + '">' + fulLabel + '</span></td>' +
+                    '<td class="p-4"><div class="flex flex-col"><span class="px-2.5 py-1 rounded-full text-xs font-bold self-start ' + fulBadge + '">' + fulLabel + '</span>' + pendingHtml + '</div></td>' +
                     '<td class="p-4"><button class="text-navy hover:text-gold transition-colors p-1 edit-order-btn" data-id="' + o.orderId + '" title="แก้ไข"><i class="bi bi-pencil-square text-lg"></i></button></td>';
                 tbody.appendChild(tr);
             });
@@ -708,34 +764,82 @@
 
             // Items
             var itemsEl = document.getElementById("omItems");
+            var shippedItems = [];
+            try { shippedItems = JSON.parse(o.shippedItemsData || "[]").map(String); } catch (e) {}
             if (o.items && o.items.length > 0) {
-                itemsEl.innerHTML = o.items.map(function(i) {
-                    var html = '<div class="flex justify-between items-start border-b border-gray-200 pb-2 mb-2 last:border-0 last:pb-0 last:mb-0">' +
-                        '<div><span class="text-navy font-medium">' + (i.name || "-") + '</span>' +
-                        (i.size ? '<span class="text-gray-400 text-xs ml-1">(' + i.size + ')</span>' : '');
+                itemsEl.innerHTML = o.items.map(function(i, idx) {
+                    var html = '<div class="border-b border-gray-200 pb-2 mb-2 last:border-0 last:pb-0 last:mb-0">';
+                    var qty = i.quantity || i.qty || 1;
+                    
                     if (i.isBundle && i.bundleItems) {
-                        html += '<ul class="text-xs text-gray-500 mt-1 ml-2 list-none">';
+                        html += '<div class="flex justify-between items-start mb-1"><div class="text-navy font-medium">' + (i.name || "-") + '</div>' +
+                                '<div class="text-right flex-shrink-0 ml-4"><span class="text-gray-500">x' + qty + '</span><span class="text-navy font-semibold ml-2">' + (i.price || 0).toLocaleString() + ' ฿</span></div></div>';
+                        html += '<ul class="text-xs mt-1 ml-2 list-none space-y-1">';
                         var mapping = { "shirt": "เสื้อผู้ใหญ่", "shirt_kids": "เสื้อเด็ก", "tumbler": "แก้ว", "totebag": "ถุงผ้า", "keychain": "พวงกุญแจ", "opener": "ที่เปิดขวด" };
                         var sizesArr = i.size ? i.size.split(', ') : [];
                         var sizeIndex = 0;
+                        var subIndex = 0;
+
+                        // Multiply subitems by main quantity if needed? The user's previous logic didn't multiply the subitems loop by qty, but each subitem is x(qty).
+                        // Let's keep it simple: one checkbox per sub-item definition. If there are multiple bundles, the admin will just tick it all together or we need to expand it?
+                        // Let's expand every single physical item to have its own checkbox.
+                        // Wait, if qty=2, and bundle has 1 shirt. There are 2 shirts.
+                        // The user's code previously:
+                        // for(var c=0; c<bq; c++) ... sizeIndex++
+                        // This handled `bq` (bundle quantity of that component) but NOT `qty` (how many bundles they bought).
+                        // But let's assume `qty` is 1 for bundles or `bq` handles it. I will keep the original logic for generating the `<li>` and just add a checkbox.
+
                         for (var k in i.bundleItems) {
-                            var bq = i.bundleItems[k];
+                            var bq = i.bundleItems[k] * qty; // Multiply by qty to ensure we list every single item
                             var bName = mapping[k] || k;
                             if (k === 'shirt' || k === 'shirt_kids') {
                                 for(var c=0; c<bq; c++) {
                                     var sz = sizesArr[sizeIndex] || "N/A";
                                     sizeIndex++;
-                                    html += '<li>- ' + bName + ' (' + sz + ')</li>';
+                                    var key = idx + "-" + subIndex;
+                                    var isChecked = shippedItems.indexOf(key) !== -1;
+                                    var textClass = isChecked ? "text-green-600 font-medium" : "text-gray-600 om-pending-text";
+                                    var statusText = isChecked ? " <span class='text-[10px] text-green-600 bg-green-50 px-1 rounded'>[จัดส่งแล้ว]</span>" : " <span class='text-[10px] text-red-500 bg-red-50 px-1 rounded hidden om-pending-badge'>[รอจัดส่ง]</span>";
+                                    html += '<li class="flex items-center gap-2 ' + textClass + '">' +
+                                            '<input type="checkbox" class="om-item-checkbox hidden" data-key="' + key + '" ' + (isChecked ? 'checked' : '') + '>' +
+                                            '- ' + bName + ' (' + sz + ')' + statusText + '</li>';
+                                    subIndex++;
                                 }
                             } else {
-                                html += '<li>- ' + bName + ' x' + bq + '</li>';
+                                for(var c=0; c<bq; c++) {
+                                    var key = idx + "-" + subIndex;
+                                    var isChecked = shippedItems.indexOf(key) !== -1;
+                                    var textClass = isChecked ? "text-green-600 font-medium" : "text-gray-600 om-pending-text";
+                                    var statusText = isChecked ? " <span class='text-[10px] text-green-600 bg-green-50 px-1 rounded'>[จัดส่งแล้ว]</span>" : " <span class='text-[10px] text-red-500 bg-red-50 px-1 rounded hidden om-pending-badge'>[รอจัดส่ง]</span>";
+                                    html += '<li class="flex items-center gap-2 ' + textClass + '">' +
+                                            '<input type="checkbox" class="om-item-checkbox hidden" data-key="' + key + '" ' + (isChecked ? 'checked' : '') + '>' +
+                                            '- ' + bName + statusText + '</li>';
+                                    subIndex++;
+                                }
                             }
                         }
-                        html += '</ul>';
+                        html += '</ul></div>';
+                    } else {
+                        // Standard product
+                        html += '<div class="flex justify-between items-start">';
+                        html += '<div class="flex items-start gap-2">';
+                        
+                        // Expand by qty so they can tick individual items if they bought 2 shirts
+                        var sz = i.size ? ' <span class="text-xs">(' + i.size + ')</span>' : '';
+                        html += '<ul class="text-sm list-none space-y-1">';
+                        for(var q=0; q<qty; q++) {
+                            var key = idx + "-" + q;
+                            var isChecked = shippedItems.indexOf(key) !== -1;
+                            var textClass = isChecked ? "text-green-600 font-medium" : "text-navy font-medium om-pending-text";
+                            var statusText = isChecked ? " <span class='text-[10px] text-green-600 bg-green-50 px-1 rounded font-normal'>[จัดส่งแล้ว]</span>" : " <span class='text-[10px] text-red-500 bg-red-50 px-1 rounded font-normal hidden om-pending-badge'>[รอจัดส่ง]</span>";
+                            html += '<li class="flex items-center gap-2 ' + textClass + '">' +
+                                    '<input type="checkbox" class="om-item-checkbox hidden" data-key="' + key + '" ' + (isChecked ? 'checked' : '') + '>' +
+                                    (i.name || "-") + sz + statusText + '</li>';
+                        }
+                        html += '</ul></div>';
+                        html += '<div class="text-right flex-shrink-0 ml-4"><span class="text-gray-500">x' + qty + '</span>' +
+                                '<span class="text-navy font-semibold ml-2">' + (i.price || 0).toLocaleString() + ' ฿</span></div></div></div>';
                     }
-                    html += '</div>' +
-                        '<div class="text-right flex-shrink-0 ml-4"><span class="text-gray-500">x' + (i.quantity || i.qty || 1) + '</span>' +
-                        '<span class="text-navy font-semibold ml-2">' + (i.price || 0).toLocaleString() + ' ฿</span></div></div>';
                     return html;
                 }).join("");
             } else {
@@ -825,9 +929,63 @@
             document.getElementById("omFulStatus").value = curFul;
             document.getElementById("omTracking").value = o.trackingNumber || "";
             document.getElementById("omCarrier").value = o.carrier || "";
+            document.getElementById("omAdminNote").value = o.adminNote || "";
+
+            toggleCheckboxes();
 
             document.getElementById("orderModal").classList.remove("hidden");
         }
+
+        function toggleCheckboxes() {
+            var status = document.getElementById("omFulStatus").value;
+            var checkboxes = document.querySelectorAll(".om-item-checkbox");
+            var pendingBadges = document.querySelectorAll(".om-pending-badge");
+            
+            checkboxes.forEach(function(cb) {
+                if (status === "PARTIAL") {
+                    cb.classList.remove("hidden");
+                } else {
+                    cb.classList.add("hidden");
+                }
+            });
+            
+            pendingBadges.forEach(function(badge) {
+                if (status === "PARTIAL") {
+                    badge.classList.remove("hidden");
+                } else {
+                    badge.classList.add("hidden");
+                }
+            });
+        }
+
+        document.getElementById("omFulStatus").addEventListener("change", toggleCheckboxes);
+        
+        // Add listener to checkboxes to toggle colors dynamically
+        document.getElementById("omItems").addEventListener("change", function(e) {
+            if (e.target && e.target.classList.contains("om-item-checkbox")) {
+                var li = e.target.closest("li");
+                var badge = li.querySelector("span.text-\\[10px\\]");
+                
+                if (e.target.checked) {
+                    li.classList.remove("text-navy", "text-gray-600", "om-pending-text");
+                    li.classList.add("text-green-600", "font-medium");
+                    if (badge) {
+                        badge.className = "text-[10px] text-green-600 bg-green-50 px-1 rounded font-normal";
+                        badge.innerText = "[จัดส่งแล้ว]";
+                    }
+                } else {
+                    li.classList.remove("text-green-600", "font-medium");
+                    li.classList.add("text-gray-600", "om-pending-text");
+                    if (badge) {
+                        badge.className = "text-[10px] text-red-500 bg-red-50 px-1 rounded font-normal om-pending-badge";
+                        badge.innerText = "[รอจัดส่ง]";
+                        if (document.getElementById("omFulStatus").value !== "PARTIAL") {
+                            badge.classList.add("hidden");
+                        }
+                    }
+                }
+            }
+        });
 
         function closeModal() {
             document.getElementById("orderModal").classList.add("hidden");
@@ -929,6 +1087,14 @@
             var fulStatus = document.getElementById("omFulStatus").value;
             var tracking = document.getElementById("omTracking").value.trim();
             var carrier = document.getElementById("omCarrier").value.trim();
+            var adminNote = document.getElementById("omAdminNote").value.trim();
+
+            var shippedItems = [];
+            if (fulStatus === "PARTIAL") {
+                document.querySelectorAll(".om-item-checkbox:checked").forEach(function(cb) {
+                    shippedItems.push(cb.getAttribute("data-key"));
+                });
+            }
 
             Swal.fire({ title: "กำลังบันทึก...", allowOutsideClick: false, didOpen: function() { Swal.showLoading(); } });
 
@@ -939,7 +1105,9 @@
                 paymentStatus: payStatus,
                 fulfillmentStatus: fulStatus,
                 trackingNumber: tracking,
-                carrier: carrier
+                carrier: carrier,
+                shippedItemsData: JSON.stringify(shippedItems),
+                adminNote: adminNote
             })
             .then(function(data) {
                 if (data.success) {
