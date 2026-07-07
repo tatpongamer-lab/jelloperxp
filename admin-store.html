@@ -93,13 +93,27 @@
 
             <!-- Tab: Overview -->
             <div id="tab-overview" class="content-tab active">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-5 mb-8">
                     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 border-l-4 border-l-navy">
                         <div class="flex items-center justify-between mb-2">
                             <div class="text-sm text-gray-500">รายได้รวม</div>
                             <div class="w-10 h-10 bg-navy/10 rounded-xl flex items-center justify-center"><i class="bi bi-currency-exchange text-navy text-lg"></i></div>
                         </div>
                         <div class="text-2xl font-bold text-navy" id="statRevenue">0 ฿</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 border-l-4 border-l-pink-400">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="text-sm text-gray-500">ยอดขายสินค้า</div>
+                            <div class="w-10 h-10 bg-pink-50 rounded-xl flex items-center justify-center"><i class="bi bi-bag-heart text-pink-500 text-lg"></i></div>
+                        </div>
+                        <div class="text-2xl font-bold text-navy" id="statProductSales">0 ฿</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 border-l-4 border-l-blue-400">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="text-sm text-gray-500">ค่าจัดส่งรวม</div>
+                            <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center"><i class="bi bi-truck text-blue-500 text-lg"></i></div>
+                        </div>
+                        <div class="text-2xl font-bold text-navy" id="statShipping">0 ฿</div>
                     </div>
                     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 border-l-4 border-l-gold">
                         <div class="flex items-center justify-between mb-2">
@@ -440,6 +454,21 @@
                     document.getElementById("statRevenue").innerText = (data.stats.totalRevenue || 0).toLocaleString() + " ฿";
                     document.getElementById("statOrders").innerText = data.stats.totalOrders || 0;
                     document.getElementById("statPending").innerText = data.stats.pendingPayments || 0;
+
+                    var totalRevenueNum = parseFloat(data.stats.totalRevenue) || 0;
+                    var totalShipping = 0;
+                    currentOrders.forEach(function(o) {
+                        if (o.paymentStatus !== "REJECTED" && o.shippingFee) {
+                            totalShipping += parseFloat(o.shippingFee) || 0;
+                        }
+                    });
+                    
+                    var totalProductSales = totalRevenueNum - totalShipping;
+                    var statProductSalesEl = document.getElementById("statProductSales");
+                    if (statProductSalesEl) statProductSalesEl.innerText = totalProductSales.toLocaleString() + " ฿";
+
+                    var statShippingEl = document.getElementById("statShipping");
+                    if (statShippingEl) statShippingEl.innerText = totalShipping.toLocaleString() + " ฿";
 
                     updateStoreUI();
                     renderTable();
@@ -1221,9 +1250,9 @@
                     currentLabels.push(labelHtml);
                 });
 
-                // Group by 6 per page
-                for (var i = 0; i < currentLabels.length; i += 6) {
-                    var chunk = currentLabels.slice(i, i + 6);
+                // Group by 8 per page
+                for (var i = 0; i < currentLabels.length; i += 8) {
+                    var chunk = currentLabels.slice(i, i + 8);
                     pagesHtml += '<div class="page">' + chunk.join("") + '</div>';
                 }
 
@@ -1232,7 +1261,7 @@
                     "<html><head><title>พิมพ์ใบปะหน้า (Batch)</title>" +
                     "<style>" +
                     "body { font-family: sans-serif; padding: 20px; margin: 0; background: #525659; }" +
-                    ".page { background: #fff; width: 210mm; height: 297mm; padding: 8mm; margin: 0 auto 20px auto; box-sizing: border-box; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 5mm; box-shadow: 0 0 10px rgba(0,0,0,0.1); overflow: hidden; }" +
+                    ".page { background: #fff; width: 210mm; height: 297mm; padding: 8mm; margin: 0 auto 20px auto; box-sizing: border-box; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(4, minmax(0, 1fr)); gap: 4mm; box-shadow: 0 0 10px rgba(0,0,0,0.1); overflow: hidden; }" +
                     ".label { border: 1px dashed #999; padding: 5mm; display: flex; flex-direction: column; box-sizing: border-box; position: relative; overflow: hidden; }" +
                     "@media print { " +
                     "   @page { size: A4 portrait; margin: 0; } " +
