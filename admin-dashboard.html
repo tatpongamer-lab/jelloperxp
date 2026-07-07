@@ -702,6 +702,9 @@
             <div class="container d-flex justify-content-between align-items-center mb-1">
                 <div class="nav-brand">Admin <span class="text-accent">Dashboard</span></div>
                 <div class="d-flex gap-2">
+                    <button class="btn btn-outline" id="btnToggleReg" onclick="toggleRegistration()" style="color: var(--nav-text); border-color: rgba(255,255,255,0.2);">
+                        <i class="bi bi-power"></i> <span id="regStatusText">เช็คสถานะ...</span>
+                    </button>
                     <button class="btn" id="themeToggle" onclick="toggleTheme()" style="color: var(--nav-text); border: 1px solid rgba(255,255,255,0.2);">
                         <i class="bi bi-sun-fill" id="themeIcon"></i>
                     </button>
@@ -1197,6 +1200,7 @@
             let teacherData = [];
             let extSponsorRevenue = 0;
             let hostRevenue = 0;
+            let souvenirRevenue = 0;
             let expensesData = [];
             let currentSlipTicketId = null;
 
@@ -1250,12 +1254,85 @@
                         ADMIN_PIN = pin;
                         document.getElementById('authSection').style.display = 'none';
                         document.getElementById('mainApp').style.display = 'block';
+                        fetchRegistrationStatus();
                         fetchData();
                     } else {
                         Swal.fire({ icon: 'error', title: 'PIN ไม่ถูกต้อง', text: 'กรุณาลองใหม่อีกครั้ง', background: '#161b22', color: 'var(--text-main)' });
                     }
                 } catch (err) {
                     Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message, background: '#161b22', color: 'var(--text-main)' });
+                }
+            }
+
+            async function fetchRegistrationStatus() {
+                try {
+                    const response = await fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: "getSystemStatus" })
+                    });
+                    const res = await response.json();
+                    if (res.success) {
+                        updateRegStatusUI(res.status);
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch registration status", err);
+                }
+            }
+
+            function updateRegStatusUI(status) {
+                const btn = document.getElementById('btnToggleReg');
+                const text = document.getElementById('regStatusText');
+                if (status === "OPEN") {
+                    btn.classList.remove('btn-danger', 'btn-outline');
+                    btn.classList.add('btn-success');
+                    text.innerText = "เปิดรับลงทะเบียน";
+                } else {
+                    btn.classList.remove('btn-success', 'btn-outline');
+                    btn.classList.add('btn-danger');
+                    text.innerText = "ปิดรับลงทะเบียน";
+                }
+                btn.dataset.status = status;
+            }
+
+            async function toggleRegistration() {
+                const btn = document.getElementById('btnToggleReg');
+                const currentStatus = btn.dataset.status || "OPEN";
+                const newStatus = currentStatus === "OPEN" ? "CLOSED" : "OPEN";
+                const confirmText = newStatus === "OPEN" ? "เปิดรับลงทะเบียน" : "ปิดรับลงทะเบียน";
+                
+                const result = await Swal.fire({
+                    title: `ยืนยันการ${confirmText}?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'ยืนยัน',
+                    cancelButtonText: 'ยกเลิก',
+                    background: '#161b22', color: 'white'
+                });
+
+                if (!result.isConfirmed) return;
+
+                Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, background: '#161b22', color: 'white', didOpen: () => Swal.showLoading() });
+
+                try {
+                    const response = await fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify({
+                            action: "toggleRegistration",
+                            pin: ADMIN_PIN,
+                            status: newStatus
+                        })
+                    });
+                    const res = await response.json();
+
+                    if (res.success) {
+                        updateRegStatusUI(res.status);
+                        Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ', timer: 1500, showConfirmButton: false, background: '#161b22', color: 'white' });
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'บันทึกล้มเหลว', text: res.message, background: '#161b22', color: 'white' });
+                    }
+                } catch (err) {
+                    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message, background: '#161b22', color: 'white' });
                 }
             }
 
@@ -1277,6 +1354,7 @@
                         extSponsorRevenue = parseFloat(res.sponsorRevenue) || 0;
                         window.sponsorRevenueByBatch = res.sponsorRevenueByBatch || {};
                         hostRevenue = parseFloat(res.hostRevenue) || 0;
+                        souvenirRevenue = parseFloat(res.souvenirRevenue) || 0;
                         expensesData = res.expenses || [];
                         processData();
                         updateSelectOptions();
@@ -1689,13 +1767,17 @@
                 document.getElementById('totalTableCount').innerText = `รวม: ${totalTables} โต๊ะ`;
 
                 // Finance Update
-                const totalRevenue = revTicket + extSponsorRevenue + hostRevenue;
+                const totalRevenue = revTicket + extSponsorRevenue + hostRevenue + souvenirRevenue;
                 const totalExpenses = expensesData.reduce((sum, item) => sum + item.amount, 0);
                 const netBalance = totalRevenue - totalExpenses;
 
                 document.getElementById('sumRevTicket').innerText = formatCurrency(revTicket);
                 document.getElementById('sumRevSponsor').innerText = formatCurrency(extSponsorRevenue);
                 document.getElementById('sumRevHost').innerText = formatCurrency(hostRevenue);
+                
+                const sumRevSouvenirEl = document.getElementById('sumRevSouvenir');
+                sumRevSouvenirEl.innerText = formatCurrency(souvenirRevenue);
+                sumRevSouvenirEl.className = ""; // Remove text-warning
                 
                 document.getElementById('sumRevTotal').innerText = formatCurrency(totalRevenue);
                 document.getElementById('sumExpTotal').innerText = formatCurrency(totalExpenses);
