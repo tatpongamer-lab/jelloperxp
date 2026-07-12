@@ -221,7 +221,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p class="text-muted small">เรทราคาผู้ใหญ่: กลางวัน 300.- / กลางคืน 1,000.- / ทั้งวัน 1,300.-<br>เด็กโต: 500.- (เฉพาะมีงานกลางคืน)</p>
+                <p class="text-muted small">เรทราคาผู้ใหญ่: กลางวัน 300.- / กลางคืน 1,200.- / ทั้งวัน 1,500.-<br>เด็กโต: 500.- (เฉพาะมีงานกลางคืน)</p>
                 <select id="exEvent" class="form-select mb-3" onchange="calcExtraPrice()">
                     <option value="">-- ใช้ประเภทงานเดียวกับตั๋วหลัก --</option>
                     <option value="DAY_ONLY">เฉพาะกลางวัน</option>
@@ -387,6 +387,13 @@
         batchSelect.innerHTML += `<option value="HS2">ม.ปลาย รุ่น 2</option>`;
         batchSelect.innerHTML += `<option value="HS3">ม.ปลาย รุ่น 3</option>`;
         for(let i=1; i<=30; i++) batchSelect.innerHTML += `<option value="${i}/${i+3}">รุ่น ${i}/${i+3}</option>`;
+
+        // 🔒 เมื่อ Walk-in Modal ถูกปิด ให้กล้องกลับมาทำงาน
+        document.getElementById('walkinModal').addEventListener('hidden.bs.modal', function () {
+            if (document.getElementById('scanner-section').style.display !== 'none' && html5QrCode) {
+                try { html5QrCode.resume(); } catch (e) {}
+            }
+        });
     });
 
     // Helper to start camera
@@ -554,9 +561,9 @@
         if (type === "DAY_ONLY") {
             rateAdult = 300; rateChild = 0;
         } else if (type === "NIGHT_ONLY") {
-            rateAdult = 1000; rateChild = 500;
+            rateAdult = 1200; rateChild = 500;
         } else if (type === "DAY_NIGHT") {
-            rateAdult = 1300; rateChild = 500;
+            rateAdult = 1500; rateChild = 500;
         }
         
         extraAmount = (adult * rateAdult) + (childO12 * rateChild);
@@ -626,6 +633,10 @@
 
     // --- 5. Walk-in Logic ---
     function openWalkinModal() {
+        // 🔒 หยุดกล้องเพื่อป้องกันสแกน QR ทะลุ Modal
+        if (html5QrCode) {
+            try { html5QrCode.pause(true); } catch (e) {}
+        }
         document.getElementById('wkPrefix').value = ""; document.getElementById('wkPrefixOther').value = ""; document.getElementById('wkPrefixOther').style.display = 'none';
         document.getElementById('wkFirst').value = ""; document.getElementById('wkLast').value = ""; document.getElementById('wkNick').value = ""; document.getElementById('wkPhone').value = "";
         document.getElementById('wkBatch').value = ""; document.getElementById('wkEvent').value = ""; document.getElementById('wkFood').value = "";
@@ -647,9 +658,9 @@
         if (type === "DAY_ONLY") {
             rateAdult = 300; rateChild = 0;
         } else if (type === "NIGHT_ONLY") {
-            rateAdult = 1000; rateChild = 500;
+            rateAdult = 1200; rateChild = 500;
         } else if (type === "DAY_NIGHT") {
-            rateAdult = 1300; rateChild = 500;
+            rateAdult = 1500; rateChild = 500;
         }
 
         const totalAdults = 1 + adultFollowers; // รวมคนสมัครหลัก + ผู้ติดตามผู้ใหญ่
@@ -680,8 +691,8 @@
                 Nickname: document.getElementById('wkNick').value,
                 Phone: phone, Batch: batch, EventType: eventType,
                 Food: document.getElementById('wkFood').value,
-                AdultCount: document.getElementById('wkAdult').value, ChildOver12Count: document.getElementById('wkChildO12').value,
-                ChildUnder12Count: document.getElementById('wkChildU12').value, 
+                AdultCount: parseInt(document.getElementById('wkAdult').value) || 0, ChildOver12Count: parseInt(document.getElementById('wkChildO12').value) || 0,
+                ChildUnder12Count: parseInt(document.getElementById('wkChildU12').value) || 0, 
                 SlipBase64: base64Slip ? base64Slip.split(',')[1] : "", // 🚀 ส่ง Base64 ไปตั้งชื่อตาม TicketID ใน GAS
                 operator: OPERATOR_NAME,
                 pin: ADMIN_PIN
