@@ -441,9 +441,74 @@
         showLoading("กำลังค้นหาข้อมูล...");
         try {
             const res = await fetchGAS({ action: "search", Phone: document.getElementById('searchPhone').value, FirstName: document.getElementById('searchName').value, mode: "ALL", pin: ADMIN_PIN });
-            processTicketData(res);
+            if (res.success && res.multiple) {
+                showTicketSelector(res.results);
+            } else {
+                processTicketData(res);
+            }
         } catch(e) { Swal.fire('Error', `ขัดข้อง: ${e.message}`, 'error').then(() => { isProcessing = false; }); }
     }
+
+    function showTicketSelector(tickets) {
+        Swal.close();
+        const eventLabels = { 
+            DAY_ONLY: "☀️ กลางวัน", NIGHT_ONLY: "🌙 กลางคืน", DAY_NIGHT: "☀️🌙 ทั้งวัน" 
+        };
+        const roleLabels = { ALUMNI: "ศิษย์เก่า", SPONSOR: "Sponsor", TEACHER: "คุณครู" };
+
+        let html = `<div style="text-align:left; max-height:60vh; overflow-y:auto;">`;
+        tickets.forEach((t, idx) => {
+            const checked = t.checkinStatus === true;
+            const statusBadge = checked 
+                ? `<span style="color:#ef4444;">✅ เช็คอินแล้ว</span>` 
+                : `<span style="color:#10b981;">🟢 ยังไม่เช็คอิน</span>`;
+            html += `
+            <div onclick="selectTicket(${idx})" 
+                 style="background:#1e293b; border:2px solid #334155; border-radius:12px; 
+                        padding:14px; margin-bottom:10px; cursor:pointer; transition:border-color 0.2s;"
+                 onmouseover="this.style.borderColor='#3b82f6'" 
+                 onmouseout="this.style.borderColor='#334155'">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <span style="font-weight:bold; font-size:1.1rem; color:#3b82f6;">${t.ticketId}</span>
+                    <span style="background:#0d1117; padding:2px 10px; border-radius:20px; font-size:0.8rem; color:#f59e0b;">
+                        ${roleLabels[t.role] || t.role}
+                    </span>
+                </div>
+                <div style="color:#f8fafc; margin-bottom:4px;">${t.name}</div>
+                <div style="display:flex; justify-content:space-between; color:#94a3b8; font-size:0.85rem;">
+                    <span>${eventLabels[t.eventType] || t.eventType}</span>
+                    ${statusBadge}
+                </div>
+            </div>`;
+        });
+        html += `</div>`;
+
+        window._pendingTickets = tickets;
+
+        Swal.fire({
+            title: `🎫 พบ ${tickets.length} บัตร`,
+            html: html,
+            showConfirmButton: false,
+            showCancelButton: true,
+            cancelButtonText: 'ยกเลิก',
+            width: '400px',
+            background: '#0f172a',
+            color: '#f8fafc',
+        }).then((result) => {
+            if (result.dismiss) {
+                isProcessing = false;
+                window._pendingTickets = null;
+            }
+        });
+    }
+
+    function selectTicket(index) {
+        const ticket = window._pendingTickets[index];
+        window._pendingTickets = null;
+        Swal.close();
+        processTicketData({ success: true, ...ticket });
+    }
+
 
     // --- 3. Process Ticket Logic ---
     function processTicketData(res) {
