@@ -373,6 +373,7 @@
     let walkinAmount = 0;
     let isProcessing = false; 
     let html5QrCode = null;
+    let cameraIntendedState = true; // true = should be active, false = should be paused
 
     // Lazy Load Modals
     let extraModalInstance = null;
@@ -390,15 +391,33 @@
 
         // 🔒 เมื่อ Walk-in Modal ถูกปิด ให้กล้องกลับมาทำงาน
         document.getElementById('walkinModal').addEventListener('hidden.bs.modal', function () {
-            if (document.getElementById('scanner-section').style.display !== 'none' && html5QrCode) {
-                try { html5QrCode.resume(); } catch (e) {}
-            }
+            resumeCamera();
         });
     });
 
-    // Helper to start camera
+    // --- Camera State Management ---
+    function pauseCamera() {
+        cameraIntendedState = false;
+        if (html5QrCode && html5QrCode.getState() === 2 /* SCANNING */) {
+            try { html5QrCode.pause(true); } catch(e){}
+        }
+    }
+
+    function resumeCamera() {
+        cameraIntendedState = true;
+        if (document.hidden) return; // ถ้าพับจออยู่ ไม่ต้องเปิดกล้อง
+        
+        if (html5QrCode && html5QrCode.getState() === 3 /* PAUSED */) {
+            try { html5QrCode.resume(); } catch(e){}
+        } else if (!html5QrCode || html5QrCode.getState() === 1 /* NOT_STARTED */) {
+            startCamera(); 
+        }
+    }
+
     function startCamera() {
         if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+        if (html5QrCode.getState() === 2 /* SCANNING */) return; 
+        
         html5QrCode.start(
             { facingMode: "environment" }, 
             { fps: 10, qrbox: { width: 250, height: 250 } },
@@ -410,14 +429,20 @@
         });
     }
 
-    // 📸 Smart Camera Management: ปิดกล้องอัตโนมัติเมื่อสลับหน้าหรือปิดหน้าจอ
+    // 📸 Smart Power Saving: ควบคุมกล้องเมื่อพับจอ/สลับแอป
     document.addEventListener("visibilitychange", () => {
         if (!html5QrCode || document.getElementById('mainApp').style.display === 'none') return;
 
         if (document.hidden) {
-            html5QrCode.stop().catch(err => console.error("Error stopping camera:", err));
+            // เมื่อพับหน้าจอ -> หยุดกล้องชั่วคราวเพื่อประหยัดแบต ทันที!
+            if (html5QrCode.getState() === 2 /* SCANNING */) {
+                try { html5QrCode.pause(true); } catch(e){}
+            }
         } else {
-            startCamera();
+            // เมื่อกลับมาหน้าเว็บ -> เปิดกล้อง "เฉพาะ" กรณีที่มันควรจะทำงานเท่านั้น
+            if (cameraIntendedState && html5QrCode.getState() === 3 /* PAUSED */) {
+                try { html5QrCode.resume(); } catch(e){}
+            }
         }
     });
 
@@ -571,9 +596,7 @@
         document.getElementById('scanner-section').style.display = 'none';
         document.getElementById('result-section').style.display = 'block';
 
-        if (html5QrCode) {
-            try { html5QrCode.pause(true); } catch (e) {}
-        }
+        pauseCamera();
     }
 
     async function confirmCheckIn() {
@@ -698,10 +721,8 @@
 
     // --- 5. Walk-in Logic ---
     function openWalkinModal() {
-        // 🔒 หยุดกล้องเพื่อป้องกันสแกน QR ทะลุ Modal
-        if (html5QrCode) {
-            try { html5QrCode.pause(true); } catch (e) {}
-        }
+        // 🔒 หยุดกล้องเพื่อป้องกันสแกน QR ทะลุ Modal และประหยัดแบตเตอรี่
+        pauseCamera();
         document.getElementById('wkPrefix').value = ""; document.getElementById('wkPrefixOther').value = ""; document.getElementById('wkPrefixOther').style.display = 'none';
         document.getElementById('wkFirst').value = ""; document.getElementById('wkLast').value = ""; document.getElementById('wkNick').value = ""; document.getElementById('wkPhone').value = "";
         document.getElementById('wkBatch').value = ""; document.getElementById('wkEvent').value = ""; document.getElementById('wkFood').value = "";
@@ -850,9 +871,7 @@
         document.getElementById('result-section').style.display = 'none';
         document.getElementById('scanner-section').style.display = 'block';
 
-        if (html5QrCode) {
-            try { html5QrCode.resume(); } catch (e) {}
-        }
+        resumeCamera();
     }
 </script>
 </body>
