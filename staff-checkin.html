@@ -29,7 +29,7 @@
         
         /* Layout Reset */
         #mainApp {
-            height: 100vh;
+            height: 100dvh; /* Dynamic viewport height for mobile */
             display: flex;
             flex-direction: column;
             overflow: hidden; /* No Scroll */
@@ -176,15 +176,15 @@
 
                     <!-- Distributions (Stickers & Wristbands Side-by-Side) -->
                     <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <div class="dist-box bg-st" id="box-sticker" style="display: none;">
+                        <div class="col d-none" id="col-sticker">
+                            <div class="dist-box bg-st">
                                 <div><small style="opacity: 0.7;">รวม <span id="r_st_total_pax">0</span> ท่าน</small></div>
                                 <div class="small fw-bold mt-1">สติ๊กเกอร์</div>
                                 <div class="qty" id="r_sticker_count">0</div>
                             </div>
                         </div>
-                        <div class="col-6">
-                            <div class="dist-box bg-wb" id="box-wristband" style="display: none;">
+                        <div class="col d-none" id="col-wristband">
+                            <div class="dist-box bg-wb">
                                 <div><small style="opacity: 0.7;">รวม <span id="r_wb_total_pax">0</span> ท่าน</small></div>
                                 <div class="small fw-bold mt-1">สายรัดข้อมือ</div>
                                 <div class="qty" id="r_wristband_count">0</div>
@@ -259,7 +259,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-                <button type="button" class="btn btn-success" onclick="submitCheckInWithExtra()">💾 ยืนยันบันทึกและเข้างาน</button>
+                <button type="button" class="btn btn-success" onclick="submitCheckInWithExtra()">ยืนยันบันทึกและเข้างาน</button>
             </div>
         </div>
     </div>
@@ -337,7 +337,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-                <button type="button" class="btn btn-success w-100" onclick="submitWalkin()">💾 บันทึกและให้เข้างาน</button>
+                <button type="button" class="btn btn-success w-100" onclick="submitWalkin()">บันทึกและให้เข้างาน</button>
             </div>
         </div>
     </div>
@@ -401,28 +401,31 @@
     });
 
     // --- Camera State Management ---
-    function pauseCamera() {
+    let isCameraStarting = false;
+
+    async function pauseCamera() {
         cameraIntendedState = false;
-        if (html5QrCode && html5QrCode.getState() === 2 /* SCANNING */) {
-            try { html5QrCode.pause(true); } catch(e){}
+        if (html5QrCode && (html5QrCode.getState() === 2 || html5QrCode.getState() === 3)) {
+            try { await html5QrCode.stop(); } catch(e){}
         }
     }
 
-    function resumeCamera() {
+    async function resumeCamera() {
         cameraIntendedState = true;
         if (document.hidden) return; // ถ้าพับจออยู่ ไม่ต้องเปิดกล้อง
         
-        if (html5QrCode && html5QrCode.getState() === 3 /* PAUSED */) {
-            try { html5QrCode.resume(); } catch(e){}
-        } else if (!html5QrCode || html5QrCode.getState() === 1 /* NOT_STARTED */) {
-            startCamera(); 
+        // ถ้ามันค้างอยู่ ให้หยุดก่อนเริ่มใหม่
+        if (html5QrCode && (html5QrCode.getState() === 2 || html5QrCode.getState() === 3)) {
+            try { await html5QrCode.stop(); } catch(e){}
         }
+        startCamera();
     }
 
     function startCamera() {
         if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
-        if (html5QrCode.getState() === 2 /* SCANNING */) return; 
+        if (html5QrCode.getState() === 2 || isCameraStarting) return; 
         
+        isCameraStarting = true;
         html5QrCode.start(
             { facingMode: "environment" }, 
             { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
@@ -430,7 +433,11 @@
             (errorMessage) => { }
         ).catch(err => {
             console.error("Camera Error:", err);
-            document.getElementById('reader').innerHTML = `<div class="p-4 text-danger fw-bold">กรุณาอนุญาตให้เว็บเข้าถึงกล้องถ่ายรูป<br><small>(${err})</small></div>`;
+            if(err && err.name === 'NotAllowedError') {
+                document.getElementById('reader').innerHTML = `<div class="p-4 text-danger fw-bold">กรุณาอนุญาตให้เว็บเข้าถึงกล้องถ่ายรูป</div>`;
+            }
+        }).finally(() => {
+            isCameraStarting = false;
         });
     }
 
@@ -439,14 +446,16 @@
         if (!html5QrCode || document.getElementById('mainApp').style.display === 'none') return;
 
         if (document.hidden) {
-            // เมื่อพับหน้าจอ -> หยุดกล้องชั่วคราวเพื่อประหยัดแบต ทันที!
-            if (html5QrCode.getState() === 2 /* SCANNING */) {
-                try { html5QrCode.pause(true); } catch(e){}
+            // เมื่อพับหน้าจอ -> ปิดกล้องสมบูรณ์เพื่อคืนฮาร์ดแวร์ให้มือถือ
+            if (html5QrCode.getState() === 2 || html5QrCode.getState() === 3) {
+                html5QrCode.stop().catch(()=>{});
             }
         } else {
-            // เมื่อกลับมาหน้าเว็บ -> เปิดกล้อง "เฉพาะ" กรณีที่มันควรจะทำงานเท่านั้น
-            if (cameraIntendedState && html5QrCode.getState() === 3 /* PAUSED */) {
-                try { html5QrCode.resume(); } catch(e){}
+            // เมื่อเปิดกลับมา -> ถ้าตั้งใจจะเปิดกล้องอยู่แล้ว ให้หน่วงเวลา 500ms แล้วค่อยเปิดใหม่
+            if (cameraIntendedState) {
+                setTimeout(() => {
+                    startCamera();
+                }, 500);
             }
         }
     });
@@ -482,7 +491,7 @@
     function showTicketSelector(tickets) {
         Swal.close();
         const eventLabels = { 
-            DAY_ONLY: "☀️ กลางวัน", NIGHT_ONLY: "🌙 กลางคืน", DAY_NIGHT: "☀️🌙 ทั้งวัน" 
+            DAY_ONLY: "กลางวัน", NIGHT_ONLY: "กลางคืน", DAY_NIGHT: "ทั้งวัน" 
         };
         const roleLabels = { ALUMNI: "ศิษย์เก่า", SPONSOR: "Sponsor", TEACHER: "คุณครู" };
 
@@ -490,8 +499,8 @@
         tickets.forEach((t, idx) => {
             const checked = t.checkinStatus === true;
             const statusBadge = checked 
-                ? `<span style="color:#ef4444;">✅ เช็คอินแล้ว</span>` 
-                : `<span style="color:#10b981;">🟢 ยังไม่เช็คอิน</span>`;
+                ? `<span style="color:#ef4444;">เช็คอินแล้ว</span>` 
+                : `<span style="color:#10b981;">ยังไม่เช็คอิน</span>`;
             html += `
             <div onclick="selectTicket(${idx})" 
                  style="background:#1e293b; border:2px solid #334155; border-radius:12px; 
@@ -516,7 +525,7 @@
         window._pendingTickets = tickets;
 
         Swal.fire({
-            title: `🎫 พบ ${tickets.length} บัตร`,
+            title: `พบ ${tickets.length} บัตร`,
             html: html,
             showConfirmButton: false,
             showCancelButton: true,
@@ -572,13 +581,13 @@
         const eventEl = document.getElementById('r_event');
         eventEl.classList.remove('badge-day', 'badge-night', 'badge-both');
         if (res.eventType === "DAY_ONLY") {
-            eventEl.innerText = "☀️ กลางวัน";
+            eventEl.innerText = "กลางวัน";
             eventEl.classList.add('badge-day');
         } else if (res.eventType === "NIGHT_ONLY") {
-            eventEl.innerText = "🌙 กลางคืน";
+            eventEl.innerText = "กลางคืน";
             eventEl.classList.add('badge-night');
         } else {
-            eventEl.innerText = "☀️🌙 ทั้งวัน";
+            eventEl.innerText = "ทั้งวัน";
             eventEl.classList.add('badge-both');
         }
 
@@ -590,30 +599,29 @@
         const wbCount = 1 + parseInt(res.adult || 0) + parseInt(res.childO12 || 0);
 
         // 🟢 สติ๊กเกอร์ = งานกลางวัน (ทุกคนได้)
-        const boxSt = document.getElementById('box-sticker');
+        const colSt = document.getElementById('col-sticker');
         if (res.eventType === "DAY_ONLY" || res.eventType === "DAY_NIGHT") {
             document.getElementById('r_sticker_count').innerText = totalPax;
             document.getElementById('r_st_total_pax').innerText = totalPax;
-            boxSt.style.display = 'block';
+            colSt.classList.remove('d-none');
         } else { 
-            boxSt.style.display = 'none';
+            colSt.classList.add('d-none');
         }
 
         // 🔵 สายรัดข้อมือ = งานกลางคืน (ไม่รวมเด็กเล็ก)
-        const boxWb = document.getElementById('box-wristband');
+        const colWb = document.getElementById('col-wristband');
         if (res.eventType === "NIGHT_ONLY" || res.eventType === "DAY_NIGHT") {
             document.getElementById('r_wristband_count').innerText = wbCount;
             document.getElementById('r_wb_total_pax').innerText = wbCount;
-            boxWb.style.display = 'block';
+            colWb.classList.remove('d-none');
         } else { 
-            boxWb.style.display = 'none';
+            colWb.classList.add('d-none');
         }
 
         document.getElementById('alert-pending').style.display = (res.paymentStatus === 'PENDING') ? 'block' : 'none';
         
         // View transitions
         document.getElementById('scanner-section').style.display = 'none';
-        if(document.getElementById('walkin-section')) document.getElementById('walkin-section').style.display = 'none';
         document.getElementById('result-section').style.display = 'block';
         document.getElementById('confirm-section').style.display = 'block';
 
@@ -826,12 +834,12 @@
 
         if (hasDay) {
             lines.push(`<div class="p-2 mb-2 rounded" style="background: rgba(16, 185, 129, 0.1); border-left: 5px solid #10b981; color: #10b981;">
-                <span class="fs-5 fw-bold">🟢 แจกสติ๊กเกอร์: ${stickerCount} ชิ้น</span>
+                <span class="fs-5 fw-bold">แจกสติ๊กเกอร์: ${stickerCount} ชิ้น</span>
             </div>`);
         }
         if (hasNight) {
             lines.push(`<div class="p-2 mb-2 rounded" style="background: rgba(59, 130, 246, 0.1); border-left: 5px solid #3b82f6; color: #3b82f6;">
-                <span class="fs-5 fw-bold">🔵 แจกสายรัดข้อมือ: ${wristbandCount} เส้น</span>
+                <span class="fs-5 fw-bold">แจกสายรัดข้อมือ: ${wristbandCount} เส้น</span>
             </div>`);
         }
         
@@ -892,7 +900,6 @@
         document.getElementById('result-section').style.display = 'none';
         document.getElementById('confirm-section').style.display = 'none';
         document.getElementById('scanner-section').style.display = 'block';
-        if(document.getElementById('walkin-section')) document.getElementById('walkin-section').style.display = 'block';
 
         resumeCamera();
     }
