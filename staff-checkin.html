@@ -6,6 +6,7 @@
     <title>STAFF Checkin</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -22,193 +23,197 @@
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
+            --purple: #8b5cf6;
         }
         body { background-color: var(--bg-dark); font-family: 'Sarabun', sans-serif; color: var(--text-primary); }
-        .staff-header {
-            background: linear-gradient(135deg, #161b22 0%, #1a2332 100%);
-            color: var(--primary-blue);
-            padding: 18px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 1.3rem;
-            letter-spacing: 2px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 2px solid var(--primary-blue);
+        
+        /* Layout Reset */
+        #mainApp {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* No Scroll */
         }
+        .scroll-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
         .card-box {
             background: var(--card-dark);
             border-radius: 14px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 15px;
+            margin-bottom: 15px;
             border: 1px solid var(--card-border);
         }
-        #reader { width: 100%; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary-blue); min-height: 250px; background: #000; }
-        .data-label { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 2px; }
-        .data-value { font-size: 1.1rem; font-weight: bold; color: var(--text-primary); margin-bottom: 10px; }
-        .btn-huge { padding: 15px; font-size: 1.1rem; font-weight: bold; border-radius: 10px; }
-        #result-section { display: none; }
-        .alert-sticker { background-color: rgba(63,185,80,0.12); border-left: 5px solid var(--success); color: var(--success); }
-        .alert-wristband { background-color: rgba(88,166,255,0.12); border-left: 5px solid var(--primary-blue); color: var(--primary-blue); }
-        .alert-pending { background-color: rgba(210,153,34,0.12); border-left: 5px solid var(--warning); color: var(--warning); }
-
-        /* === Dark Mode Overrides === */
-        .form-control, .form-select {
-            background-color: #0d1117;
+        
+        /* Compact Scanner */
+        #reader { width: 100%; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary-blue); height: 180px; background: #000; }
+        
+        /* Result Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+            margin-bottom: 15px;
+            background: #0d1117;
+            padding: 12px;
+            border-radius: 12px;
             border: 1px solid var(--card-border);
-            color: var(--text-primary);
+            font-size: 0.95rem;
         }
-        .form-control:focus, .form-select:focus {
-            background-color: #0d1117;
-            border-color: var(--primary-blue);
-            color: var(--text-primary);
-            box-shadow: 0 0 0 0.25rem rgba(88,166,255,0.2);
+        .dist-box {
+            border-radius: 12px;
+            padding: 8px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
         }
+        .dist-box i { font-size: 1.2rem; display: block; margin-bottom: 2px; }
+        .dist-box .qty { font-size: 1.5rem; font-weight: bold; line-height: 1; }
+        .bg-st { background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.05)); color: var(--success); border-color: rgba(16,185,129,0.3); }
+        .bg-wb { background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(59,130,246,0.05)); color: var(--primary-blue); border-color: rgba(59,130,246,0.3); }
+        
+        /* Badges */
+        .badge-role { font-size: 0.75rem; padding: 4px 8px; border-radius: 6px; }
+        .badge-day { background: rgba(245,158,11,0.2); color: var(--warning); border: 1px solid var(--warning); }
+        .badge-night { background: rgba(139,92,246,0.2); color: var(--purple); border: 1px solid var(--purple); }
+        .badge-both { background: linear-gradient(90deg, rgba(245,158,11,0.2), rgba(139,92,246,0.2)); border: 1px solid rgba(255,255,255,0.3); }
+        
+        .btn-huge { padding: 15px; font-size: 1.1rem; font-weight: bold; border-radius: 10px; transition: transform 0.1s; }
+        .btn-huge:active { transform: scale(0.98); }
+        
+        .sticky-bottom-action {
+            position: sticky;
+            bottom: 0;
+            background: var(--bg-dark);
+            padding: 15px 10px;
+            z-index: 100;
+            border-top: 1px solid var(--card-border);
+        }
+        
+        /* Dark Mode Input Overrides */
+        .form-control, .form-select { background-color: #0d1117; border: 1px solid var(--card-border); color: var(--text-primary); }
+        .form-control:focus, .form-select:focus { background-color: #0d1117; border-color: var(--primary-blue); color: var(--text-primary); box-shadow: 0 0 0 0.25rem rgba(88,166,255,0.2); }
         .form-control::placeholder { color: var(--text-secondary); }
-        .bg-light { background-color: #0d1117 !important; }
-        .border { border-color: var(--card-border) !important; }
-        .text-muted { color: var(--text-secondary) !important; }
-        .text-primary { color: var(--primary-blue) !important; }
-        .text-success { color: var(--success) !important; }
-        .text-danger { color: var(--danger) !important; }
-        .text-dark { color: var(--text-primary) !important; }
-        .modal-content {
-            background-color: var(--card-dark);
-            border: 1px solid var(--card-border);
-            color: var(--text-primary);
-        }
-        .modal-header.bg-primary {
-            background: linear-gradient(135deg, #161b22, #1a2332) !important;
-            border-bottom: 1px solid var(--card-border);
-        }
-        .modal-header.bg-warning {
-            background: linear-gradient(135deg, #2a2000, #3d2e00) !important;
-            border-bottom: 1px solid var(--card-border);
-        }
+        .modal-content { background-color: var(--card-dark); border: 1px solid var(--card-border); color: var(--text-primary); }
+        .modal-header.bg-primary { background: linear-gradient(135deg, #161b22, #1a2332) !important; border-bottom: 1px solid var(--card-border); }
+        .modal-header.bg-warning { background: linear-gradient(135deg, #2a2000, #3d2e00) !important; border-bottom: 1px solid var(--card-border); }
         .modal-header.bg-warning .modal-title { color: var(--warning) !important; }
         .modal-footer { border-top: 1px solid var(--card-border); }
         hr { border-color: var(--card-border); opacity: 0.5; }
-        .btn-outline-primary {
-            color: var(--primary-blue);
-            border-color: var(--primary-blue);
-        }
-        .btn-outline-primary:hover {
-            background-color: rgba(88,166,255,0.15);
-            color: var(--primary-blue);
-            border-color: var(--primary-blue);
-        }
+        
+        .btn-outline-primary { color: var(--primary-blue); border-color: var(--primary-blue); }
+        .btn-outline-primary:hover { background-color: rgba(88,166,255,0.15); color: var(--primary-blue); }
         .btn-success { background-color: #238636; border-color: #238636; }
         .btn-success:hover { background-color: #2ea043; border-color: #2ea043; }
-        .btn-warning {
-            background-color: rgba(210,153,34,0.15);
-            border: 2px solid var(--warning);
-            color: var(--warning) !important;
-        }
+        .btn-warning { background-color: rgba(210,153,34,0.15); border: 2px solid var(--warning); color: var(--warning) !important; }
         .btn-warning:hover { background-color: rgba(210,153,34,0.25); }
         .btn-secondary { background-color: #21262d; border-color: var(--card-border); color: var(--text-primary); }
-        .btn-secondary:hover { background-color: #30363d; }
         .btn-close { filter: invert(1); }
-        small { color: var(--text-secondary); }
-        label.fw-bold { color: var(--text-primary); }
-        /* SweetAlert2 Dark Mode */
-        div.swal2-popup { background: var(--card-dark) !important; color: var(--text-primary) !important; }
-        .swal2-title { color: var(--text-primary) !important; }
-        .swal2-html-container { color: var(--text-secondary) !important; }
-
-        /* แก้ปัญหา In-app Browser ไม่สามารถเลือก Dropdown ได้ */
-        select.form-select, select {
-            -webkit-appearance: menulist !important;
-            appearance: menulist !important;
-            cursor: pointer;
-        }
+        
+        div.swal2-popup { background: var(--card-dark) !important; color: var(--text-primary) !important; border-radius: 16px; }
+        .swal2-title, .swal2-html-container { color: var(--text-primary) !important; }
     </style>
 </head>
 <body>
 
 <div id="authSection" class="container" style="height: 100vh; display: flex; align-items: center; justify-content: center;">
     <div class="card-box text-center" style="max-width: 400px; width: 100%;">
-        <h4 class="text-white mb-3">🔐 Staff Login</h4>
-        <input type="password" id="pinInput" class="form-control text-center fs-4 mb-3" placeholder="Enter PIN" maxlength="6" onkeypress="if(event.key==='Enter') login()">
-        <button class="btn btn-primary w-100 py-2" onclick="login()">เข้าสู่ระบบ</button>
+        <h4 class="text-white mb-4"><i class="bi bi-shield-lock"></i> Staff Login</h4>
+        <input type="password" id="pinInput" class="form-control text-center fs-4 mb-3 py-3" placeholder="Enter PIN" maxlength="6" onkeypress="if(event.key==='Enter') login()">
+        <button class="btn btn-primary btn-huge w-100" onclick="login()">เข้าสู่ระบบ</button>
     </div>
 </div>
 
 <div id="mainApp" style="display: none;">
-    <div class="staff-header">STAFF </div>
+    <div class="scroll-container">
+        <div class="container pb-3 pt-2" style="max-width: 500px; margin: 0 auto;">
+            
+            <div id="scanner-section">
+                <!-- Scanner -->
+                <div class="card-box text-center p-1 mb-2">
+                    <div id="reader"></div>
+                </div>
+                
+                <!-- Manual Search -->
+                <div class="card-box mb-3 p-3">
+                    <form id="manualSearchForm" onsubmit="handleManualSearch(event)">
+                        <div class="d-flex gap-2">
+                            <!-- We can combine inputs or just keep phone and name inline -->
+                            <input type="tel" class="form-control" id="searchPhone" placeholder="ค้นหา: เบอร์โทร" style="width: 55%;">
+                            <input type="text" class="form-control" id="searchName" placeholder="ชื่อจริง" style="width: 45%;">
+                        </div>
+                        <button type="submit" class="btn btn-outline-primary w-100 fw-bold mt-2 py-2"><i class="bi bi-search"></i> ค้นหา</button>
+                    </form>
+                </div>
+                
+                <div class="mt-4">
+                    <button type="button" class="btn btn-warning w-100 text-dark shadow-sm py-3 fw-bold" onclick="openWalkinModal()">
+                        <i class="bi bi-person-plus-fill"></i> สมัคร Walk-in หน้างาน
+                    </button>
+                </div>
+            </div>
 
-    <div class="container mt-3 pb-5" style="max-width: 500px;">
+            <!-- Result Section -->
+            <div id="result-section" style="display: none;">
+                <div class="card-box pb-3 mb-2">
+                    <!-- Row 1: ID & Event -->
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <h4 class="text-primary mb-0 fw-bold" id="r_ticket_id" style="letter-spacing: 1px;">-</h4>
+                        <span id="r_event" class="badge-role">-</span>
+                    </div>
+                    <!-- Row 2: Name & Role/Batch -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="fs-5 fw-bold" id="r_name">-</div>
+                        <span id="r_batch" class="text-secondary small fw-bold text-end">-</span>
+                    </div>
+                    
+                    <div class="alert alert-pending p-2 mb-3 fw-bold text-center" id="alert-pending" style="display: none;">
+                        <i class="bi bi-exclamation-triangle-fill"></i> สถานะ PENDING<br><small class="fw-normal">รอตรวจสอบสลิป หรือ เก็บเงินสด</small>
+                    </div>
 
-        <div id="scanner-section">
-        <div class="card-box text-center p-2">
-            <div id="reader"></div>
+                    <!-- Distributions (Stickers & Wristbands Side-by-Side) -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <div class="dist-box bg-st" id="box-sticker" style="display: none;">
+                                <div><small style="opacity: 0.7;">รวม <span id="r_st_total_pax">0</span> ท่าน</small></div>
+                                <div class="small fw-bold mt-1">สติ๊กเกอร์</div>
+                                <div class="qty" id="r_sticker_count">0</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="dist-box bg-wb" id="box-wristband" style="display: none;">
+                                <div><small style="opacity: 0.7;">รวม <span id="r_wb_total_pax">0</span> ท่าน</small></div>
+                                <div class="small fw-bold mt-1">สายรัดข้อมือ</div>
+                                <div class="qty" id="r_wristband_count">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Follower breakdown small text -->
+                    <div class="text-center text-secondary small mb-3 p-2" style="background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        ผู้ใหญ่ <span id="r_adult" class="text-white fw-bold">0</span> | เด็กโต <span id="r_childO12" class="text-white fw-bold">0</span> | เด็กเล็ก <span id="r_childU12" class="text-white fw-bold">0</span>
+                    </div>
+                    
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <button type="button" class="btn btn-secondary w-100 py-2" onclick="resetScanner()"><i class="bi bi-arrow-left"></i> ย้อนกลับ</button>
+                        </div>
+                        <div class="col-6">
+                            <button type="button" class="btn btn-outline-primary w-100 py-2" onclick="openExtraModal()"><i class="bi bi-person-plus"></i> เพิ่มผู้ติดตาม</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div class="card-box">
-            <h6 class="text-primary mb-3">ไม่มี QR</h6>
-            <form id="manualSearchForm" onsubmit="handleManualSearch(event)">
-                <input type="tel" class="form-control mb-2" id="searchPhone" placeholder="เบอร์โทรศัพท์ (ใส่เพียงอย่างใดอย่างหนึ่งก็ได้)">
-                <input type="text" class="form-control mb-3" id="searchName" placeholder="ชื่อจริง (ไม่ต้องใส่คำนำหน้า)">
-                <button type="submit" class="btn btn-outline-primary w-100 fw-bold py-2">ค้นหา</button>
-            </form>
-        </div>
-
-        <button type="button" class="btn btn-warning w-100 btn-huge text-dark shadow-sm" onclick="openWalkinModal()">
-            Walk-in
-        </button>
     </div>
-
-    <div id="result-section">
-        <div class="card-box">
-            <h5 class="text-center text-primary mb-3 fw-bold">ข้อมูลการลงทะเบียน</h5>
-            <div class="p-3 bg-light rounded border mb-3">
-                <div class="row mb-2">
-                    <div class="col-4 text-muted small">หมายเลขบัตร</div>
-                    <div class="col-8 fw-bold text-end" id="r_ticket_id">-</div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-4 text-muted small">ชื่อ-สกุล</div>
-                    <div class="col-8 fw-bold text-end" id="r_name">-</div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-4 text-muted small">รุ่น</div>
-                    <div class="col-8 fw-bold text-end" id="r_batch">-</div>
-                </div>
-                <div class="row">
-                    <div class="col-4 text-muted small">ประเภทงาน</div>
-                    <div class="col-8 fw-bold text-end text-success" id="r_event">-</div>
-                </div>
-            </div>
-
-            <div class="p-3 bg-light rounded border mb-3">
-                <div class="fw-bold mb-2">ผู้ติดตาม (รวม <span id="r_total_pax">0</span> ท่าน):</div>
-                <div class="row text-center">
-                    <div class="col-4"><small class="text-muted">ผู้ใหญ่</small><br><span id="r_adult" class="fs-5 fw-bold">0</span></div>
-                    <div class="col-4"><small class="text-muted">เด็กโต</small><br><span id="r_childO12" class="fs-5 fw-bold">0</span></div>
-                    <div class="col-4"><small class="text-muted">เด็กเล็ก</small><br><span id="r_childU12" class="fs-5 fw-bold">0</span></div>
-                </div>
-            </div>
-
-            <div class="alert alert-sticker p-3 mb-2 fw-bold justify-content-between align-items-center d-none" id="alert-sticker">
-                <div>🟢 สติ๊กเกอร์</div>
-                <div class="fs-4 text-danger"><span id="r_sticker_count">0</span> ชิ้น</div>
-            </div>
-
-            <div class="alert alert-wristband p-3 mb-3 fw-bold justify-content-between align-items-center d-none" id="alert-wristband">
-                <div>🔵 สายรัดข้อมือ</div>
-                <div class="fs-4 text-danger"><span id="r_wristband_count">0</span> เส้น</div>
-            </div>
-
-            <div class="alert alert-pending p-3 mb-3 fw-bold" id="alert-pending" style="display: none;">
-                ⚠️ สถานะ: PENDING (รอตรวจสอบสลิป)<br>
-                <small class="fw-normal">กรุณาตรวจสอบสลิปในมือถือผู้ร่วมงาน หรือเก็บเงินสด</small>
-            </div>
-
-            <button type="button" class="btn btn-success w-100 btn-huge mb-2 shadow-sm" onclick="confirmCheckIn()">✅ ยืนยัน</button>
-            <button type="button" class="btn btn-outline-primary w-100 btn-huge mb-3" onclick="openExtraModal()">➕ เพิ่มผู้ติดตาม</button>
-            <button type="button" class="btn btn-secondary w-100 py-2" onclick="resetScanner()">ย้อนกลับ / สแกนคิวต่อไป</button>
+    
+    <!-- Sticky Confirm Button (Only visible in result mode) -->
+    <div id="confirm-section" class="sticky-bottom-action" style="display: none;">
+        <div class="container p-0" style="max-width: 500px; margin: 0 auto;">
+            <button type="button" class="btn btn-success w-100 btn-huge shadow-lg" onclick="confirmCheckIn()"><i class="bi bi-check2-circle"></i> ยืนยันให้เข้างาน</button>
         </div>
     </div>
 </div>
@@ -551,50 +556,66 @@
         document.getElementById('r_name').innerText = res.name;
         
         let batchDisplay = String(res.batch || "");
-        if(batchDisplay.startsWith("HS")) {
+        if(res.role === "TEACHER") {
+            batchDisplay = "คุณครู";
+        } else if(res.role === "SPONSOR") {
+            batchDisplay = "Sponsor (" + res.company + ")";
+        } else if(batchDisplay.startsWith("HS")) {
             batchDisplay = "ม.ปลาย รุ่น " + batchDisplay.replace("HS", "");
-        } else if(batchDisplay !== "TEACHER" && batchDisplay !== "SPONSOR") {
+        } else if(batchDisplay && res.role !== "ALUMNI") {
+            batchDisplay = "รุ่น " + batchDisplay;
+        } else if(batchDisplay && res.role === "ALUMNI") {
             batchDisplay = "รุ่น " + batchDisplay;
         }
         document.getElementById('r_batch').innerText = batchDisplay;
         
-        const eventLabels = { DAY_ONLY: "เฉพาะกลางวัน ☀️", NIGHT_ONLY: "เฉพาะกลางคืน 🌙", DAY_NIGHT: "กลางวันและกลางคืน ☀️🌙" };
-        document.getElementById('r_event').innerText = eventLabels[res.eventType] || res.eventType;
-        document.getElementById('r_adult').innerText = res.adult;
-        document.getElementById('r_childO12').innerText = res.childO12;
-        document.getElementById('r_childU12').innerText = res.childU12;
-        
-        const followersCount = parseInt(res.adult || 0) + parseInt(res.childO12 || 0) + parseInt(res.childU12 || 0);
-        document.getElementById('r_total_pax').innerText = followersCount;
+        const eventEl = document.getElementById('r_event');
+        eventEl.classList.remove('badge-day', 'badge-night', 'badge-both');
+        if (res.eventType === "DAY_ONLY") {
+            eventEl.innerText = "☀️ กลางวัน";
+            eventEl.classList.add('badge-day');
+        } else if (res.eventType === "NIGHT_ONLY") {
+            eventEl.innerText = "🌙 กลางคืน";
+            eventEl.classList.add('badge-night');
+        } else {
+            eventEl.innerText = "☀️🌙 ทั้งวัน";
+            eventEl.classList.add('badge-both');
+        }
 
+        document.getElementById('r_adult').innerText = res.adult || 0;
+        document.getElementById('r_childO12').innerText = res.childO12 || 0;
+        document.getElementById('r_childU12').innerText = res.childU12 || 0;
+        
         const totalPax = 1 + parseInt(res.adult || 0) + parseInt(res.childO12 || 0) + parseInt(res.childU12 || 0);
         const wbCount = 1 + parseInt(res.adult || 0) + parseInt(res.childO12 || 0);
 
         // 🟢 สติ๊กเกอร์ = งานกลางวัน (ทุกคนได้)
-        const alertSt = document.getElementById('alert-sticker');
+        const boxSt = document.getElementById('box-sticker');
         if (res.eventType === "DAY_ONLY" || res.eventType === "DAY_NIGHT") {
             document.getElementById('r_sticker_count').innerText = totalPax;
-            alertSt.classList.remove('d-none');
-            alertSt.classList.add('d-flex');
+            document.getElementById('r_st_total_pax').innerText = totalPax;
+            boxSt.style.display = 'block';
         } else { 
-            alertSt.classList.add('d-none');
-            alertSt.classList.remove('d-flex'); 
+            boxSt.style.display = 'none';
         }
 
         // 🔵 สายรัดข้อมือ = งานกลางคืน (ไม่รวมเด็กเล็ก)
-        const alertWb = document.getElementById('alert-wristband');
+        const boxWb = document.getElementById('box-wristband');
         if (res.eventType === "NIGHT_ONLY" || res.eventType === "DAY_NIGHT") {
             document.getElementById('r_wristband_count').innerText = wbCount;
-            alertWb.classList.remove('d-none');
-            alertWb.classList.add('d-flex');
+            document.getElementById('r_wb_total_pax').innerText = wbCount;
+            boxWb.style.display = 'block';
         } else { 
-            alertWb.classList.add('d-none');
-            alertWb.classList.remove('d-flex');
+            boxWb.style.display = 'none';
         }
 
         document.getElementById('alert-pending').style.display = (res.paymentStatus === 'PENDING') ? 'block' : 'none';
+        
+        // View transitions
         document.getElementById('scanner-section').style.display = 'none';
+        if(document.getElementById('walkin-section')) document.getElementById('walkin-section').style.display = 'none';
         document.getElementById('result-section').style.display = 'block';
+        document.getElementById('confirm-section').style.display = 'block';
 
         pauseCamera();
     }
@@ -869,7 +890,9 @@
         isProcessing = false; 
         document.getElementById('manualSearchForm').reset();
         document.getElementById('result-section').style.display = 'none';
+        document.getElementById('confirm-section').style.display = 'none';
         document.getElementById('scanner-section').style.display = 'block';
+        if(document.getElementById('walkin-section')) document.getElementById('walkin-section').style.display = 'block';
 
         resumeCamera();
     }
