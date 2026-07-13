@@ -483,6 +483,10 @@
             "shirt": 10, "shirt_kids": 11, "tumbler": 12, "totebag": 13, "keychain": 14, "opener": 15 
         };
         products.sort(function(a, b) {
+            var meta = window.metaData || {};
+            var aSold = isProductSoldOut(a, meta) ? 1 : 0;
+            var bSold = isProductSoldOut(b, meta) ? 1 : 0;
+            if (aSold !== bSold) return aSold - bSold;
             var pA = orderPriority[a.id] || 99;
             var pB = orderPriority[b.id] || 99;
             return pA - pB;
@@ -581,20 +585,24 @@
                             });
                         });
                         
+                        if (data.meta) {
+                            window.metaData = data.meta;
+                        }
+
                         var orderPriority = { 
                             "promo_ultimate": 1, "promo_alumni": 2, "promo_family": 3, "promo_essential": 4, 
                             "promo_together": 5, "promo_everyday": 6, "promo_first": 7,
                             "shirt": 10, "shirt_kids": 11, "tumbler": 12, "totebag": 13, "keychain": 14, "opener": 15 
                         };
                         products.sort(function(a, b) {
+                            var meta = window.metaData || {};
+                            var aSold = isProductSoldOut(a, meta) ? 1 : 0;
+                            var bSold = isProductSoldOut(b, meta) ? 1 : 0;
+                            if (aSold !== bSold) return aSold - bSold;
                             var pA = orderPriority[a._frontId] || orderPriority[a.id] || 99;
                             var pB = orderPriority[b._frontId] || orderPriority[b.id] || 99;
                             return pA - pB;
                         });
-
-                        if (data.meta) {
-                            window.metaData = data.meta;
-                        }
                         
                         renderProducts();
                     }
@@ -694,6 +702,23 @@
                     startCarousel();
                 }, {passive: true});
             }
+        }
+
+        // --- Sold Out Check Helper ---
+        function isProductSoldOut(p, meta) {
+            var limitKc = parseInt(meta["LIMIT_keychain"]) || 100;
+            var soldKc  = parseInt(meta["SOLD_keychain"])  || 0;
+            var remainKc = Math.max(0, limitKc - soldKc);
+            var limitTb = parseInt(meta["LIMIT_tumbler"]) || 100;
+            var soldTb  = parseInt(meta["SOLD_tumbler"])  || 0;
+            var remainTb = Math.max(0, limitTb - soldTb);
+            if (p.id === 'keychain' && remainKc <= 0) return true;
+            if (p.id === 'tumbler'  && remainTb <= 0) return true;
+            if (p.isBundle && p.items) {
+                if (p.items.keychain && remainKc < p.items.keychain) return true;
+                if (p.items.tumbler  && remainTb < p.items.tumbler)  return true;
+            }
+            return false;
         }
 
         // --- Render Products ---
