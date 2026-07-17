@@ -417,7 +417,7 @@
         }
 
         // --- Copy Account Number ---
-        function copyAccountNumber() {
+        window.copyAccountNumber = function() {
             var accNo = "020424234159"; // Without dashes for easy pasting in banking apps
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(accNo).then(function() {
@@ -426,7 +426,7 @@
             } else {
                 fallbackCopyTextToClipboard(accNo);
             }
-        }
+        };
         function fallbackCopyTextToClipboard(text) {
             var textArea = document.createElement("textarea");
             textArea.value = text;
