@@ -474,10 +474,16 @@
             { id: "promo_essential",name: "REUNION ESSENTIAL ของขวัญแห่งวันวาน", price: 889,  group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 1, tumbler: 1, keychain: 1 }, img: 'image/REUNION ESSENTIAL.png' },
             { id: "promo_together", name: "TOGETHER AGAIN คู่หูวันคืนถิ่น", price: 799,  group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 2 }, img: 'image/TOGETHER AGAIN.png' },
             { id: "promo_everyday", name: "EVERYDAY KHAESAD แคแสดเคียงกาย", price: 569,  group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { tumbler: 1, totebag: 1 }, img: 'image/EVERYDAY KHAESAD.png' },
-            { id: "promo_first",    name: "FIRST MEMORY เริ่มต้นแห่งความผูกพัน", price: 499,  group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 1, keychain: 1 }, img: 'image/FIRST MEMORY.png' }
+            { id: "promo_first",    name: "FIRST MEMORY เริ่มต้นแห่งความผูกพัน", price: 499,  group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 1, keychain: 1 }, img: 'image/FIRST MEMORY.png' },
+
+            // Special Packages
+            { id: "promo_special1", name: "SPECIAL 1 เซ็ตเปิดความทรงจำ", price: 479, group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 1, opener: 1 }, img: 'image/special1.jpg' },
+            { id: "promo_special2", name: "SPECIAL 2 เซ็ตเชื่อมต่อสายใย", price: 599, group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { shirt: 1, totebag: 1 }, img: 'image/special2.jpg' },
+            { id: "promo_special3", name: "SPECIAL 3 คู่หู คู่ใจ คู่กาย", price: 269, group: 1, hasSize: false, shipFeeItem: true, isBundle: true, items: { opener: 1, totebag: 1 }, img: 'image/special3.jpg' }
         ];
 
         var orderPriority = { 
+            "promo_special1": -3, "promo_special2": -2, "promo_special3": -1,
             "promo_ultimate": 1, "promo_alumni": 2, "promo_family": 3, "promo_essential": 4, 
             "promo_together": 5, "promo_everyday": 6, "promo_first": 7,
             "shirt": 10, "shirt_kids": 11, "tumbler": 12, "totebag": 13, "keychain": 14, "opener": 15 
@@ -590,6 +596,7 @@
                         }
 
                         var orderPriority = { 
+                            "promo_special1": -3, "promo_special2": -2, "promo_special3": -1,
                             "promo_ultimate": 1, "promo_alumni": 2, "promo_family": 3, "promo_essential": 4, 
                             "promo_together": 5, "promo_everyday": 6, "promo_first": 7,
                             "shirt": 10, "shirt_kids": 11, "tumbler": 12, "totebag": 13, "keychain": 14, "opener": 15 
