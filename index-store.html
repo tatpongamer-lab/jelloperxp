@@ -71,20 +71,60 @@
         #tracking-results .order-card:nth-child(5) { animation-delay: 320ms; }
         @keyframes cardFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         .border-3 { border-width: 3px; }
+        /* Closed overlay tracking section */
+        #closed-tracking-section { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease; }
+        #closed-tracking-section.open { max-height: 70vh; opacity: 1; margin-top: 1rem; }
+        #closed-tracking-results .order-card { animation: cardFadeIn 0.3s ease-out both; }
+        #closed-tracking-results .order-card:nth-child(1) { animation-delay: 0ms; }
+        #closed-tracking-results .order-card:nth-child(2) { animation-delay: 80ms; }
+        #closed-tracking-results .order-card:nth-child(3) { animation-delay: 160ms; }
+        #closed-tracking-results .order-card:nth-child(4) { animation-delay: 240ms; }
+        #closed-tracking-results .order-card:nth-child(5) { animation-delay: 320ms; }
+        #closed-track-toggle-icon { transition: transform 0.3s ease; }
+        #closed-track-toggle-icon.rotated { transform: rotate(180deg); }
     </style>
 </head>
 <body class="bg-gray-200 text-charcoal font-body antialiased flex justify-center">
 
     <!-- Store Closed Overlay -->
-    <div id="store-closed-overlay" class="fixed inset-0 z-[90] hidden items-center justify-center bg-navy/95 backdrop-blur-md">
-        <div class="text-center px-8 store-closed-content">
+    <div id="store-closed-overlay" class="fixed inset-0 z-[90] hidden flex-col items-center bg-navy/95 backdrop-blur-md overflow-y-auto">
+        <div class="w-full max-w-md mx-auto px-6 pt-16 pb-8 store-closed-content flex flex-col items-center">
+            <!-- Store closed message -->
             <div class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
                 <i class="ph ph-storefront text-5xl text-gold"></i>
             </div>
-            <h2 class="text-2xl font-heading font-bold text-white mb-3">ร้านค้าปิดชั่วคราว</h2>
-            <p class="text-beige text-sm mb-2">ขออภัย ระบบร้านค้าปิดให้บริการชั่วคราว</p>
-            <p class="text-beige/60 text-xs">กรุณาติดตามข่าวสารเพื่อรับทราบกำหนดเปิดให้บริการ</p>
+            <h2 class="text-2xl font-heading font-bold text-white mb-3 text-center">ร้านค้าปิดชั่วคราว</h2>
+            <p class="text-beige text-sm mb-2 text-center">ขออภัย ระบบร้านค้าปิดให้บริการชั่วคราว</p>
+            <p class="text-beige/60 text-xs text-center">กรุณาติดตามข่าวสารเพื่อรับทราบกำหนดเปิดให้บริการ</p>
             <div class="mt-8 w-16 h-0.5 bg-gold/50 mx-auto"></div>
+
+            <!-- Order tracking section -->
+            <div class="w-full mt-8">
+                <button id="closed-track-toggle" onclick="app.toggleClosedTracking()"
+                    class="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-2xl bg-gold/15 border border-gold/30 text-gold font-medium text-sm hover:bg-gold/25 active:scale-[0.97] transition-all duration-200">
+                    <i class="ph ph-package text-lg"></i>
+                    <span>ตรวจสอบสถานะคำสั่งซื้อ</span>
+                    <i class="ph ph-caret-down text-sm" id="closed-track-toggle-icon"></i>
+                </button>
+
+                <div id="closed-tracking-section" class="w-full">
+                    <div class="flex gap-2 mt-4">
+                        <input type="tel" id="closed-track-phone" placeholder="เบอร์โทรศัพท์ที่ใช้สั่งซื้อ"
+                            class="flex-1 p-3 rounded-xl bg-white/10 border border-white/20 text-white text-sm placeholder-beige/50 focus:outline-none focus:border-gold focus:bg-white/15 transition-colors">
+                        <button onclick="app.searchOrdersClosed()" id="closed-track-btn"
+                            class="bg-gold text-navy px-4 rounded-xl text-sm font-bold active:scale-95 transition-transform flex items-center gap-1.5 whitespace-nowrap shadow-md shadow-gold/20">
+                            <i class="ph ph-magnifying-glass"></i> ค้นหา
+                        </button>
+                    </div>
+                    <div id="closed-tracking-results" class="mt-4 space-y-3 pb-4">
+                        <div class="flex flex-col items-center justify-center py-8 text-beige/30">
+                            <i class="ph ph-package text-5xl mb-3"></i>
+                            <p class="text-sm font-medium text-beige/50">ค้นหาด้วยเบอร์โทรศัพท์</p>
+                            <p class="text-[11px] mt-1 text-beige/40">เพื่อดูสถานะออเดอร์ของคุณ</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1128,6 +1168,49 @@
             .finally(function() { loadingOverlay.classList.add('hidden'); loadingOverlay.classList.remove('flex'); });
         });
 
+        // --- Closed Overlay Tracking ---
+        function toggleClosedTracking() {
+            var section = document.getElementById('closed-tracking-section');
+            var icon = document.getElementById('closed-track-toggle-icon');
+            if (section) {
+                section.classList.toggle('open');
+                if (icon) icon.classList.toggle('rotated');
+                if (section.classList.contains('open')) {
+                    var phoneInput = document.getElementById('closed-track-phone');
+                    if (phoneInput) setTimeout(function() { phoneInput.focus(); }, 350);
+                }
+            }
+        }
+
+        function searchOrdersClosed() {
+            var phone = document.getElementById('closed-track-phone').value.trim();
+            var results = document.getElementById('closed-tracking-results');
+            var btn = document.getElementById('closed-track-btn');
+            if (!/^0[0-9]{8,9}$/.test(phone)) {
+                results.innerHTML = '<div class="text-center py-8 text-red-400"><i class="ph ph-warning text-3xl mb-2"></i><p class="text-sm">กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง</p></div>';
+                return;
+            }
+            btn.disabled = true; btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> กำลังค้นหา...';
+            results.innerHTML = '<div class="flex flex-col items-center justify-center py-12 text-beige/40"><div class="w-8 h-8 border-3 border-beige/30 border-t-gold rounded-full animate-spin mb-3"></div><p class="text-sm">กำลังค้นหาออเดอร์...</p></div>';
+
+            fetch(API_URL, {
+                method: 'POST',
+                mode: 'cors',
+                redirect: 'follow',
+                body: JSON.stringify({ action: 'searchOrders', phone: phone })
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.success && data.orders && data.orders.length > 0) {
+                    results.innerHTML = data.orders.map(function(o) { return renderOrderCard(o); }).join('');
+                } else {
+                    results.innerHTML = '<div class="text-center py-8 text-beige/40"><i class="ph ph-package text-5xl mb-3"></i><p class="text-sm font-medium text-beige/50">ไม่พบรายการสั่งซื้อ</p><p class="text-[11px] mt-1 text-beige/40">ตรวจสอบเบอร์โทรศัพท์แล้วลองอีกครั้ง</p></div>';
+                }
+            })
+            .catch(function(err) { console.error('Search error:', err); results.innerHTML = '<div class="text-center py-8 text-red-400"><i class="ph ph-wifi-slash text-4xl mb-2"></i><p class="text-sm">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้</p></div>'; })
+            .finally(function() { btn.disabled = false; btn.innerHTML = '<i class="ph ph-magnifying-glass"></i> ค้นหา'; });
+        }
+
         // --- Order Tracking ---
         function searchOrders() {
             var phone = document.getElementById('track-phone').value.trim();
@@ -1321,6 +1404,8 @@
             Array.from(shippingOptions).forEach(function(opt) { opt.addEventListener('change', updateCheckoutCalculation); });
             var trackPhone = document.getElementById('track-phone');
             if (trackPhone) { trackPhone.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); searchOrders(); } }); }
+            var closedTrackPhone = document.getElementById('closed-track-phone');
+            if (closedTrackPhone) { closedTrackPhone.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); searchOrdersClosed(); } }); }
         }
 
         // --- Nav Active State ---
@@ -1332,7 +1417,7 @@
         }
 
         // --- Global Access ---
-        window.app = { addToCart: addToCart, removeFromCart: removeFromCart, openCart: openCart, closeCart: closeCart, closeCheckout: closeCheckout, openTracking: openTracking, closeTracking: closeTracking, searchOrders: searchOrders, setActiveNav: setActiveNav, prevSlide: prevSlide, nextSlide: nextSlide, removeSlip: removeSlip };
+        window.app = { addToCart: addToCart, removeFromCart: removeFromCart, openCart: openCart, closeCart: closeCart, closeCheckout: closeCheckout, openTracking: openTracking, closeTracking: closeTracking, searchOrders: searchOrders, searchOrdersClosed: searchOrdersClosed, toggleClosedTracking: toggleClosedTracking, setActiveNav: setActiveNav, prevSlide: prevSlide, nextSlide: nextSlide, removeSlip: removeSlip };
         window.openBundleModal = openBundleModal;
         window.addBundleDirectly = addBundleDirectly;
         window.closeBundleModal = closeBundleModal;
