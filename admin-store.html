@@ -155,6 +155,7 @@
                             <option value="PARTIAL">จัดส่งบางส่วน</option>
                             <option value="FULFILLED">จัดส่งแล้ว</option>
                             <option value="NOT_REQUIRED">รับหน้างาน</option>
+                            <option value="PICKED_UP">รับแล้ว</option>
                         </select>
                         <button id="batchPrintBtn" class="bg-navy text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-800 transition-colors flex items-center gap-2 hidden">
                             <i class="bi bi-printer"></i> พิมพ์ใบปะหน้าที่เลือก (<span id="batchPrintCount">0</span>)
@@ -296,6 +297,7 @@
                                         <option value="PARTIAL">จัดส่งบางส่วน</option>
                                         <option value="FULFILLED">จัดส่งแล้ว</option>
                                         <option value="NOT_REQUIRED">ไม่ต้องจัดส่ง</option>
+                                        <option value="PICKED_UP">รับแล้ว</option>
                                     </select>
                                 </div>
                                 <div>
@@ -663,7 +665,7 @@
                 
                 var isPickup = o.deliveryMethod && (o.deliveryMethod.indexOf("pickup") !== -1 || o.deliveryMethod.indexOf("รับ") !== -1);
                 var curFul = o.fulfillmentStatus || "UNFULFILLED";
-                if (isPickup) curFul = "NOT_REQUIRED";
+                if (isPickup && curFul !== "PICKED_UP") curFul = "NOT_REQUIRED";
                 
                 return curFul === filterFulfillment;
             });
@@ -679,10 +681,10 @@
                 
                 var isPickup = o.deliveryMethod && (o.deliveryMethod.indexOf("pickup") !== -1 || o.deliveryMethod.indexOf("รับ") !== -1);
                 var curFul = o.fulfillmentStatus || "UNFULFILLED";
-                if (isPickup) curFul = "NOT_REQUIRED";
+                if (isPickup && curFul !== "PICKED_UP") curFul = "NOT_REQUIRED";
                 
-                var fulBadge = curFul === "FULFILLED" ? "bg-blue-100 text-blue-700" : (curFul === "PARTIAL" ? "bg-orange-100 text-orange-700" : (curFul === "NOT_REQUIRED" ? "bg-gray-100 text-gray-500" : "bg-red-100 text-red-700"));
-                var fulLabel = curFul === "FULFILLED" ? "จัดส่งแล้ว" : (curFul === "PARTIAL" ? "จัดส่งบางส่วน" : (curFul === "NOT_REQUIRED" ? "รับหน้างาน" : "รอจัดส่ง"));
+                var fulBadge = curFul === "FULFILLED" ? "bg-blue-100 text-blue-700" : (curFul === "PICKED_UP" ? "bg-purple-100 text-purple-700" : (curFul === "PARTIAL" ? "bg-orange-100 text-orange-700" : (curFul === "NOT_REQUIRED" ? "bg-gray-100 text-gray-500" : "bg-red-100 text-red-700")));
+                var fulLabel = curFul === "FULFILLED" ? "จัดส่งแล้ว" : (curFul === "PICKED_UP" ? "รับแล้ว" : (curFul === "PARTIAL" ? "จัดส่งบางส่วน" : (curFul === "NOT_REQUIRED" ? "รับหน้างาน" : "รอจัดส่ง")));
 
                 var pendingHtml = "";
                 if (curFul === "PARTIAL") {
