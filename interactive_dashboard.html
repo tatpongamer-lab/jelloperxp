@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Sales & Inventory Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js DataLabels Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <!-- html2canvas & jsPDF for Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f3f4f6; /* bg-gray-100 */
+            color: #1f2937;
+        }
+        /* Dashboard Container (Auto Height) */
+        .dashboard-wrapper {
+            width: 1123px;
+            min-height: 794px;
+            height: auto;
+            background-color: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            margin: 20px auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 30px;
+        }
+        
+        /* Editable Input Styles */
+        .editable-input {
+            width: 100px;
+            background-color: #f8fafc; /* slate-50 */
+            border: 1px solid transparent;
+            border-bottom: 1px dashed #9ca3af; /* gray-400 */
+            border-radius: 4px;
+            text-align: right;
+            outline: none;
+            transition: all 0.2s;
+            color: inherit;
+            font-family: inherit;
+            padding: 2px 4px;
+        }
+        .editable-input:hover {
+            background-color: #f1f5f9; /* slate-100 */
+            border-bottom-color: #64748b; /* slate-500 */
+        }
+        .editable-input:focus {
+            border-bottom: 2px solid #3b82f6; /* blue-500 */
+            background-color: #eff6ff; /* blue-50 */
+        }
+        .editable-input.large {
+            width: 140px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            padding: 4px 8px;
+        }
+
+        /* Hide edit borders when exporting */
+        .is-exporting .editable-input,
+        .temp-export-element {
+            border-bottom: none !important;
+            background-color: transparent !important;
+        }
+
+        /* Hide number input arrows for cleaner look */
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        /* Customize scrollbar for table if it overflows (fallback) */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="py-8">
+
+    <!-- Action Buttons (Outside A4) -->
+    <div class="w-[1123px] mx-auto mb-4 flex justify-end gap-3">
+        <button onclick="exportToPNG()" class="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 flex items-center gap-2 text-sm font-medium transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+            บันทึกเป็นรูปภาพ (PNG)
+        </button>
+        <button onclick="exportToPDF()" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-sm hover:bg-blue-700 flex items-center gap-2 text-sm font-medium transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="16" y1="13" y2="21"/><line x1="12" x2="12" y1="13" y2="21"/><line x1="8" x2="8" y1="13" y2="21"/><line x1="8" x2="16" y1="13" y2="13"/></svg>
+            บันทึกเป็น PDF
+        </button>
+    </div>
+
+    <!-- Dashboard Container -->
+    <div id="dashboard-container" class="dashboard-wrapper px-8 py-6">
+        
+        <!-- Header -->
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">ภาพรวมยอดขายและสินค้าคงคลัง</h1>
+                <p class="text-sm text-gray-500 mt-1 flex items-center gap-2">
+                    สรุปข้อมูลการขาย กำไร และมูลค่าสินค้าอัปเดตล่าสุด
+                    <span id="current-date-badge" class="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full"></span>
+                </p>
+            </div>
+            <div class="bg-blue-50 border border-blue-100 px-5 py-2.5 rounded-xl shadow-sm">
+                <p class="text-sm font-medium text-blue-800" id="kpi-net-total">ยอดรวมสุทธิ (รวมส่ง): ฿62,363.00</p>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-5 gap-3 mb-3">
+            <!-- 1. Actual Sales (Editable) -->
+            <div class="bg-white rounded-xl border-l-4 border-blue-500 shadow-sm border border-gray-100 p-3">
+                <p class="text-[13px] font-medium text-gray-500 mb-1">ยอดขายจริง</p>
+                <div class="flex items-center text-gray-900">
+                    <span class="text-xl font-bold mr-1">฿</span>
+                    <input type="number" id="input-actual-sales" class="editable-input large text-left" value="58203" onchange="handleGlobalChange()" onfocus="this.select()" onkeydown="if(event.key==='Enter')this.blur()">
+                </div>
+            </div>
+
+            <!-- 2. Gross Margin -->
+            <div class="bg-white rounded-xl border-l-4 border-green-500 shadow-sm border border-gray-100 p-3 relative">
+                <p class="text-[13px] font-medium text-gray-500 mb-1">กำไรขั้นต้น</p>
+                <p class="text-2xl font-bold text-gray-900" id="kpi-gross-margin">฿15,230.00</p>
+                <!-- Margin Percentage Badge -->
+                <div class="absolute top-4 right-4 bg-green-100 text-green-700 text-[11px] font-bold px-2 py-1 rounded-md" id="kpi-margin-percent">
+                    26.17%
+                </div>
+            </div>
+
+            <!-- 3. COGS -->
+            <div class="bg-white rounded-xl border-l-4 border-orange-400 shadow-sm border border-gray-100 p-3">
+                <p class="text-[13px] font-medium text-gray-500 mb-1">ต้นทุนขาย</p>
+                <p class="text-2xl font-bold text-gray-900" id="kpi-cogs">฿42,973.00</p>
+            </div>
+
+            <!-- 4. Remaining Value -->
+            <div class="bg-white rounded-xl border-l-4 border-purple-500 shadow-sm border border-gray-100 p-3">
+                <p class="text-[13px] font-medium text-gray-500 mb-1">มูลค่าคงเหลือ</p>
+                <p class="text-2xl font-bold text-gray-900" id="kpi-remaining-val">฿56,927.00</p>
+            </div>
+
+            <!-- 5. Shipping Fee (Editable) -->
+            <div class="bg-white rounded-xl border-l-4 border-teal-400 shadow-sm border border-gray-100 p-3">
+                <p class="text-[13px] font-medium text-gray-500 mb-1">ค่าจัดส่ง</p>
+                <div class="flex items-center text-gray-900">
+                    <span class="text-xl font-bold mr-1">฿</span>
+                    <input type="number" id="input-shipping" class="editable-input large text-left" value="4160" onchange="handleGlobalChange()" onfocus="this.select()" onkeydown="if(event.key==='Enter')this.blur()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <!-- Bar Chart -->
+            <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm min-h-0">
+                <h2 class="text-[14px] font-semibold text-gray-800 mb-3">จำนวนสินค้าที่ขายได้ vs คงเหลือ</h2>
+                <div class="relative h-[200px] w-full">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Doughnut Chart -->
+            <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm min-h-0">
+                <h2 class="text-[14px] font-semibold text-gray-800 mb-3">สัดส่วนจำนวนชิ้นที่ขายได้แยกตามสินค้า</h2>
+                <div class="relative h-[200px] w-full flex justify-center">
+                    <canvas id="doughnutChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Section -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm flex-1 flex flex-col min-h-0">
+            <div class="px-5 py-3 border-b border-gray-100 bg-gray-50 rounded-t-xl">
+                <h2 class="text-[14px] font-semibold text-gray-800">รายละเอียดสินค้า (คลิกที่ตัวเลขเพื่อแก้ไข)</h2>
+            </div>
+            <div class="p-0 overflow-visible flex-1">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-[13px] text-gray-500 border-b border-gray-100">
+                            <th class="py-3 px-5 font-medium w-[22%]">รายการสินค้า</th>
+                            <th class="py-3 px-4 font-medium text-right">ราคาขาย (฿)</th>
+                            <th class="py-3 px-4 font-medium text-right">ต้นทุน (฿)</th>
+                            <th class="py-3 px-4 font-medium text-center">ผลิต</th>
+                            <th class="py-3 px-4 font-medium text-center text-green-600">ขายได้</th>
+                            <th class="py-3 px-4 font-medium text-center text-purple-600">คงเหลือ</th>
+                            <th class="py-3 px-5 font-medium text-right">มูลค่าคงเหลือ (฿)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="text-[14px]">
+                        <!-- Rows will be generated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+    </div>
+
+    <script>
+        // Data State
+        let actualSales = localStorage.getItem('actualSales') !== null ? parseFloat(localStorage.getItem('actualSales')) : 58203;
+        let shippingFee = localStorage.getItem('shippingFee') !== null ? parseFloat(localStorage.getItem('shippingFee')) : 4160;
+
+        let defaultProducts = [
+            { id: 'shirt', name: 'เสื้อเชิ้ต (shirt)', price: 419, cost: 200, produced: 205, sold: 111 },
+            { id: 'shirt_kids', name: 'เสื้อเชิ้ตเด็ก (shirt_kids)', price: 199, cost: 170, produced: 20, sold: 15 },
+            { id: 'tumbler', name: 'แก้วน้ำ (tumbler)', price: 389, cost: 281, produced: 100, sold: 43 },
+            { id: 'bag', name: 'กระเป๋า (bag)', price: 199, cost: 140, produced: 100, sold: 27 },
+            { id: 'opener', name: 'ที่เปิดขวด (opener)', price: 79, cost: 31, produced: 200, sold: 32 },
+            { id: 'keychain', name: 'พวงกุญแจ (keychain)', price: 99, cost: 72, produced: 100, sold: 19 }
+        ];
+        
+        let products = localStorage.getItem('products') ? JSON.parse(localStorage.getItem('products')) : defaultProducts;
+        
+        // Sort products by price (highest to lowest)
+        products.sort((a, b) => b.price - a.price);
+
+        function saveData() {
+            localStorage.setItem('actualSales', actualSales);
+            localStorage.setItem('shippingFee', shippingFee);
+            localStorage.setItem('products', JSON.stringify(products));
+        }
+
+        // Chart Instances
+        let barChart;
+        let doughnutChart;
+
+        // Utility: Format Currency
+        const formatMoney = (amount) => {
+            return amount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        };
+
+        // Initialize App
+        function init() {
+            // First calculation to set 'remaining'
+            products.forEach(p => { p.remaining = p.produced - p.sold; });
+            
+            const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('current-date-badge').innerText = 'อัปเดตล่าสุด: ' + new Date().toLocaleDateString('th-TH', dateOptions);
+
+            document.getElementById('input-actual-sales').value = actualSales;
+            document.getElementById('input-shipping').value = shippingFee;
+
+            renderTable();
+            initCharts();
+            updateDashboard();
+        }
+
+        // Generate Table Rows
+        function renderTable() {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            products.forEach((p, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-gray-50 hover:bg-blue-50/50 transition-colors " + (idx % 2 === 1 ? "bg-gray-50/30" : "");
+                
+                tr.innerHTML = `
+                    <td class="py-3 px-5 font-medium text-gray-800">${p.name}</td>
+                    <td class="py-3 px-4 text-right text-gray-600">
+                        <input type="number" class="editable-input table-input" data-row="${idx}" data-col="0" value="${p.price}" onchange="handleProductChange(${idx}, 'price', this.value)" onfocus="this.select()" onkeydown="handleTableKey(event)">
+                    </td>
+                    <td class="py-3 px-4 text-right text-gray-600">
+                        <input type="number" class="editable-input table-input" data-row="${idx}" data-col="1" value="${p.cost}" onchange="handleProductChange(${idx}, 'cost', this.value)" onfocus="this.select()" onkeydown="handleTableKey(event)">
+                    </td>
+                    <td class="py-3 px-4 text-center text-gray-600">
+                        <input type="number" class="editable-input table-input text-center w-[60px]" data-row="${idx}" data-col="2" value="${p.produced}" onchange="handleProductChange(${idx}, 'produced', this.value)" onfocus="this.select()" onkeydown="handleTableKey(event)">
+                    </td>
+                    <td class="py-3 px-4 text-center font-bold text-green-600">
+                        <input type="number" class="editable-input table-input text-center w-[60px] text-green-600 font-bold" data-row="${idx}" data-col="3" value="${p.sold}" onchange="handleProductChange(${idx}, 'sold', this.value)" onfocus="this.select()" onkeydown="handleTableKey(event)">
+                    </td>
+                    <td class="py-3 px-4 text-center font-bold text-purple-600" id="cell-rem-${idx}">
+                        ${p.remaining}
+                    </td>
+                    <td class="py-3 px-5 text-right text-gray-800" id="cell-val-${idx}">
+                        ฿${formatMoney(p.remaining * p.cost)}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Handle Global Input Changes
+        function handleGlobalChange() {
+            actualSales = parseFloat(document.getElementById('input-actual-sales').value) || 0;
+            shippingFee = parseFloat(document.getElementById('input-shipping').value) || 0;
+            updateDashboard();
+            saveData();
+        }
+
+        // Handle Table Input Changes
+        function handleProductChange(idx, field, value) {
+            products[idx][field] = parseFloat(value) || 0;
+            
+            // Recalculate remaining
+            products[idx].remaining = products[idx].produced - products[idx].sold;
+            
+            // Update specific table cells (avoid re-rendering whole table to keep input focus)
+            document.getElementById(`cell-rem-${idx}`).innerText = products[idx].remaining;
+            document.getElementById(`cell-val-${idx}`).innerText = '฿' + formatMoney(products[idx].remaining * products[idx].cost);
+
+            updateDashboard();
+            saveData();
+        }
+
+        // Keyboard Navigation (Excel-like)
+        function handleTableKey(e) {
+            const currentInput = e.target;
+            const row = parseInt(currentInput.getAttribute('data-row'));
+            const col = parseInt(currentInput.getAttribute('data-col'));
+            let nextInput = null;
+
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                nextInput = document.querySelector(`.table-input[data-row="${row - 1}"][data-col="${col}"]`);
+            } else if (e.key === 'ArrowDown' || e.key === 'Enter') {
+                e.preventDefault();
+                nextInput = document.querySelector(`.table-input[data-row="${row + 1}"][data-col="${col}"]`);
+                if (!nextInput && e.key === 'Enter') {
+                    currentInput.blur(); // Remove focus if it's the last row
+                }
+            }
+            
+            if (nextInput) {
+                nextInput.focus();
+            }
+        }
+
+        // Core Calculation and UI Update
+        function updateDashboard() {
+            let totalCogs = 0;
+            let totalRemainingVal = 0;
+
+            products.forEach(p => {
+                totalCogs += (p.sold * p.cost);
+                totalRemainingVal += (p.remaining * p.cost);
+            });
+
+            let grossMargin = actualSales - totalCogs;
+            let marginPercent = actualSales > 0 ? ((grossMargin / actualSales) * 100).toFixed(2) : 0;
+            let netTotal = actualSales + shippingFee;
+
+            // Update KPI DOM
+            document.getElementById('kpi-cogs').innerText = '฿' + formatMoney(totalCogs);
+            document.getElementById('kpi-gross-margin').innerText = '฿' + formatMoney(grossMargin);
+            document.getElementById('kpi-margin-percent').innerText = marginPercent + '%';
+            document.getElementById('kpi-remaining-val').innerText = '฿' + formatMoney(totalRemainingVal);
+            document.getElementById('kpi-net-total').innerText = 'ยอดรวมสุทธิ (รวมส่ง): ฿' + formatMoney(netTotal);
+
+            // Change Margin color based on value
+            const marginBadge = document.getElementById('kpi-margin-percent');
+            if (grossMargin >= 0) {
+                marginBadge.className = "absolute top-4 right-4 bg-green-100 text-green-700 text-[11px] font-bold px-2 py-1 rounded-md";
+            } else {
+                marginBadge.className = "absolute top-4 right-4 bg-red-100 text-red-700 text-[11px] font-bold px-2 py-1 rounded-md";
+            }
+
+            updateChartsData();
+        }
+
+        // Initialize Charts
+        function initCharts() {
+            Chart.register(ChartDataLabels);
+
+            const labels = products.map(p => p.name.split(' (')[0]);
+            
+            // Bar Chart
+            const ctxBar = document.getElementById('barChart').getContext('2d');
+            barChart = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'ขายได้', data: [], backgroundColor: '#2ecc71', stack: 'Stack 0' },
+                        { label: 'คงเหลือ', data: [], backgroundColor: '#a855f7', stack: 'Stack 0' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { family: 'Kanit' }, boxWidth: 12, padding: 20 } },
+                        datalabels: {
+                            color: '#fff', font: { weight: 'bold', family: 'Kanit', size: 11 },
+                            formatter: (value) => value > 0 ? value : ''
+                        }
+                    },
+                    scales: {
+                        x: { stacked: true, ticks: { font: { family: 'Kanit' } } },
+                        y: { stacked: true, beginAtZero: true, ticks: { font: { family: 'Kanit' } } }
+                    }
+                }
+            });
+
+            // Doughnut Chart
+            const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
+            doughnutChart = new Chart(ctxDoughnut, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: [],
+                        backgroundColor: ['#4285F4', '#EA4335', '#FBBC05', '#34A853', '#7B61FF', '#FF6D01'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: { padding: 10 },
+                    plugins: {
+                        legend: { 
+                            position: 'right', 
+                            labels: { font: { family: 'Kanit', size: 11 }, usePointStyle: true, boxWidth: 6, padding: 12 } 
+                        },
+                        datalabels: {
+                            color: '#fff', font: { weight: 'bold', family: 'Kanit', size: 12 },
+                            formatter: (value) => value > 0 ? value : ''
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
+
+        // Update Charts Data
+        function updateChartsData() {
+            if(barChart && doughnutChart) {
+                // Bar Data
+                barChart.data.datasets[0].data = products.map(p => p.sold);
+                barChart.data.datasets[1].data = products.map(p => p.remaining);
+                barChart.update();
+
+                // Doughnut Data
+                doughnutChart.data.datasets[0].data = products.map(p => p.sold);
+                doughnutChart.update();
+            }
+        }
+
+        // Exporter Pre/Post Process (Fixes html2canvas input cropping bug)
+        function beforeExport() {
+            const container = document.getElementById('dashboard-container');
+            container.classList.add('is-exporting');
+            
+            // Convert inputs to spans temporarily to prevent text cropping in exported image
+            const inputs = container.querySelectorAll('input.editable-input');
+            inputs.forEach(input => {
+                const span = document.createElement('span');
+                span.className = input.className + ' temp-export-element';
+                span.style.display = 'inline-block';
+                span.style.minWidth = input.offsetWidth + 'px';
+                span.innerText = input.value;
+                
+                input.style.display = 'none';
+                input.parentNode.insertBefore(span, input);
+            });
+        }
+
+        function afterExport() {
+            const container = document.getElementById('dashboard-container');
+            container.classList.remove('is-exporting');
+            
+            // Remove temp spans and restore inputs
+            const tempElements = container.querySelectorAll('.temp-export-element');
+            tempElements.forEach(el => el.remove());
+            
+            const inputs = container.querySelectorAll('input.editable-input');
+            inputs.forEach(input => input.style.display = '');
+        }
+
+        // Exporter: Image
+        function exportToPNG() {
+            beforeExport();
+            const container = document.getElementById('dashboard-container');
+            
+            html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'dashboard-summary.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                afterExport();
+            });
+        }
+
+        // Exporter: PDF
+        function exportToPDF() {
+            beforeExport();
+            const container = document.getElementById('dashboard-container');
+            
+            html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                
+                const pdfWidth = 297; // Base width in mm (A4 landscape width)
+                const dummyPdf = new jsPDF();
+                const imgProps = dummyPdf.getImageProperties(imgData);
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                
+                // Create PDF with dynamic height to fit content perfectly
+                const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [pdfWidth, pdfHeight] });
+                
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save('dashboard-summary.pdf');
+                
+                afterExport();
+            });
+        }
+
+        // Boot
+        window.onload = init;
+    </script>
+</body>
+</html>
