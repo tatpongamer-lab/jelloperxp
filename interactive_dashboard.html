@@ -37,25 +37,33 @@
         
         /* Editable Input Styles */
         .editable-input {
-            width: 100px;
-            background-color: #f8fafc; /* slate-50 */
+            width: 100%;
+            background-color: transparent;
             border: 1px solid transparent;
-            border-bottom: 1px dashed #9ca3af; /* gray-400 */
-            border-radius: 4px;
-            text-align: right;
+            border-radius: 6px;
             outline: none;
             transition: all 0.2s;
             color: inherit;
             font-family: inherit;
-            padding: 2px 4px;
+            padding: 4px 8px;
+            font-weight: inherit;
         }
         .editable-input:hover {
             background-color: #f1f5f9; /* slate-100 */
-            border-bottom-color: #64748b; /* slate-500 */
         }
         .editable-input:focus {
-            border-bottom: 2px solid #3b82f6; /* blue-500 */
-            background-color: #eff6ff; /* blue-50 */
+            background-color: #fff;
+            border-color: #3b82f6; /* blue-500 */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        /* Hide arrows in number inputs */
+        .editable-input::-webkit-outer-spin-button,
+        .editable-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .editable-input[type=number] {
+            -moz-appearance: textfield;
         }
         .editable-input.large {
             width: 140px;
@@ -101,15 +109,25 @@
 <body class="py-8">
 
     <!-- Action Buttons (Outside A4) -->
-    <div class="w-[1123px] mx-auto mb-4 flex justify-end gap-3">
-        <button onclick="exportToPNG()" class="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 flex items-center gap-2 text-sm font-medium transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-            บันทึกเป็นรูปภาพ (PNG)
-        </button>
-        <button onclick="exportToPDF()" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-sm hover:bg-blue-700 flex items-center gap-2 text-sm font-medium transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="16" y1="13" y2="21"/><line x1="12" x2="12" y1="13" y2="21"/><line x1="8" x2="8" y1="13" y2="21"/><line x1="8" x2="16" y1="13" y2="13"/></svg>
-            บันทึกเป็น PDF
-        </button>
+    <div class="w-[1123px] mx-auto mb-4 flex justify-between gap-3">
+        <div class="flex items-center gap-2">
+            <input type="hidden" id="api-password" value="2530">
+            <button onclick="fetchOnlineData()" id="btn-fetch-data" class="px-4 py-2 bg-green-600 text-white rounded-lg shadow-sm hover:bg-green-700 flex items-center gap-2 text-sm font-medium transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
+                ดึงข้อมูลออนไลน์
+            </button>
+            <span id="api-status" class="text-sm font-medium text-gray-500 ml-2"></span>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="exportToPNG()" class="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 flex items-center gap-2 text-sm font-medium transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                บันทึกเป็นรูปภาพ (PNG)
+            </button>
+            <button onclick="exportToPDF()" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-sm hover:bg-blue-700 flex items-center gap-2 text-sm font-medium transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="16" y1="13" y2="21"/><line x1="12" x2="12" y1="13" y2="21"/><line x1="8" x2="8" y1="13" y2="21"/><line x1="8" x2="16" y1="13" y2="13"/></svg>
+                บันทึกเป็น PDF
+            </button>
+        </div>
     </div>
 
     <!-- Dashboard Container -->
@@ -125,50 +143,60 @@
                 </p>
             </div>
             <div class="bg-blue-50 border border-blue-100 px-5 py-2.5 rounded-xl shadow-sm">
-                <p class="text-sm font-medium text-blue-800" id="kpi-net-total">ยอดรวมสุทธิ (รวมส่ง): ฿62,363.00</p>
+                <p class="text-sm font-medium text-blue-800" id="kpi-net-total">ยอดรวมสุทธิ (รวมส่ง): ฿0.00</p>
             </div>
         </div>
 
         <!-- KPI Cards -->
         <div class="grid grid-cols-5 gap-3 mb-3">
-            <!-- 1. Actual Sales (Editable) -->
-            <div class="bg-white rounded-xl border-l-4 border-blue-500 shadow-sm border border-gray-100 p-3">
-                <p class="text-[13px] font-medium text-gray-500 mb-1">ยอดขายจริง</p>
-                <div class="flex items-center text-gray-900">
-                    <span class="text-xl font-bold mr-1">฿</span>
-                    <input type="number" id="input-actual-sales" class="editable-input large text-left" value="58203" onchange="handleGlobalChange()" onfocus="this.select()" onkeydown="if(event.key==='Enter')this.blur()">
+            <!-- 1. Actual Sales -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 w-16 h-16 bg-gray-50 rounded-full opacity-50 pointer-events-none"></div>
+                <p class="text-[13px] font-medium text-gray-500 mb-1 relative z-10">ยอดขายรวม</p>
+                <p class="text-2xl font-bold text-gray-900 relative z-10 mb-2" id="kpi-actual-sales">฿0.00</p>
+                
+                <div class="flex flex-col mt-2 border-t border-gray-50 pt-2 relative z-10">
+                    <div class="flex justify-between items-center text-[12px] mb-1">
+                        <span class="text-gray-500">ออนไลน์:</span>
+                        <span class="font-medium text-gray-700" id="kpi-online-revenue">฿0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center text-[12px]">
+                        <span class="text-gray-500 mt-1">หน้างาน:</span>
+                        <div class="flex items-center">
+                            <span class="text-gray-700 mr-1">฿</span>
+                            <input type="number" id="input-onsite-revenue" class="editable-input text-right w-[80px] text-[12px] py-1 px-2 border border-gray-200 rounded" value="0" onchange="handleManualOnSiteRevenue()" onfocus="this.select()" onkeydown="if(event.key==='Enter')this.blur()">
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- 2. Gross Margin -->
             <div class="bg-white rounded-xl border-l-4 border-green-500 shadow-sm border border-gray-100 p-3 relative">
                 <p class="text-[13px] font-medium text-gray-500 mb-1">กำไรขั้นต้น</p>
-                <p class="text-2xl font-bold text-gray-900" id="kpi-gross-margin">฿15,230.00</p>
+                <p class="text-2xl font-bold text-gray-900" id="kpi-gross-margin">฿0.00</p>
                 <!-- Margin Percentage Badge -->
                 <div class="absolute top-4 right-4 bg-green-100 text-green-700 text-[11px] font-bold px-2 py-1 rounded-md" id="kpi-margin-percent">
-                    26.17%
+                    0.00%
                 </div>
             </div>
 
             <!-- 3. COGS -->
             <div class="bg-white rounded-xl border-l-4 border-orange-400 shadow-sm border border-gray-100 p-3">
                 <p class="text-[13px] font-medium text-gray-500 mb-1">ต้นทุนขาย</p>
-                <p class="text-2xl font-bold text-gray-900" id="kpi-cogs">฿42,973.00</p>
+                <p class="text-2xl font-bold text-gray-900" id="kpi-cogs">฿0.00</p>
             </div>
 
             <!-- 4. Remaining Value -->
             <div class="bg-white rounded-xl border-l-4 border-purple-500 shadow-sm border border-gray-100 p-3">
                 <p class="text-[13px] font-medium text-gray-500 mb-1">มูลค่าคงเหลือ</p>
-                <p class="text-2xl font-bold text-gray-900" id="kpi-remaining-val">฿56,927.00</p>
+                <p class="text-2xl font-bold text-gray-900" id="kpi-remaining-val">฿0.00</p>
             </div>
 
-            <!-- 5. Shipping Fee (Editable) -->
+            <!-- 5. Shipping Fee (Read-only) -->
             <div class="bg-white rounded-xl border-l-4 border-teal-400 shadow-sm border border-gray-100 p-3">
-                <p class="text-[13px] font-medium text-gray-500 mb-1">ค่าจัดส่ง</p>
-                <div class="flex items-center text-gray-900">
-                    <span class="text-xl font-bold mr-1">฿</span>
-                    <input type="number" id="input-shipping" class="editable-input large text-left" value="4160" onchange="handleGlobalChange()" onfocus="this.select()" onkeydown="if(event.key==='Enter')this.blur()">
-                </div>
+                <p class="text-[13px] font-medium text-gray-500 mb-1">ค่าจัดส่ง (ออนไลน์)</p>
+                <p class="text-2xl font-bold text-gray-900" id="kpi-shipping">฿0.00</p>
+                <input type="hidden" id="input-shipping" value="0">
             </div>
         </div>
 
@@ -194,19 +222,29 @@
         <!-- Table Section -->
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm flex-1 flex flex-col min-h-0">
             <div class="px-5 py-3 border-b border-gray-100 bg-gray-50 rounded-t-xl">
-                <h2 class="text-[14px] font-semibold text-gray-800">รายละเอียดสินค้า (คลิกที่ตัวเลขเพื่อแก้ไข)</h2>
+                <h2 class="text-[14px] font-semibold text-gray-800">รายละเอียดสินค้า </h2>
             </div>
             <div class="p-0 overflow-visible flex-1">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="text-[13px] text-gray-500 border-b border-gray-100">
-                            <th class="py-3 px-5 font-medium w-[22%]">รายการสินค้า</th>
-                            <th class="py-3 px-4 font-medium text-right">ราคาขาย (฿)</th>
-                            <th class="py-3 px-4 font-medium text-right">ต้นทุน (฿)</th>
-                            <th class="py-3 px-4 font-medium text-center">ผลิต</th>
-                            <th class="py-3 px-4 font-medium text-center text-green-600">ขายได้</th>
-                            <th class="py-3 px-4 font-medium text-center text-purple-600">คงเหลือ</th>
-                            <th class="py-3 px-5 font-medium text-right">มูลค่าคงเหลือ (฿)</th>
+                            <!-- Product Name -->
+                            <th class="py-3 px-4 font-medium w-[22%]">รายการสินค้า</th>
+                            
+                            <!-- Cost & Produced Group -->
+                            <th class="py-3 px-2 font-medium text-right w-[11%]">ราคาขาย (฿)</th>
+                            <th class="py-3 px-2 font-medium text-right w-[11%]">ต้นทุน (฿)</th>
+                            <th class="py-3 px-2 font-medium text-center w-[10%]">ผลิต</th>
+                            
+                            <!-- Sales Group (Shaded Background) -->
+                            <th class="py-3 px-2 font-medium text-center text-blue-600 bg-slate-50 w-[8%] rounded-tl-lg">ออนไลน์</th>
+                            <th class="py-3 px-2 font-medium text-center text-green-600 bg-slate-50 w-[8%]">หน้างาน</th>
+                            <th class="py-3 px-2 font-medium text-center text-orange-500 bg-slate-50 w-[8%]">สปอนเซอร์</th>
+                            <th class="py-3 px-2 font-medium text-center font-bold text-gray-800 bg-slate-100 w-[8%] rounded-tr-lg">รวมขายได้</th>
+                            
+                            <!-- Remaining Group -->
+                            <th class="py-3 px-2 font-medium text-center text-purple-600 w-[8%]">คงเหลือ</th>
+                            <th class="py-3 px-4 font-medium text-right w-[14%]">มูลค่าคงเหลือ (฿)</th>
                         </tr>
                     </thead>
                     <tbody id="table-body" class="text-[14px]">
@@ -220,26 +258,51 @@
 
     <script>
         // Data State
-        let actualSales = localStorage.getItem('actualSales') !== null ? parseFloat(localStorage.getItem('actualSales')) : 58203;
-        let shippingFee = localStorage.getItem('shippingFee') !== null ? parseFloat(localStorage.getItem('shippingFee')) : 4160;
+        let actualSales = localStorage.getItem('actualSales') !== null ? parseFloat(localStorage.getItem('actualSales')) : 0;
+        let shippingFee = localStorage.getItem('shippingFee') !== null ? parseFloat(localStorage.getItem('shippingFee')) : 0;
+        let onlineRevenue = localStorage.getItem('onlineRevenue') !== null ? parseFloat(localStorage.getItem('onlineRevenue')) : 0;
+        let manualOnSiteRevenue = localStorage.getItem('manualOnSiteRevenue') !== null ? parseFloat(localStorage.getItem('manualOnSiteRevenue')) : null;
 
         let defaultProducts = [
-            { id: 'shirt', name: 'เสื้อเชิ้ต (shirt)', price: 419, cost: 200, produced: 205, sold: 111 },
-            { id: 'shirt_kids', name: 'เสื้อเชิ้ตเด็ก (shirt_kids)', price: 199, cost: 170, produced: 20, sold: 15 },
-            { id: 'tumbler', name: 'แก้วน้ำ (tumbler)', price: 389, cost: 281, produced: 100, sold: 43 },
-            { id: 'bag', name: 'กระเป๋า (bag)', price: 199, cost: 140, produced: 100, sold: 27 },
-            { id: 'opener', name: 'ที่เปิดขวด (opener)', price: 79, cost: 31, produced: 200, sold: 32 },
-            { id: 'keychain', name: 'พวงกุญแจ (keychain)', price: 99, cost: 72, produced: 100, sold: 19 }
+            { id: 'shirt', name: 'เสื้อเชิ้ต (shirt)', price: 419, cost: 200, produced: 205, soldOnline: 0, soldOnSite: 0, sponsor: 0 },
+            { id: 'shirt_kids', name: 'เสื้อเชิ้ตเด็ก (shirt_kids)', price: 199, cost: 170, produced: 20, soldOnline: 0, soldOnSite: 0, sponsor: 0 },
+            { id: 'tumbler', name: 'แก้วน้ำ (tumbler)', price: 389, cost: 281, produced: 100, soldOnline: 0, soldOnSite: 0, sponsor: 0 },
+            { id: 'bag', name: 'กระเป๋า (bag)', price: 199, cost: 140, produced: 100, soldOnline: 0, soldOnSite: 0, sponsor: 0 },
+            { id: 'opener', name: 'ที่เปิดขวด (opener)', price: 79, cost: 31, produced: 200, soldOnline: 0, soldOnSite: 0, sponsor: 0 },
+            { id: 'keychain', name: 'พวงกุญแจ (keychain)', price: 99, cost: 72, produced: 100, soldOnline: 0, soldOnSite: 0, sponsor: 0 },
+            { id: 'sticker', name: 'สติกเกอร์ (sticker)', price: 50, cost: 20, produced: 100, soldOnline: 0, soldOnSite: 0, sponsor: 0 }
         ];
         
         let products = localStorage.getItem('products') ? JSON.parse(localStorage.getItem('products')) : defaultProducts;
         
+        // Migrate old data if needed
+        products.forEach(p => {
+            if (p.sold !== undefined && p.soldOnline === undefined) {
+                p.soldOnSite = p.sold; // Move old 'sold' to 'soldOnSite'
+                p.soldOnline = 0;
+                delete p.sold;
+            }
+            if (p.sponsor === undefined) p.sponsor = 0;
+            p.totalSold = (p.soldOnline || 0) + (p.soldOnSite || 0) + (p.sponsor || 0);
+        });
+
+        // Add sticker if missing from old cache
+        if (!products.find(p => p.id === 'sticker')) {
+            products.push({ id: 'sticker', name: 'สติกเกอร์ (sticker)', price: 50, cost: 20, produced: 100, soldOnline: 0, soldOnSite: 0, sponsor: 0, totalSold: 0 });
+        }
+
         // Sort products by price (highest to lowest)
         products.sort((a, b) => b.price - a.price);
 
         function saveData() {
             localStorage.setItem('actualSales', actualSales);
             localStorage.setItem('shippingFee', shippingFee);
+            localStorage.setItem('onlineRevenue', onlineRevenue);
+            if (manualOnSiteRevenue !== null) {
+                localStorage.setItem('manualOnSiteRevenue', manualOnSiteRevenue);
+            } else {
+                localStorage.removeItem('manualOnSiteRevenue');
+            }
             localStorage.setItem('products', JSON.stringify(products));
         }
 
@@ -247,25 +310,31 @@
         let barChart;
         let doughnutChart;
 
-        // Utility: Format Currency
-        const formatMoney = (amount) => {
-            return amount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        // Format Currency
+        function formatMoney(num) {
+            return parseFloat(num).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         };
 
         // Initialize App
         function init() {
             // First calculation to set 'remaining'
-            products.forEach(p => { p.remaining = p.produced - p.sold; });
+            products.forEach(p => { 
+                p.totalSold = (p.soldOnline || 0) + (p.soldOnSite || 0) + (p.sponsor || 0);
+                p.remaining = p.produced - p.totalSold; 
+            });
             
             const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('current-date-badge').innerText = 'อัปเดตล่าสุด: ' + new Date().toLocaleDateString('th-TH', dateOptions);
 
-            document.getElementById('input-actual-sales').value = actualSales;
             document.getElementById('input-shipping').value = shippingFee;
 
+            recalculateTotalSales();
             renderTable();
             initCharts();
             updateDashboard();
+            
+            // Fetch online data automatically on load
+            fetchOnlineData();
         }
 
         // Generate Table Rows
@@ -278,23 +347,32 @@
                 tr.className = "border-b border-gray-50 hover:bg-blue-50/50 transition-colors " + (idx % 2 === 1 ? "bg-gray-50/30" : "");
                 
                 tr.innerHTML = `
-                    <td class="py-3 px-5 font-medium text-gray-800">${p.name}</td>
-                    <td class="py-3 px-4 text-right text-gray-600">
-                        <input type="number" class="editable-input table-input" data-row="${idx}" data-col="0" value="${p.price}" onchange="handleProductChange(${idx}, 'price', this.value)" onfocus="this.select()" onkeydown="handleTableKey(event)">
+                    <td class="py-3 px-4 font-medium text-gray-800 align-middle">${p.name}</td>
+                    <td class="py-3 px-2 align-middle">
+                        <input type="number" class="editable-input table-input text-right text-gray-600" data-row="${idx}" data-col="0" value="${p.price}" onchange="handleProductChange(${idx}, 'price', this.value)" onfocus="this.select()" onkeydown="handleTableKey(event)">
                     </td>
-                    <td class="py-3 px-4 text-right text-gray-600">
-                        <input type="number" class="editable-input table-input" data-row="${idx}" data-col="1" value="${p.cost}" onchange="handleProductChange(${idx}, 'cost', this.value)" onfocus="this.select()" onkeydown="handleTableKey(event)">
+                    <td class="py-3 px-2 align-middle">
+                        <input type="number" class="editable-input table-input text-right text-gray-600" data-row="${idx}" data-col="1" value="${p.cost}" onchange="handleProductChange(${idx}, 'cost', this.value)" onfocus="this.select()" onkeydown="handleTableKey(event)">
                     </td>
-                    <td class="py-3 px-4 text-center text-gray-600">
-                        <input type="number" class="editable-input table-input text-center w-[60px]" data-row="${idx}" data-col="2" value="${p.produced}" onchange="handleProductChange(${idx}, 'produced', this.value)" onfocus="this.select()" onkeydown="handleTableKey(event)">
+                    <td class="py-3 px-2 align-middle">
+                        <input type="number" class="editable-input table-input text-center text-gray-600" data-row="${idx}" data-col="2" value="${p.produced}" onchange="handleProductChange(${idx}, 'produced', this.value)" onfocus="this.select()" onkeydown="handleTableKey(event)">
                     </td>
-                    <td class="py-3 px-4 text-center font-bold text-green-600">
-                        <input type="number" class="editable-input table-input text-center w-[60px] text-green-600 font-bold" data-row="${idx}" data-col="3" value="${p.sold}" onchange="handleProductChange(${idx}, 'sold', this.value)" onfocus="this.select()" onkeydown="handleTableKey(event)">
+                    <td class="py-3 px-2 text-center align-middle text-blue-600 bg-slate-50 font-medium" id="cell-online-${idx}">
+                        ${p.soldOnline}
                     </td>
-                    <td class="py-3 px-4 text-center font-bold text-purple-600" id="cell-rem-${idx}">
+                    <td class="py-3 px-2 align-middle bg-slate-50">
+                        <input type="number" class="editable-input table-input text-center text-green-600 font-bold" data-row="${idx}" data-col="3" value="${p.soldOnSite}" onchange="handleProductChange(${idx}, 'soldOnSite', this.value)" onfocus="this.select()" onkeydown="handleTableKey(event)">
+                    </td>
+                    <td class="py-3 px-2 align-middle bg-slate-50">
+                        <input type="number" class="editable-input table-input text-center text-orange-500 font-bold" data-row="${idx}" data-col="4" value="${p.sponsor}" onchange="handleProductChange(${idx}, 'sponsor', this.value)" onfocus="this.select()" onkeydown="handleTableKey(event)">
+                    </td>
+                    <td class="py-3 px-2 text-center align-middle font-bold text-gray-800 bg-slate-100" id="cell-totalsold-${idx}">
+                        ${p.totalSold}
+                    </td>
+                    <td class="py-3 px-2 text-center align-middle font-bold text-purple-600" id="cell-rem-${idx}">
                         ${p.remaining}
                     </td>
-                    <td class="py-3 px-5 text-right text-gray-800" id="cell-val-${idx}">
+                    <td class="py-3 px-4 text-right align-middle text-gray-800" id="cell-val-${idx}">
                         ฿${formatMoney(p.remaining * p.cost)}
                     </td>
                 `;
@@ -304,20 +382,52 @@
 
         // Handle Global Input Changes
         function handleGlobalChange() {
-            actualSales = parseFloat(document.getElementById('input-actual-sales').value) || 0;
             shippingFee = parseFloat(document.getElementById('input-shipping').value) || 0;
             updateDashboard();
             saveData();
+        }
+
+        function handleManualOnSiteRevenue() {
+            let val = parseFloat(document.getElementById('input-onsite-revenue').value);
+            if (!isNaN(val)) {
+                manualOnSiteRevenue = val;
+            } else {
+                manualOnSiteRevenue = null;
+            }
+            updateDashboard();
+            saveData();
+        }
+        
+        function recalculateTotalSales() {
+            let onSiteRevenue = 0;
+            products.forEach(p => {
+                onSiteRevenue += (p.soldOnSite * p.price);
+            });
+            
+            // Only update DOM if manual override is NOT active
+            if (manualOnSiteRevenue === null) {
+                document.getElementById('input-onsite-revenue').value = onSiteRevenue;
+            }
+            
+            updateDashboard();
         }
 
         // Handle Table Input Changes
         function handleProductChange(idx, field, value) {
             products[idx][field] = parseFloat(value) || 0;
             
-            // Recalculate remaining
-            products[idx].remaining = products[idx].produced - products[idx].sold;
+            // Recalculate remaining & total
+            products[idx].totalSold = (products[idx].soldOnline || 0) + (products[idx].soldOnSite || 0) + (products[idx].sponsor || 0);
+            products[idx].remaining = products[idx].produced - products[idx].totalSold;
+            
+            // Auto update actual sales if on-site sales change
+            if (field === 'soldOnSite' || field === 'price') {
+                manualOnSiteRevenue = null; // Clear manual override since table was changed
+                recalculateTotalSales();
+            }
             
             // Update specific table cells (avoid re-rendering whole table to keep input focus)
+            document.getElementById(`cell-totalsold-${idx}`).innerText = products[idx].totalSold;
             document.getElementById(`cell-rem-${idx}`).innerText = products[idx].remaining;
             document.getElementById(`cell-val-${idx}`).innerText = '฿' + formatMoney(products[idx].remaining * products[idx].cost);
 
@@ -352,23 +462,40 @@
         function updateDashboard() {
             let totalCogs = 0;
             let totalRemainingVal = 0;
+            let tableOnSiteRevenue = 0;
 
             products.forEach(p => {
-                totalCogs += (p.sold * p.cost);
+                let totalItemsOut = p.totalSold;
+                totalCogs += (totalItemsOut * p.cost);
                 totalRemainingVal += (p.remaining * p.cost);
+                tableOnSiteRevenue += (p.soldOnSite * p.price);
             });
+
+            // Determine final on-site revenue
+            let finalOnSiteRevenue = manualOnSiteRevenue !== null ? manualOnSiteRevenue : tableOnSiteRevenue;
+            
+            // Ensure input matches if no manual override
+            if (manualOnSiteRevenue === null) {
+                document.getElementById('input-onsite-revenue').value = tableOnSiteRevenue;
+            }
+
+            actualSales = onlineRevenue + finalOnSiteRevenue;
 
             let grossMargin = actualSales - totalCogs;
             let marginPercent = actualSales > 0 ? ((grossMargin / actualSales) * 100).toFixed(2) : 0;
             let netTotal = actualSales + shippingFee;
 
             // Update KPI DOM
+            document.getElementById('kpi-actual-sales').innerText = '฿' + formatMoney(actualSales);
+            document.getElementById('kpi-online-revenue').innerText = '฿' + formatMoney(onlineRevenue);
+            
             document.getElementById('kpi-cogs').innerText = '฿' + formatMoney(totalCogs);
             document.getElementById('kpi-gross-margin').innerText = '฿' + formatMoney(grossMargin);
             document.getElementById('kpi-margin-percent').innerText = marginPercent + '%';
             document.getElementById('kpi-remaining-val').innerText = '฿' + formatMoney(totalRemainingVal);
             document.getElementById('kpi-net-total').innerText = 'ยอดรวมสุทธิ (รวมส่ง): ฿' + formatMoney(netTotal);
-
+            document.getElementById('kpi-shipping').innerText = '฿' + formatMoney(shippingFee);
+            
             // Change Margin color based on value
             const marginBadge = document.getElementById('kpi-margin-percent');
             if (grossMargin >= 0) {
@@ -422,7 +549,7 @@
                     labels: labels,
                     datasets: [{
                         data: [],
-                        backgroundColor: ['#4285F4', '#EA4335', '#FBBC05', '#34A853', '#7B61FF', '#FF6D01'],
+                        backgroundColor: ['#4285F4', '#EA4335', '#FBBC05', '#34A853', '#7B61FF', '#FF6D01', '#E91E63'],
                         borderWidth: 0
                     }]
                 },
@@ -449,14 +576,136 @@
         function updateChartsData() {
             if(barChart && doughnutChart) {
                 // Bar Data
-                barChart.data.datasets[0].data = products.map(p => p.sold);
+                barChart.data.datasets[0].data = products.map(p => p.totalSold);
                 barChart.data.datasets[1].data = products.map(p => p.remaining);
                 barChart.update();
 
                 // Doughnut Data
-                doughnutChart.data.datasets[0].data = products.map(p => p.sold);
+                doughnutChart.data.datasets[0].data = products.map(p => p.totalSold);
                 doughnutChart.update();
             }
+        }
+        
+        // API Fetch Logic
+        const API_URL = "https://script.google.com/macros/s/AKfycbw2kOjC60iW9gZltuEg_seerk0tJ6dP4V2YSd5-Fhuk3As06G7zhzYtuQYpoAW2WqKG/exec";
+        
+        function fetchOnlineData() {
+            const pwd = document.getElementById('api-password').value;
+            if (!pwd) {
+                alert("กรุณาใส่รหัสผ่าน Admin เพื่อดึงข้อมูลออนไลน์");
+                return;
+            }
+            
+            // Save password temporarily for convenience
+            sessionStorage.setItem('adminPwd', pwd);
+            
+            const btn = document.getElementById('btn-fetch-data');
+            const statusText = document.getElementById('api-status');
+            
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            statusText.innerText = "กำลังดึงข้อมูล...";
+            statusText.className = "text-sm font-medium text-blue-600 ml-2 animate-pulse";
+            
+            fetch(API_URL, {
+                method: "POST",
+                mode: "cors",
+                redirect: "follow",
+                body: JSON.stringify({ action: "getAdminData", password: pwd })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    processOnlineData(data.orders, data.stats);
+                    statusText.innerText = "อัปเดตล่าสุด: " + new Date().toLocaleTimeString('th-TH');
+                    statusText.className = "text-sm font-medium text-green-600 ml-2";
+                } else {
+                    alert("เกิดข้อผิดพลาด: " + (data.message || "ไม่สามารถโหลดข้อมูลได้"));
+                    statusText.innerText = "รหัสผ่านผิด หรือเกิดข้อผิดพลาด";
+                    statusText.className = "text-sm font-medium text-red-600 ml-2";
+                }
+            })
+            .catch(err => {
+                console.error("fetchData error:", err);
+                alert("ไม่สามารถเชื่อมต่อ API ได้");
+                statusText.innerText = "เชื่อมต่อล้มเหลว";
+                statusText.className = "text-sm font-medium text-red-600 ml-2";
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            });
+        }
+        
+        function processOnlineData(orders, stats) {
+            let onlineSalesCounts = {
+                shirt: 0,
+                shirt_kids: 0,
+                tumbler: 0,
+                bag: 0,
+                opener: 0,
+                keychain: 0,
+                sticker: 0
+            };
+            
+            let totalShipping = 0;
+            
+            orders.forEach(o => {
+                if (o.paymentStatus === "REJECTED") return; 
+                
+                if (o.shippingFee) {
+                    totalShipping += parseFloat(o.shippingFee) || 0;
+                }
+
+                if (o.items && Array.isArray(o.items)) {
+                    o.items.forEach(item => {
+                        if (item.isBundle && item.bundleItems) {
+                            for (let k in item.bundleItems) {
+                                let bq = item.bundleItems[k];
+                                let key = k;
+                                if (k === 'totebag') key = 'bag'; // map totebag to bag
+                                if (onlineSalesCounts[key] !== undefined) {
+                                    onlineSalesCounts[key] += (bq * item.quantity);
+                                }
+                            }
+                        } else {
+                            let pName = item.name;
+                            let key = null;
+                            if (pName.indexOf("เสื้อ") !== -1 && pName.indexOf("เด็ก") === -1) key = 'shirt';
+                            else if (pName.indexOf("เด็ก") !== -1) key = 'shirt_kids';
+                            else if (pName.indexOf("แก้ว") !== -1) key = 'tumbler';
+                            else if (pName.indexOf("ถุงผ้า") !== -1) key = 'bag';
+                            else if (pName.indexOf("พวงกุญแจ") !== -1) key = 'keychain';
+                            else if (pName.indexOf("เปิดขวด") !== -1) key = 'opener';
+                            else if (pName.indexOf("สติกเกอร์") !== -1 || pName.indexOf("sticker") !== -1) key = 'sticker';
+                            
+                            if (key && onlineSalesCounts[key] !== undefined) {
+                                onlineSalesCounts[key] += item.quantity;
+                            }
+                        }
+                    });
+                }
+            });
+            
+            // Update products
+            products.forEach(p => {
+                if (onlineSalesCounts[p.id] !== undefined) {
+                    p.soldOnline = onlineSalesCounts[p.id];
+                }
+                p.totalSold = (p.soldOnline || 0) + (p.soldOnSite || 0) + (p.sponsor || 0);
+                p.remaining = p.produced - p.totalSold;
+            });
+            
+            // Update Revenues
+            let totalRevenueNum = parseFloat(stats.totalRevenue) || 0;
+            onlineRevenue = totalRevenueNum - totalShipping; // Only product sales online
+            shippingFee = totalShipping;
+            document.getElementById('input-shipping').value = shippingFee;
+            
+            recalculateTotalSales();  
+            renderTable(); 
+            updateDashboard();
+            saveData();
         }
 
         // Exporter Pre/Post Process (Fixes html2canvas input cropping bug)
