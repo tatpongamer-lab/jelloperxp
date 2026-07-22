@@ -681,6 +681,32 @@
             cursor: pointer;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+    @media print {
+        @page { size: A4 portrait; margin: 8mm; }
+        body * { visibility: hidden !important; }
+        #tabDetailed, #tabDetailed * { visibility: visible !important; }
+        #tabDetailed { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; font-size: 9px !important; }
+        .tab-btn, .btn, nav, #exportActionBox { display: none !important; }
+        .card { border: 1px solid #ccc !important; box-shadow: none !important; margin-bottom: 6px !important; break-inside: avoid; }
+        .card .p-3 { padding: 6px !important; }
+        body { background-color: #fff !important; color: #000 !important; margin: 0; padding: 0; }
+        th, td { border-color: #ddd !important; color: #000 !important; padding: 3px 4px !important; font-size: 9px !important; white-space: nowrap !important; }
+        .table-compact th { background-color: #f8f9fa !important; }
+        .badge { color: #000 !important; border: 1px solid #000; }
+        .summary-tables-grid { display: block !important; gap: 0 !important; }
+        h3, h4 { font-size: 12px !important; margin: 0 !important; }
+        .mb-3, .mb-4 { margin-bottom: 6px !important; }
+        .fs-4, .fs-5, .fs-6 { font-size: 9px !important; }
+    }
+    #tabDetailed .table-compact th,
+    #tabDetailed .table-compact td {
+        white-space: nowrap;
+        padding: 6px 8px;
+        font-size: 0.85rem;
+    }
+    </style>
 </head>
 
 <body>
@@ -724,6 +750,7 @@
                     <button class="tab-btn" onclick="switchTab(event, 'tabSummary')">สรุปข้อมูล</button>
                     <button class="tab-btn" onclick="switchTab(event, 'tabStats')">สถิติ</button>
                     <button class="tab-btn" onclick="switchTab(event, 'tabFinance')">การเงิน</button>
+                    <button class="tab-btn fw-bold" style="color: #ffc107;" onclick="switchTab(event, 'tabDetailed')">จัดงาน(ละเอียด)</button>
                 </div>
             </div>
         </nav>
@@ -883,6 +910,7 @@
                                 <span id="goalText" style="color: #ffffff; font-weight: 700; font-size: 1.1rem; text-shadow: 0 1px 4px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,0.5); z-index: 10;">0 / 400 คน (0%)</span>
                             </div>
                         </div>
+                        <div class="text-center mt-2"><small id="goalChildNote" class="text-muted"></small></div>
                     </div>
                 </div>
 
@@ -1118,6 +1146,118 @@
                     </table>
                 </div>
             </div>
+                </div>
+            </div>
+
+            <!-- TAB 8: จัดงาน(ละเอียด) -->
+            <div id="tabDetailed" class="tab-content">
+                <div class="d-flex justify-content-between align-items-center mb-3" id="exportActionBox">
+                    <h3 class="mb-0 text-warning"><i class="bi bi-clipboard-data"></i> สรุปข้อมูลจัดงาน (ละเอียด)</h3>
+                    <div>
+                        <button class="btn btn-outline-warning me-2" onclick="exportJPG()"><i class="bi bi-image"></i> Export JPG</button>
+                        <button class="btn btn-outline-info" onclick="window.print()"><i class="bi bi-printer"></i> Print PDF</button>
+                    </div>
+                </div>
+
+                <div class="summary-tables-grid mb-4">
+                    <!-- สรุปจำนวนผู้เข้าร่วมงานทั้งหมด -->
+                    <div class="card p-0 mb-4" style="grid-column: 1 / -1; border: 2px solid var(--accent) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;">
+                        <div class="p-3 border-bottom border-secondary text-center" style="border-color: var(--border) !important; background: rgba(255,255,255,0.02);">
+                            <h4 class="mb-0 text-white" style="font-weight: 700;">สรุปจำนวนผู้เข้าร่วมงานทั้งหมด (Grand Total)</h4>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table-compact text-center" style="font-size: 1.1rem;">
+                                <thead>
+                                    <tr>
+                                        <th class="text-info">ศิษย์เก่า</th>
+                                        <th>ผู้ติดตาม (ผู้ใหญ่)</th>
+                                        <th>ผู้ติดตาม (เด็ก)</th>
+                                        <th class="text-warning">สปอนเซอร์</th>
+                                        <th class="text-success">คุณครู</th>
+                                        <th class="text-accent fs-5 fw-bold">รวมทั้งสิ้น</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td id="gtAlumni" class="fw-bold">0</td>
+                                        <td id="gtFollowerAdult" class="fw-bold">0</td>
+                                        <td id="gtFollowerChild" class="fw-bold">0</td>
+                                        <td id="gtSponsor" class="fw-bold">0</td>
+                                        <td id="gtTeacher" class="fw-bold">0</td>
+                                        <td id="gtTotal" class="text-accent fs-4 fw-bold">0</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- สรุปงานกลางวัน / กลางคืน -->
+                    <div style="grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div class="card p-3" style="border: 1px solid var(--border) !important;">
+                            <h4 class="text-info mb-3">สรุปงานกลางวัน</h4>
+                            <div class="mb-2"><strong>รวมผู้ร่วมงาน:</strong> <span id="gtDayTotal" class="fw-bold text-white fs-5">0</span> คน</div>
+                            <div class="mb-3 text-muted small">(ผู้ใหญ่ <span id="gtDayA">0</span> / เด็กโต <span id="gtDayCO">0</span> / เด็กเล็ก <span id="gtDayCU">0</span>)</div>
+                            <div class="mb-1"><strong>อาหารไทยพุทธ:</strong> <span id="gtDayFoodB">0</span> คน</div>
+                            <div><strong>อาหารมุสลิม:</strong> <span id="gtDayFoodH" class="text-warning">0</span> คน</div>
+                        </div>
+                        <div class="card p-3" style="border: 1px solid var(--border) !important;">
+                            <h4 class="text-info mb-3">สรุปงานกลางคืน</h4>
+                            <div class="mb-2"><strong>รวมผู้ร่วมงาน:</strong> <span id="gtNightTotal" class="fw-bold text-white fs-5">0</span> คน</div>
+                            <div class="mb-3 text-muted small">(ผู้ใหญ่ <span id="gtNightA">0</span> / เด็กโต <span id="gtNightCO">0</span> / เด็กเล็ก <span id="gtNightCU">0</span>)</div>
+                            <div class="mb-1"><strong>อาหารไทยพุทธ:</strong> <span id="gtNightFoodB">0</span> คน</div>
+                            <div><strong>อาหารมุสลิม:</strong> <span id="gtNightFoodH" class="text-warning">0</span> คน</div>
+                        </div>
+                    </div>
+
+                    <!-- สรุปยอดจัดงานรายรุ่น -->
+                    <div class="card p-0" style="grid-column: 1 / -1;">
+                        <div class="p-3 border-bottom border-secondary" style="border-color: var(--border) !important;">
+                            <h4 class="mb-0 text-accent">สรุปยอดจัดงานรายรุ่น (ศิษย์เก่า + สปอนเซอร์ในรุ่น)</h4>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table-compact text-center">
+                                <thead>
+                                    <tr>
+                                        <th class="text-start">ชื่อรุ่น</th>
+                                        <th>ศิษย์เก่า</th>
+                                        <th>ติดตาม(ผู้ใหญ่)</th>
+                                        <th>ติดตาม(เด็ก)</th>
+                                        <th>สปอนเซอร์</th>
+                                        <th class="text-success">รวม</th>
+                                        <th class="text-info">กลางวัน</th>
+                                        <th class="text-info">กลางคืน</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbDetailBatch"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- กลุ่มอื่นๆ (ครู + สปอนเซอร์ไม่มีรุ่น) -->
+                    <div class="card p-0" style="grid-column: 1 / -1;">
+                        <div class="p-3 border-bottom border-secondary" style="border-color: var(--border) !important;">
+                            <h4 class="mb-0 text-white">กลุ่มอื่นๆ</h4>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table-compact text-center">
+                                <thead>
+                                    <tr>
+                                        <th class="text-start">กลุ่ม</th>
+                                        <th>จำนวน</th>
+                                        <th>ติดตาม(ผู้ใหญ่)</th>
+                                        <th>ติดตาม(เด็ก)</th>
+                                        <th class="text-success">รวม</th>
+                                        <th class="text-info">กลางวัน</th>
+                                        <th class="text-info">กลางคืน</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbDetailOthers"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <!-- Expense Modal -->
@@ -1559,14 +1699,17 @@
 
                 // Calculate Goal Progress (Target 400: Alumni, Teacher, Sponsor, Adult followers)
                 let goalCurrent = 0;
+                let goalChildCount = 0;
                 paidData.forEach(d => {
                     goalCurrent += (1 + d.adultCount);
+                    goalChildCount += (d.childOver12Count + d.childUnder12Count);
                 });
                 
                 const goalTarget = 400;
                 const goalPercent = Math.min(100, (goalCurrent / goalTarget) * 100).toFixed(1);
                 document.getElementById('goalText').innerText = `${goalCurrent} / ${goalTarget} คน (${goalPercent}%)`;
                 document.getElementById('goalProgressBar').style.width = `${goalPercent}%`;
+                document.getElementById('goalChildNote').innerText = goalChildCount > 0 ? `(ไม่นับเด็ก ${goalChildCount} คน)` : '';
                 if(goalCurrent >= goalTarget) {
                     document.getElementById('goalText').classList.add('text-success');
                 } else {
@@ -1616,6 +1759,11 @@
                 let batchSponsorRevenue = {};
                 let batchTableCount = {};
                 
+                // Detailed stats variables
+                let detailBatch = {}; // { batchName: { alumni: 0, sponsor: 0, follower: 0, followerAdult: 0, followerChild: 0, halal: 0, total: 0, day: 0, night: 0 } }
+                let detailTeacher = { teacher: 0, follower: 0, followerAdult: 0, followerChild: 0, halal: 0, total: 0, day: 0, night: 0 };
+                let detailSponsor = { sponsor: 0, follower: 0, followerAdult: 0, followerChild: 0, halal: 0, total: 0, day: 0, night: 0 };
+
                 let revTicket = 0;
                 let revSponsor = 0;
 
@@ -1640,6 +1788,53 @@
 
                     // Type stats
                     if (typeCount[d.eventType] !== undefined) typeCount[d.eventType]++;
+
+                    // Detailed Tab stats (counting people)
+                    const followersCount = d.adultCount + d.childOver12Count + d.childUnder12Count;
+                    const followerAdultCount = d.adultCount;
+                    const followerChildCount = d.childOver12Count + d.childUnder12Count;
+                    const halalCount = (d.food === 'HALAL') ? totalInRecord : 0;
+                    
+                    let sBatch = d.Batch || d.sponsorBatch || d.batchRaw || (d.batch !== 'SPONSOR' ? d.batch : null);
+                    
+                    if (d.isTeacher) {
+                        detailTeacher.teacher += 1;
+                        detailTeacher.follower += followersCount;
+                        detailTeacher.followerAdult += followerAdultCount;
+                        detailTeacher.followerChild += followerChildCount;
+                        detailTeacher.halal += halalCount;
+                        detailTeacher.total += totalInRecord;
+                        if (d.eventType === 'DAY_NIGHT' || d.eventType === 'DAY_ONLY') detailTeacher.day += totalInRecord;
+                        if (d.eventType === 'DAY_NIGHT' || d.eventType === 'NIGHT_ONLY') detailTeacher.night += totalInRecord;
+                    } else if (d.isSponsor && (!sBatch || sBatch === 'SPONSOR' || sBatch.toString().trim() === '')) {
+                        detailSponsor.sponsor += 1;
+                        detailSponsor.follower += followersCount;
+                        detailSponsor.followerAdult += followerAdultCount;
+                        detailSponsor.followerChild += followerChildCount;
+                        detailSponsor.halal += halalCount;
+                        detailSponsor.total += totalInRecord;
+                        if (d.eventType === 'DAY_NIGHT' || d.eventType === 'DAY_ONLY') detailSponsor.day += totalInRecord;
+                        if (d.eventType === 'DAY_NIGHT' || d.eventType === 'NIGHT_ONLY') detailSponsor.night += totalInRecord;
+                    } else {
+                        let b = d.isSponsor ? sBatch : d.batch;
+                        if (!b) b = "ไม่ระบุรุ่น";
+                        
+                        if (!detailBatch[b]) detailBatch[b] = { alumni: 0, sponsor: 0, follower: 0, followerAdult: 0, followerChild: 0, halal: 0, total: 0, day: 0, night: 0 };
+                        
+                        if (d.isSponsor) {
+                            detailBatch[b].sponsor += 1;
+                        } else {
+                            detailBatch[b].alumni += 1;
+                        }
+                        
+                        detailBatch[b].follower += followersCount;
+                        detailBatch[b].followerAdult += followerAdultCount;
+                        detailBatch[b].followerChild += followerChildCount;
+                        detailBatch[b].halal += halalCount;
+                        detailBatch[b].total += totalInRecord;
+                        if (d.eventType === 'DAY_NIGHT' || d.eventType === 'DAY_ONLY') detailBatch[b].day += totalInRecord;
+                        if (d.eventType === 'DAY_NIGHT' || d.eventType === 'NIGHT_ONLY') detailBatch[b].night += totalInRecord;
+                    }
 
                     // Finance
                     if (d.isSponsor) {
@@ -1765,6 +1960,96 @@
                     return `<tr><td>${formatBatchDisplay(b)}</td><td class="text-right">${totalP}</td><td class="text-right text-accent" style="font-weight:600;">${tables}</td></tr>`;
                 }).join('');
                 document.getElementById('totalTableCount').innerText = `รวม: ${totalTables} โต๊ะ`;
+
+                // Calculate and Render Grand Totals
+                let gtAlumni = 0;
+                let gtSponsor = detailSponsor.sponsor;
+                let gtTeacher = detailTeacher.teacher;
+                let gtFollowerAdult = detailTeacher.followerAdult + detailSponsor.followerAdult;
+                let gtFollowerChild = detailTeacher.followerChild + detailSponsor.followerChild;
+                let gtTotal = detailTeacher.total + detailSponsor.total;
+
+                Object.values(detailBatch).forEach(data => {
+                    gtAlumni += data.alumni;
+                    gtSponsor += data.sponsor;
+                    gtFollowerAdult += data.followerAdult;
+                    gtFollowerChild += data.followerChild;
+                    gtTotal += data.total;
+                });
+
+                document.getElementById('gtAlumni').innerText = gtAlumni;
+                document.getElementById('gtFollowerAdult').innerText = gtFollowerAdult;
+                document.getElementById('gtFollowerChild').innerText = gtFollowerChild;
+                document.getElementById('gtSponsor').innerText = gtSponsor;
+                document.getElementById('gtTeacher').innerText = gtTeacher;
+                document.getElementById('gtTotal').innerText = gtTotal;
+
+                // Render Day/Night Summaries
+                document.getElementById('gtDayTotal').innerText = dayAdult + dayChildO12 + dayChildU12;
+                document.getElementById('gtDayA').innerText = dayAdult;
+                document.getElementById('gtDayCO').innerText = dayChildO12;
+                document.getElementById('gtDayCU').innerText = dayChildU12;
+                document.getElementById('gtDayFoodB').innerText = dayFoodB;
+                document.getElementById('gtDayFoodH').innerText = dayFoodH;
+
+                document.getElementById('gtNightTotal').innerText = nightAdult + nightChildO12 + nightChildU12;
+                document.getElementById('gtNightA').innerText = nightAdult;
+                document.getElementById('gtNightCO').innerText = nightChildO12;
+                document.getElementById('gtNightCU').innerText = nightChildU12;
+                document.getElementById('gtNightFoodB').innerText = nightFoodB;
+                document.getElementById('gtNightFoodH').innerText = nightFoodH;
+
+                // Render Detailed Batch Table
+                const sortedDetailBatches = Object.keys(detailBatch).sort((a, b) => {
+                    const strA = a.toString().toUpperCase();
+                    const strB = b.toString().toUpperCase();
+                    let hsA = 999, hsB = 999;
+                    if (strA.startsWith('HS')) {
+                        hsA = parseInt(strA.replace('HS', '')) || 999;
+                    } else if (strA.includes('/')) {
+                        hsA = parseInt(strA.split('/')[1]) || 999;
+                    }
+                    if (strB.startsWith('HS')) {
+                        hsB = parseInt(strB.replace('HS', '')) || 999;
+                    } else if (strB.includes('/')) {
+                        hsB = parseInt(strB.split('/')[1]) || 999;
+                    }
+                    return hsA - hsB;
+                });
+                
+                document.getElementById('tbDetailBatch').innerHTML = sortedDetailBatches.map(b => {
+                    const data = detailBatch[b];
+                    return `<tr>
+                        <td class="text-start">${formatBatchDisplay(b)}</td>
+                        <td>${data.alumni}</td>
+                        <td>${data.followerAdult}</td>
+                        <td>${data.followerChild}</td>
+                        <td>${data.sponsor}</td>
+                        <td class="text-success fw-bold">${data.total}</td>
+                        <td class="text-info">${data.day}</td>
+                        <td class="text-info">${data.night}</td>
+                    </tr>`;
+                }).join('');
+
+                // Render Others Table (Teacher + External Sponsor)
+                document.getElementById('tbDetailOthers').innerHTML = `<tr>
+                    <td class="text-start">คุณครู</td>
+                    <td>${detailTeacher.teacher}</td>
+                    <td>${detailTeacher.followerAdult}</td>
+                    <td>${detailTeacher.followerChild}</td>
+                    <td class="text-success fw-bold">${detailTeacher.total}</td>
+                    <td class="text-info">${detailTeacher.day}</td>
+                    <td class="text-info">${detailTeacher.night}</td>
+                </tr>
+                <tr>
+                    <td class="text-start">สปอนเซอร์(ไม่มีรุ่น)</td>
+                    <td>${detailSponsor.sponsor}</td>
+                    <td>${detailSponsor.followerAdult}</td>
+                    <td>${detailSponsor.followerChild}</td>
+                    <td class="text-success fw-bold">${detailSponsor.total}</td>
+                    <td class="text-info">${detailSponsor.day}</td>
+                    <td class="text-info">${detailSponsor.night}</td>
+                </tr>`;
 
                 // Finance Update
                 const totalRevenue = revTicket + extSponsorRevenue + hostRevenue + souvenirRevenue;
@@ -2194,6 +2479,38 @@
                 document.getElementById('slipOverlay').classList.remove('show');
                 document.getElementById('slipPanel').classList.remove('show');
                 currentSlipTicketId = null;
+            }
+
+            async function exportJPG() {
+                const element = document.getElementById('tabDetailed');
+                const btnBox = document.getElementById('exportActionBox');
+                btnBox.style.display = 'none';
+                
+                try {
+                    // A4 portrait ratio: 210mm x 297mm
+                    const a4Width = 794; // ~210mm at 96dpi
+                    const origWidth = element.style.width;
+                    element.style.width = a4Width + 'px';
+                    
+                    const canvas = await html2canvas(element, {
+                        backgroundColor: '#161b22',
+                        scale: 2,
+                        width: a4Width,
+                        windowWidth: a4Width
+                    });
+                    
+                    element.style.width = origWidth;
+                    
+                    const link = document.createElement('a');
+                    link.download = 'detailed_summary.jpg';
+                    link.href = canvas.toDataURL('image/jpeg', 0.95);
+                    link.click();
+                } catch (e) {
+                    console.error("Export Error:", e);
+                    Swal.fire('Error', 'ไม่สามารถสร้างไฟล์ภาพได้', 'error');
+                } finally {
+                    btnBox.style.display = 'flex';
+                }
             }
 
             function showImg(src) {
