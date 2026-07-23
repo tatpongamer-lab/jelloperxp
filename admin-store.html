@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
     tailwind.config = {
         theme: {
@@ -67,6 +68,9 @@
                 </a>
                 <a href="#" class="nav-link block px-4 py-3 rounded-lg hover:bg-white/10 transition-colors text-cream/80" data-tab="orders">
                     <i class="bi bi-box-seam mr-3"></i> คำสั่งซื้อ
+                </a>
+                <a href="#" class="nav-link block px-4 py-3 rounded-lg hover:bg-white/10 transition-colors text-cream/80" data-tab="items">
+                    <i class="bi bi-list-check mr-3"></i> รายการสินค้า
                 </a>
                 <a href="#" class="nav-link block px-4 py-3 rounded-lg hover:bg-white/10 transition-colors text-cream/80" data-tab="settings">
                     <i class="bi bi-gear mr-3"></i> ตั้งค่า
@@ -180,6 +184,23 @@
                             <tbody id="ordersBody" class="divide-y divide-gray-100"></tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+
+            <!-- Tab: Items -->
+            <div id="tab-items" class="content-tab">
+                <div class="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <h2 class="text-xl font-bold text-navy">สถานะการจัดส่งแยกรายชิ้น (Item Fulfillment Summary)</h2>
+                    <button id="exportJpgBtn" class="bg-navy text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-800 transition-colors flex items-center gap-2 shadow-sm">
+                        <i class="bi bi-camera"></i> ส่งออกเป็นภาพ (.jpg)
+                    </button>
+                </div>
+                <div id="exportWrapper" class="bg-white p-2 sm:p-6 rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="text-center mb-6 hidden" id="exportHeader">
+                        <h2 class="text-2xl font-heading text-navy">Alumni Reunion Store</h2>
+                        <p class="text-gray-500 text-sm mt-1" id="exportDateText">รายงานสรุปสถานะสินค้า ณ วันที่ ...</p>
+                    </div>
+                    <div id="itemFulfillmentContainer"></div>
                 </div>
             </div>
 
@@ -414,7 +435,7 @@
         });
 
         // ===== NAV TABS =====
-        var tabTitles = { overview: "ภาพรวม", orders: "จัดการคำสั่งซื้อ", settings: "ตั้งค่าร้านค้า" };
+        var tabTitles = { overview: "ภาพรวม", orders: "จัดการคำสั่งซื้อ", items: "รายการสินค้า", settings: "ตั้งค่าร้านค้า" };
 
         document.querySelectorAll(".nav-link[data-tab]").forEach(function(link) {
             link.addEventListener("click", function(e) {
@@ -475,6 +496,7 @@
                     updateStoreUI();
                     renderTable();
                     renderProductSummary();
+                    renderItemFulfillmentSummary();
                 } else {
                     Swal.fire("ผิดพลาด", data.message || "ไม่สามารถโหลดข้อมูลได้", "error");
                     statusText.innerText = "v3.0 — ERROR: " + (data.message || "unknown");
@@ -649,6 +671,166 @@
                 html += '</div></div>';
                 summaryContainer.innerHTML = html;
             }
+        }
+
+        // ===== ITEM FULFILLMENT SUMMARY =====
+        function renderItemFulfillmentSummary() {
+            var container = document.getElementById("itemFulfillmentContainer");
+            if (!container) return;
+            
+            var itemSummary = {};
+            var compMapping = { "shirt": "เสื้อผู้ใหญ่", "shirt_kids": "เสื้อเด็ก", "tumbler": "แก้วเก็บความเย็น", "totebag": "ถุงผ้า", "keychain": "พวงกุญแจ", "opener": "ที่เปิดขวด" };
+
+            function initSummaryObj() {
+                return { total: 0, UNFULFILLED: 0, PARTIAL: 0, FULFILLED: 0, NOT_REQUIRED: 0, PICKED_UP: 0, orders: { UNFULFILLED: [], PARTIAL: [], FULFILLED: [], NOT_REQUIRED: [], PICKED_UP: [] } };
+            }
+
+            currentOrders.forEach(function(o) {
+                if (o.paymentStatus === "REJECTED") return; 
+                
+                var oStatus = o.fulfillmentStatus || "UNFULFILLED";
+                var isPickup = o.deliveryMethod && (o.deliveryMethod.indexOf("pickup") !== -1 || o.deliveryMethod.indexOf("รับ") !== -1);
+                if (isPickup && oStatus !== "PICKED_UP") oStatus = "NOT_REQUIRED"; // NOT_REQUIRED = รับหน้างาน
+
+                if (o.items && Array.isArray(o.items)) {
+                    o.items.forEach(function(item) {
+                        if (item.isBundle && item.bundleItems) {
+                            var sizesArr = item.size ? item.size.split(', ') : [];
+                            var sizeIndex = 0;
+                            for (var k in item.bundleItems) {
+                                var bq = item.bundleItems[k];
+                                var compName = compMapping[k] || k;
+                                
+                                if (k === 'shirt' || k === 'shirt_kids') {
+                                    for(var c=0; c<bq; c++) {
+                                        var sz = sizesArr[sizeIndex] || "ไม่ระบุไซส์";
+                                        sizeIndex++;
+                                        var key = compName + " (ไซส์ " + sz + ")";
+                                        if (!itemSummary[key]) itemSummary[key] = initSummaryObj();
+                                        itemSummary[key].total += item.quantity;
+                                        if (itemSummary[key][oStatus] !== undefined) {
+                                            itemSummary[key][oStatus] += item.quantity;
+                                            if (itemSummary[key].orders[oStatus].indexOf(o.orderId) === -1) itemSummary[key].orders[oStatus].push(o.orderId);
+                                        }
+                                    }
+                                } else {
+                                    var key = compName;
+                                    if (!itemSummary[key]) itemSummary[key] = initSummaryObj();
+                                    itemSummary[key].total += (bq * item.quantity);
+                                    if (itemSummary[key][oStatus] !== undefined) {
+                                        itemSummary[key][oStatus] += (bq * item.quantity);
+                                        if (itemSummary[key].orders[oStatus].indexOf(o.orderId) === -1) itemSummary[key].orders[oStatus].push(o.orderId);
+                                    }
+                                }
+                            }
+                        } else {
+                            var pName = item.name;
+                            if (pName.indexOf("เสื้อ") !== -1 && pName.indexOf("เด็ก") === -1) pName = "เสื้อผู้ใหญ่";
+                            else if (pName.indexOf("เด็ก") !== -1) pName = "เสื้อเด็ก";
+                            else if (pName.indexOf("แก้ว") !== -1) pName = "แก้วเก็บความเย็น";
+                            else if (pName.indexOf("ถุงผ้า") !== -1) pName = "ถุงผ้า";
+                            else if (pName.indexOf("พวงกุญแจ") !== -1) pName = "พวงกุญแจ";
+                            else if (pName.indexOf("เปิดขวด") !== -1) pName = "ที่เปิดขวด";
+
+                            var key = pName;
+                            if (item.size) key += " (ไซส์ " + item.size + ")";
+                            
+                            if (!itemSummary[key]) itemSummary[key] = initSummaryObj();
+                            itemSummary[key].total += item.quantity;
+                            if (itemSummary[key][oStatus] !== undefined) {
+                                itemSummary[key][oStatus] += item.quantity;
+                                if (itemSummary[key].orders[oStatus].indexOf(o.orderId) === -1) itemSummary[key].orders[oStatus].push(o.orderId);
+                            }
+                        }
+                    });
+                }
+            });
+            
+            window.itemFulfillmentData = itemSummary;
+
+            var priority = { "เสื้อผู้ใหญ่": 1, "เสื้อเด็ก": 2, "แก้วเก็บความเย็น": 3, "ถุงผ้า": 4, "พวงกุญแจ": 5, "ที่เปิดขวด": 6 };
+            var keys = Object.keys(itemSummary).sort(function(a, b) {
+                var nameA = a.split(" ")[0];
+                var nameB = b.split(" ")[0];
+                var pA = priority[nameA] || 99;
+                var pB = priority[nameB] || 99;
+                if (pA === pB) return a.localeCompare(b);
+                return pA - pB;
+            });
+
+            if (keys.length === 0) {
+                container.innerHTML = '<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center text-gray-400"><i class="bi bi-inbox text-3xl block mb-2"></i>ยังไม่มีข้อมูลสินค้า</div>';
+                return;
+            }
+
+            var html = '<div class="rounded-xl border border-gray-100 overflow-hidden bg-white inline-block w-full lg:w-auto">';
+            html += '<div class="overflow-x-auto"><table class="w-full lg:w-auto text-left text-sm relative whitespace-nowrap">';
+            html += '<thead class="bg-gradient-to-r from-gray-50 to-gray-100 border-b text-gray-700 shadow-sm">';
+            html += '<tr><th class="px-6 py-3 font-bold">รายการสินค้า (ชนิด/ไซส์)</th>';
+            html += '<th class="px-4 py-3 font-bold text-center">ยอดรวมทั้งหมด</th>';
+            html += '<th class="px-4 py-3 font-bold text-center">ยังไม่ส่ง (รอจัดส่ง)</th>';
+            html += '<th class="px-4 py-3 font-bold text-center">รับหน้างาน</th>';
+            html += '<th class="px-4 py-3 font-bold text-center">จัดส่งบางส่วน</th>';
+            html += '<th class="px-4 py-3 font-bold text-center">จัดส่งแล้ว</th>';
+            html += '<th class="px-4 py-3 font-bold text-center">รับแล้ว</th>';
+            html += '</tr></thead><tbody class="divide-y divide-gray-100 bg-white">';
+            
+            function getLink(val, status, key) {
+                if (!val || val === 0) return '<span class="text-gray-300">-</span>';
+                return '<a href="#" class="item-orders-link text-gray-800 hover:text-gold underline decoration-gray-400 underline-offset-4 font-bold" data-key="' + key + '" data-status="' + status + '">' + val + '</a>';
+            }
+
+            keys.forEach(function(key) {
+                var d = itemSummary[key];
+                html += '<tr class="hover:bg-gray-50/70 transition-colors">';
+                html += '<td class="px-6 py-3 font-bold text-navy flex items-center gap-2"><i class="bi bi-box text-gold opacity-50"></i> ' + key + '</td>';
+                html += '<td class="px-4 py-3 text-center font-bold text-gray-800">' + d.total + '</td>';
+                html += '<td class="px-4 py-3 text-center">' + getLink(d.UNFULFILLED, 'UNFULFILLED', key) + '</td>';
+                html += '<td class="px-4 py-3 text-center">' + getLink(d.NOT_REQUIRED, 'NOT_REQUIRED', key) + '</td>';
+                html += '<td class="px-4 py-3 text-center">' + getLink(d.PARTIAL, 'PARTIAL', key) + '</td>';
+                html += '<td class="px-4 py-3 text-center">' + getLink(d.FULFILLED, 'FULFILLED', key) + '</td>';
+                html += '<td class="px-4 py-3 text-center">' + getLink(d.PICKED_UP, 'PICKED_UP', key) + '</td>';
+                html += '</tr>';
+            });
+            html += '</tbody></table></div></div>';
+            
+            container.innerHTML = html;
+
+            var links = container.querySelectorAll('.item-orders-link');
+            links.forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var key = this.getAttribute('data-key');
+                    var status = this.getAttribute('data-status');
+                    var orders = window.itemFulfillmentData[key].orders[status];
+                    
+                    var statusNames = {
+                        UNFULFILLED: "ยังไม่ส่ง",
+                        NOT_REQUIRED: "รับหน้างาน",
+                        PARTIAL: "จัดส่งบางส่วน",
+                        FULFILLED: "จัดส่งแล้ว",
+                        PICKED_UP: "รับแล้ว"
+                    };
+                    
+                    var htmlList = '<div class="text-left max-h-60 overflow-y-auto space-y-2 mt-4 pr-2">';
+                    orders.forEach(function(orderId) {
+                        htmlList += '<div class="bg-gray-50 p-3 rounded-lg border border-gray-200 text-navy cursor-pointer hover:bg-gold/10 hover:border-gold/30 transition-colors flex items-center" onclick="Swal.close(); openModal(\'' + orderId + '\')"><i class="bi bi-box-seam text-gold mr-3"></i> <span>ออเดอร์ <span class="font-bold">#' + orderId + '</span></span></div>';
+                    });
+                    htmlList += '</div>';
+                    
+                    Swal.fire({
+                        title: key,
+                        html: '<p class="text-sm text-gray-500 mb-2">สถานะ: <span class="font-bold text-navy">' + statusNames[status] + '</span> (' + orders.length + ' ออเดอร์)</p>' + htmlList,
+                        showConfirmButton: true,
+                        confirmButtonText: 'ปิดหน้าต่าง',
+                        confirmButtonColor: '#1E2A38',
+                        customClass: {
+                            popup: 'rounded-2xl',
+                            title: 'text-xl font-heading text-navy'
+                        }
+                    });
+                });
+            });
         }
 
         // ===== ORDERS TABLE =====
@@ -1284,6 +1466,67 @@
                 );
                 w.document.close();
                 w.onload = function() { setTimeout(function() { w.print(); }, 500); };
+            });
+        }
+
+        // ===== EXPORT TO JPG =====
+        var exportBtn = document.getElementById("exportJpgBtn");
+        if (exportBtn) {
+            exportBtn.addEventListener("click", function() {
+                var wrapper = document.getElementById("exportWrapper");
+                var header = document.getElementById("exportHeader");
+                var dateText = document.getElementById("exportDateText");
+                
+                if (!wrapper || typeof html2canvas === "undefined") {
+                    Swal.fire("ข้อผิดพลาด", "ไม่สามารถโหลดไลบรารีสำหรับสร้างรูปภาพได้", "error");
+                    return;
+                }
+
+                // Prepare for export
+                var originalBtnHtml = exportBtn.innerHTML;
+                exportBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> กำลังประมวลผล...';
+                exportBtn.disabled = true;
+                
+                // Show header for export
+                if (header) header.classList.remove("hidden");
+                if (dateText) {
+                    var now = new Date();
+                    dateText.innerText = "รายงานสรุปสถานะสินค้า ณ วันที่ " + now.toLocaleDateString("th-TH") + " เวลา " + now.toLocaleTimeString("th-TH");
+                }
+
+                setTimeout(function() {
+                    html2canvas(wrapper, {
+                        scale: 2, // High resolution
+                        backgroundColor: "#ffffff",
+                        logging: false
+                    }).then(function(canvas) {
+                        // Restore UI
+                        if (header) header.classList.add("hidden");
+                        exportBtn.innerHTML = originalBtnHtml;
+                        exportBtn.disabled = false;
+
+                        // Download
+                        var link = document.createElement("a");
+                        link.download = "Item_Fulfillment_Report_" + new Date().getTime() + ".jpg";
+                        link.href = canvas.toDataURL("image/jpeg", 0.9);
+                        link.click();
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'บันทึกรูปภาพสำเร็จ',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    }).catch(function(err) {
+                        console.error("Export error:", err);
+                        if (header) header.classList.add("hidden");
+                        exportBtn.innerHTML = originalBtnHtml;
+                        exportBtn.disabled = false;
+                        Swal.fire("ข้อผิดพลาด", "ไม่สามารถสร้างรูปภาพได้: " + err.message, "error");
+                    });
+                }, 100);
             });
         }
 
