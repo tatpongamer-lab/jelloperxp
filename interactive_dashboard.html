@@ -63,7 +63,7 @@
             margin: 0;
         }
         .editable-input[type=number] {
-            -moz-appearance: textfield;
+            appearance: textfield;
         }
         .editable-input.large {
             width: 140px;
@@ -79,15 +79,7 @@
             background-color: transparent !important;
         }
 
-        /* Hide number input arrows for cleaner look */
-        input[type="number"]::-webkit-inner-spin-button, 
-        input[type="number"]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
-        }
-        input[type="number"] {
-            -moz-appearance: textfield;
-        }
+
 
         /* Customize scrollbar for table if it overflows (fallback) */
         .custom-scrollbar::-webkit-scrollbar {
