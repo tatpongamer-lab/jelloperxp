@@ -781,6 +781,10 @@
             var remainTb = Math.max(0, limitTb - soldTb);
 
             products.forEach(function(p) {
+                // Hide cancelled and out of stock items (and their bundles)
+                var hiddenIds = ['shirt_kids', 'tumbler', 'promo_ultimate', 'promo_alumni', 'promo_family', 'promo_essential', 'promo_everyday'];
+                if (hiddenIds.indexOf(p.id) !== -1) return;
+
                 // Check stock limits
                 var isSoldOut = false;
                 var stockText = '';
