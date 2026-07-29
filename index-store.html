@@ -543,7 +543,8 @@
             { label: 'M (38")', val: 'M' }, { label: 'L (40")', val: 'L' },
             { label: 'XL (42")', val: 'XL' }, { label: '2XL (44")', val: '2XL' },
             { label: '3XL (46")', val: '3XL' }, { label: '4XL (48")', val: '4XL' },
-            { label: '5XL (50")', val: '5XL' }
+            { label: '4XL (48")', val: '4XL' }, { label: '5XL (50")', val: '5XL' },
+            { label: '6XL (52")', val: '6XL' }
         ];
 
         var sizesKids = [
@@ -808,9 +809,21 @@
                 var sizeSelectHTML = '';
                 if (p.hasSize && !p.isBundle) {
                     var sizesList = (p.id === 'shirt_kids') ? sizesKids : sizes;
+                    var optionsHtml = sizesList.map(function(s) { 
+                        var remain = p.id === 'shirt_kids' ? -1 : (meta["REMAIN_shirt_" + s.val] !== undefined && meta["REMAIN_shirt_" + s.val] !== "" ? parseInt(meta["REMAIN_shirt_" + s.val]) : -1);
+                        var optLabel = s.label;
+                        var disabledStr = "";
+                        if (remain === 0) {
+                            optLabel += ' - SOLD OUT';
+                            disabledStr = "disabled";
+                        } else if (remain > 0) {
+                            optLabel += ' (เหลือ ' + remain + ' ตัว)';
+                        }
+                        return '<option value="' + s.val + '" ' + disabledStr + '>' + optLabel + '</option>'; 
+                    }).join('');
+                    
                     sizeSelectHTML = '<select id="size-' + p.id + '" class="w-full p-2 border border-beige/60 rounded-lg bg-gray-50/50 text-xs text-navy focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all" ' + (isSoldOut ? 'disabled' : '') + '>' +
-                        '<option value="" disabled selected>เลือกไซส์</option>' +
-                        sizesList.map(function(s) { return '<option value="' + s.val + '">' + s.label + '</option>'; }).join('') +
+                        '<option value="" disabled selected>เลือกไซส์</option>' + optionsHtml +
                     '</select>';
                 }
                 
@@ -864,6 +877,18 @@
         }
 
         // --- Cart Logic ---
+        function getShirtQtyInCart(size) {
+            var qty = 0;
+            cart.forEach(function(ci) {
+                if (ci.id === 'shirt' && ci.size === size) qty += ci.quantity;
+                if (ci.isBundle && ci.items && ci.items.shirt && ci.size) {
+                    var bSizes = ci.size.split(',').map(function(x) { return x.trim(); });
+                    bSizes.forEach(function(bs) { if (bs === size) qty += ci.quantity; });
+                }
+            });
+            return qty;
+        }
+
         function addToCart(productId, size) {
             var product = products.find(function(p) { return p.id === productId; });
             if (!product) return;
@@ -872,6 +897,18 @@
             if (product.hasSize && !selectedSize) {
                 showToast("กรุณาเลือกไซส์ก่อนเพิ่มสินค้า", "warning");
                 return;
+            }
+
+            if (productId === 'shirt') {
+                var meta = window.metaData || {};
+                var remain = meta["REMAIN_shirt_" + selectedSize] !== undefined && meta["REMAIN_shirt_" + selectedSize] !== "" ? parseInt(meta["REMAIN_shirt_" + selectedSize]) : -1;
+                if (remain !== -1) {
+                    var cartQty = getShirtQtyInCart(selectedSize);
+                    if (cartQty + 1 > remain) {
+                        showToast("ขออภัย เสื้อไซส์ " + selectedSize + " มีสินค้าจำกัด (เหลือ " + remain + " ตัว)", "warning");
+                        return;
+                    }
+                }
             }
 
             var cartItemId = productId + '-' + (selectedSize || 'none');
@@ -1303,11 +1340,24 @@
             
             // Render adult shirts
             if (product.items.shirt) {
+                var meta = window.metaData || {};
+                var optionsHtml = sizes.map(function(s) { 
+                    var remain = meta["REMAIN_shirt_" + s.val] !== undefined && meta["REMAIN_shirt_" + s.val] !== "" ? parseInt(meta["REMAIN_shirt_" + s.val]) : -1;
+                    var optLabel = s.label;
+                    var disabledStr = "";
+                    if (remain === 0) {
+                        optLabel += ' - SOLD OUT';
+                        disabledStr = "disabled";
+                    } else if (remain > 0) {
+                        optLabel += ' (เหลือ ' + remain + ' ตัว)';
+                    }
+                    return '<option value="' + s.val + '" ' + disabledStr + '>' + optLabel + '</option>'; 
+                }).join('');
+
                 for (var i = 1; i <= product.items.shirt; i++) {
                     html += '<div class="mb-4"><label class="block text-xs font-bold text-navy mb-1">ไซส์เสื้อผู้ใหญ่ ตัวที่ ' + i + '</label>' +
                         '<select id="bundle-shirt-' + i + '" class="w-full p-3 border border-beige/60 rounded-xl bg-white text-sm text-navy focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all">' +
-                        '<option value="" disabled selected>เลือกไซส์</option>' +
-                        sizes.map(function(s) { return '<option value="' + s.val + '">' + s.label + '</option>'; }).join('') +
+                        '<option value="" disabled selected>เลือกไซส์</option>' + optionsHtml +
                         '</select></div>';
                 }
             }
@@ -1373,11 +1423,13 @@
             var product = currentBundleProduct;
             var selectedSizes = [];
             
+            var sizeCount = {};
             if (product.items.shirt) {
                 for (var i = 1; i <= product.items.shirt; i++) {
                     var val = document.getElementById('bundle-shirt-' + i).value;
                     if (!val) { showToast('กรุณาเลือกไซส์เสื้อผู้ใหญ่ตัวที่ ' + i, 'warning'); return; }
                     selectedSizes.push(val);
+                    sizeCount[val] = (sizeCount[val] || 0) + 1;
                 }
             }
             if (product.items.shirt_kids) {
@@ -1388,6 +1440,21 @@
                 }
             }
             
+            // Check stock across cart for bundles
+            var meta = window.metaData || {};
+            var hasError = false;
+            Object.keys(sizeCount).forEach(function(s) {
+                var remain = meta["REMAIN_shirt_" + s] !== undefined && meta["REMAIN_shirt_" + s] !== "" ? parseInt(meta["REMAIN_shirt_" + s]) : -1;
+                if (remain !== -1) {
+                    var cartQty = getShirtQtyInCart(s);
+                    if (cartQty + sizeCount[s] > remain) {
+                        showToast("ขออภัย เสื้อไซส์ " + s + " เหลือเพียง " + remain + " ตัว", "warning");
+                        hasError = true;
+                    }
+                }
+            });
+            if (hasError) return;
+
             var sizeString = selectedSizes.join(', ');
             var cartItemId = product.id + '-' + (sizeString || 'none');
             var existing = cart.find(function(item) { return item.cartItemId === cartItemId; });
