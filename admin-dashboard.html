@@ -750,6 +750,7 @@
                     <button class="tab-btn" onclick="switchTab(event, 'tabSummary')">สรุปข้อมูล</button>
                     <button class="tab-btn" onclick="switchTab(event, 'tabStats')">สถิติ</button>
                     <button class="tab-btn" onclick="switchTab(event, 'tabFinance')">การเงิน</button>
+                    <button class="tab-btn" style="color: #10b981;" onclick="switchTab(event, 'tabCheckin')">เช็คอินวันงาน <span class="badge" id="badgeCheckin" style="background-color: #10b981;">0</span></button>
                     <button class="tab-btn fw-bold" style="color: #ffc107;" onclick="switchTab(event, 'tabDetailed')">จัดงาน(ละเอียด)</button>
                 </div>
             </div>
@@ -1149,6 +1150,152 @@
                 </div>
             </div>
 
+            <!-- TAB 9: เช็คอินวันงาน -->
+            <div id="tabCheckin" class="tab-content">
+                <!-- Summary Cards -->
+                <div class="stats-grid mb-4" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
+                    <div class="stat-card" style="border-left: 3px solid var(--success);">
+                        <h3>เช็คอินแล้ว</h3>
+                        <div class="value text-success" id="ciCheckedCount">0</div>
+                        <div class="desc" id="ciCheckedPax">0 คน</div>
+                    </div>
+                    <div class="stat-card" style="border-left: 3px solid var(--danger);">
+                        <h3>ยังไม่มา</h3>
+                        <div class="value" style="color: var(--danger);" id="ciNotYetCount">0</div>
+                        <div class="desc" id="ciNotYetPax">0 คน</div>
+                    </div>
+                    <div class="stat-card" style="border-left: 3px solid var(--warning);">
+                        <h3>Walk-in</h3>
+                        <div class="value text-warning" id="ciWalkinCount">0</div>
+                        <div class="desc" id="ciWalkinPax">0 คน</div>
+                    </div>
+                    <div class="stat-card" style="border-left: 3px solid var(--accent);">
+                        <h3>% เข้างาน</h3>
+                        <div class="value text-accent" id="ciPercent">0%</div>
+                        <div class="desc" id="ciPercentDesc">0 / 0 บัตร</div>
+                    </div>
+                </div>
+
+                <!-- แยกกลางวัน / กลางคืน -->
+                <div class="summary-tables-grid mb-4">
+                    <div class="card p-0">
+                        <div class="p-3 border-bottom border-secondary" style="border-color: var(--border) !important;">
+                            <h4 class="mb-0" style="color: #38bdf8;"><i class="bi bi-sun-fill"></i> งานกลางวัน</h4>
+                        </div>
+                        <div class="p-3">
+                            <div class="d-flex justify-content-between mb-2"><span>เช็คอินแล้ว:</span><strong class="text-success" id="ciDayChecked">0 คน</strong></div>
+                            <div class="d-flex justify-content-between mb-2"><span>ยังไม่มา:</span><strong style="color: var(--danger);" id="ciDayNotYet">0 คน</strong></div>
+                            <div class="d-flex justify-content-between mb-2"><span>Walk-in:</span><strong class="text-warning" id="ciDayWalkin">0 คน</strong></div>
+                            <hr class="border-secondary my-2">
+                            <div class="d-flex justify-content-between"><span>อาหาร (มาจริง):</span><span>พุทธ <strong id="ciDayFoodB">0</strong> | ฮาลาล <strong id="ciDayFoodH">0</strong></span></div>
+                        </div>
+                    </div>
+                    <div class="card p-0">
+                        <div class="p-3 border-bottom border-secondary" style="border-color: var(--border) !important;">
+                            <h4 class="mb-0" style="color: #a78bfa;"><i class="bi bi-moon-stars-fill"></i> งานกลางคืน</h4>
+                        </div>
+                        <div class="p-3">
+                            <div class="d-flex justify-content-between mb-2"><span>เช็คอินแล้ว:</span><strong class="text-success" id="ciNightChecked">0 คน</strong></div>
+                            <div class="d-flex justify-content-between mb-2"><span>ยังไม่มา:</span><strong style="color: var(--danger);" id="ciNightNotYet">0 คน</strong></div>
+                            <div class="d-flex justify-content-between mb-2"><span>Walk-in:</span><strong class="text-warning" id="ciNightWalkin">0 คน</strong></div>
+                            <hr class="border-secondary my-2">
+                            <div class="d-flex justify-content-between"><span>อาหาร (มาจริง):</span><span>พุทธ <strong id="ciNightFoodB">0</strong> | ฮาลาล <strong id="ciNightFoodH">0</strong></span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ตารางเช็คอินแล้ว -->
+                <style>
+                    details > summary {
+                        list-style: none;
+                        cursor: pointer;
+                        user-select: none;
+                        transition: color 0.2s;
+                    }
+                    details > summary::-webkit-details-marker {
+                        display: none;
+                    }
+                    details > summary::before {
+                        content: '\F282'; /* bi-caret-right-fill */
+                        font-family: 'bootstrap-icons';
+                        display: inline-block;
+                        margin-right: 8px;
+                        transition: transform 0.2s ease-in-out;
+                    }
+                    details[open] > summary::before {
+                        transform: rotate(90deg);
+                    }
+                </style>
+                <details class="mb-4">
+                    <summary class="mb-3 text-success fs-4 fw-bold">
+                        <i class="bi bi-check-circle-fill"></i> รายชื่อเช็คอินแล้ว <span class="text-muted" id="ciCheckedTableCount" style="font-size: 0.85rem; font-weight: normal;"></span>
+                    </summary>
+                    <div class="filter-bar mb-3">
+                        <input type="text" id="filterCiCheckedSearch" class="form-control" placeholder="ค้นหา: ชื่อ / เบอร์โทร" onkeyup="renderCheckin()">
+                        <select id="filterCiCheckedRole" class="form-control" onchange="renderCheckin()">
+                            <option value="ALL">กลุ่ม: ทั้งหมด</option>
+                            <option value="ALUMNI">ศิษย์เก่า</option>
+                            <option value="SPONSOR">สปอนเซอร์</option>
+                            <option value="TEACHER">คุณครู</option>
+                        </select>
+                        <select id="filterCiCheckedEvent" class="form-control" onchange="renderCheckin()">
+                            <option value="ALL">ประเภท: ทั้งหมด</option>
+                            <option value="DAY_ONLY">กลางวัน</option>
+                            <option value="NIGHT_ONLY">กลางคืน</option>
+                            <option value="DAY_NIGHT">ทั้งวัน</option>
+                        </select>
+                    </div>
+                    <div class="card p-0">
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>เวลา</th>
+                                        <th>ชื่อ</th>
+                                        <th>รุ่น/กลุ่ม</th>
+                                        <th>ประเภทบัตร</th>
+                                        <th class="text-center">จำนวนคน</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbCiChecked"><tr><td colspan="5" class="text-center text-muted py-4">กำลังโหลด...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- ตารางยังไม่มา -->
+                <details class="mb-4">
+                    <summary class="mb-3 fs-4 fw-bold" style="color: var(--danger);">
+                        <i class="bi bi-x-circle-fill"></i> ยังไม่มา (PAID แต่ยังไม่เช็คอิน) <span class="text-muted" id="ciNotYetTableCount" style="font-size: 0.85rem; font-weight: normal;"></span>
+                    </summary>
+                    <div class="filter-bar mb-3">
+                        <input type="text" id="filterCiNotYetSearch" class="form-control" placeholder="ค้นหา: ชื่อ / เบอร์โทร" onkeyup="renderCheckin()">
+                        <select id="filterCiNotYetRole" class="form-control" onchange="renderCheckin()">
+                            <option value="ALL">กลุ่ม: ทั้งหมด</option>
+                            <option value="ALUMNI">ศิษย์เก่า</option>
+                            <option value="SPONSOR">สปอนเซอร์</option>
+                            <option value="TEACHER">คุณครู</option>
+                        </select>
+                    </div>
+                    <div class="card p-0">
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ชื่อ</th>
+                                        <th>เบอร์โทร</th>
+                                        <th>รุ่น/กลุ่ม</th>
+                                        <th>ประเภทบัตร</th>
+                                        <th class="text-center">จำนวนคน</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbCiNotYet"><tr><td colspan="5" class="text-center text-muted py-4">กำลังโหลด...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </details>
+            </div>
+
             <!-- TAB 8: จัดงาน(ละเอียด) -->
             <div id="tabDetailed" class="tab-content">
                 <div class="d-flex justify-content-between align-items-center mb-3" id="exportActionBox">
@@ -1505,6 +1652,7 @@
                         renderSponsor();
                         renderTeacher();
                         renderSummary();
+                        renderCheckin();
                     } else {
                         Swal.fire({ icon: 'error', title: 'ดึงข้อมูลล้มเหลว', text: res.message, background: '#161b22', color: 'var(--text-main)' });
                     }
@@ -2291,6 +2439,131 @@
             document.addEventListener('DOMContentLoaded', () => {
                 updateThemeIcon(savedTheme);
             });
+
+            // ================= RENDER CHECKIN TAB =================
+            function renderCheckin() {
+                const paidData = allData.filter(d => d.paymentStatus === 'PAID');
+                const checkedData = paidData.filter(d => d.checkinStatus === true);
+                const notYetData = paidData.filter(d => d.checkinStatus !== true);
+                const walkinData = checkedData.filter(d => (d.requestId || '').toString().startsWith('WALKIN_'));
+
+                // --- Summary Cards ---
+                const checkedPax = checkedData.reduce((s, d) => s + d.totalPeople, 0);
+                const notYetPax = notYetData.reduce((s, d) => s + d.totalPeople, 0);
+                const walkinPax = walkinData.reduce((s, d) => s + d.totalPeople, 0);
+
+                document.getElementById('ciCheckedCount').innerText = checkedData.length;
+                document.getElementById('ciCheckedPax').innerText = checkedPax + ' คน';
+                document.getElementById('ciNotYetCount').innerText = notYetData.length;
+                document.getElementById('ciNotYetPax').innerText = notYetPax + ' คน';
+                document.getElementById('ciWalkinCount').innerText = walkinData.length;
+                document.getElementById('ciWalkinPax').innerText = walkinPax + ' คน';
+
+                const totalPaid = paidData.length;
+                const pct = totalPaid > 0 ? ((checkedData.length / totalPaid) * 100).toFixed(1) : '0';
+                document.getElementById('ciPercent').innerText = pct + '%';
+                document.getElementById('ciPercentDesc').innerText = checkedData.length + ' / ' + totalPaid + ' บัตร';
+                document.getElementById('badgeCheckin').innerText = checkedData.length;
+
+                // --- แยกกลางวัน / กลางคืน ---
+                let dayCheckedPax = 0, dayNotYetPax = 0, nightCheckedPax = 0, nightNotYetPax = 0;
+                let dayWalkinPax = 0, nightWalkinPax = 0;
+                let dayFoodB = 0, dayFoodH = 0, nightFoodB = 0, nightFoodH = 0;
+
+                checkedData.forEach(d => {
+                    const tp = d.totalPeople;
+                    const isWalkin = (d.requestId || '').toString().startsWith('WALKIN_');
+
+                    if (d.eventType === 'DAY_ONLY' || d.eventType === 'DAY_NIGHT') {
+                        dayCheckedPax += tp;
+                        if (isWalkin) dayWalkinPax += tp;
+                        if (d.food === 'BUDDHIST') dayFoodB += tp;
+                        else if (d.food === 'HALAL') dayFoodH += tp;
+                    }
+                    if (d.eventType === 'NIGHT_ONLY' || d.eventType === 'DAY_NIGHT') {
+                        nightCheckedPax += tp;
+                        if (isWalkin) nightWalkinPax += tp;
+                        if (d.food === 'BUDDHIST') nightFoodB += tp;
+                        else if (d.food === 'HALAL') nightFoodH += tp;
+                    }
+                });
+                notYetData.forEach(d => {
+                    const tp = d.totalPeople;
+                    if (d.eventType === 'DAY_ONLY' || d.eventType === 'DAY_NIGHT') dayNotYetPax += tp;
+                    if (d.eventType === 'NIGHT_ONLY' || d.eventType === 'DAY_NIGHT') nightNotYetPax += tp;
+                });
+
+                document.getElementById('ciDayChecked').innerText = dayCheckedPax + ' คน';
+                document.getElementById('ciDayNotYet').innerText = dayNotYetPax + ' คน';
+                document.getElementById('ciDayWalkin').innerText = dayWalkinPax + ' คน';
+                document.getElementById('ciDayFoodB').innerText = dayFoodB;
+                document.getElementById('ciDayFoodH').innerText = dayFoodH;
+                
+                document.getElementById('ciNightChecked').innerText = nightCheckedPax + ' คน';
+                document.getElementById('ciNightNotYet').innerText = nightNotYetPax + ' คน';
+                document.getElementById('ciNightWalkin').innerText = nightWalkinPax + ' คน';
+                document.getElementById('ciNightFoodB').innerText = nightFoodB;
+                document.getElementById('ciNightFoodH').innerText = nightFoodH;
+
+                // --- ตารางเช็คอินแล้ว ---
+                const searchChecked = (document.getElementById('filterCiCheckedSearch').value || '').toLowerCase();
+                const roleChecked = document.getElementById('filterCiCheckedRole').value;
+                const eventChecked = document.getElementById('filterCiCheckedEvent').value;
+
+                let filteredChecked = checkedData.filter(d => {
+                    const matchSearch = (d.name || '').toLowerCase().includes(searchChecked) || (d.phone || '').includes(searchChecked);
+                    const matchRole = roleChecked === 'ALL' || d.role === roleChecked;
+                    const matchEvent = eventChecked === 'ALL' || d.eventType === eventChecked;
+                    return matchSearch && matchRole && matchEvent;
+                });
+                filteredChecked.sort((a, b) => new Date(b.checkinTime) - new Date(a.checkinTime));
+
+                document.getElementById('ciCheckedTableCount').innerText = '(' + filteredChecked.length + ' รายการ)';
+                const tbChecked = document.getElementById('tbCiChecked');
+                if (filteredChecked.length === 0) {
+                    tbChecked.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">ไม่พบข้อมูล</td></tr>';
+                } else {
+                    tbChecked.innerHTML = filteredChecked.map(d => {
+                        const time = d.checkinTime ? new Date(d.checkinTime).toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'}) : '-';
+                        const isWalkin = (d.requestId || '').toString().startsWith('WALKIN_');
+                        const walkinBadge = isWalkin ? ' <span style="background:rgba(245,158,11,0.2);color:var(--warning);padding:2px 6px;border-radius:4px;font-size:0.7rem;">Walk-in</span>' : '';
+                        return `<tr>
+                            <td style="white-space:nowrap;"><span style="color:var(--success);font-weight:600;">${time}</span>${walkinBadge}</td>
+                            <td><div style="font-weight:500;">${escapeHTML(d.name)}</div><div class="text-muted" style="font-size:0.75rem;">${escapeHTML(d.phone)}</div></td>
+                            <td>${formatBatchDisplay(d.batch, d.role)}</td>
+                            <td>${formatEventType(d.eventType)}</td>
+                            <td class="text-center">${d.totalPeople}</td>
+                        </tr>`;
+                    }).join('');
+                }
+
+                // --- ตารางยังไม่มา ---
+                const searchNotYet = (document.getElementById('filterCiNotYetSearch').value || '').toLowerCase();
+                const roleNotYet = document.getElementById('filterCiNotYetRole').value;
+
+                let filteredNotYet = notYetData.filter(d => {
+                    const matchSearch = (d.name || '').toLowerCase().includes(searchNotYet) || (d.phone || '').includes(searchNotYet);
+                    const matchRole = roleNotYet === 'ALL' || d.role === roleNotYet;
+                    return matchSearch && matchRole;
+                });
+                filteredNotYet.sort((a, b) => (a.batch || '').localeCompare(b.batch || ''));
+
+                document.getElementById('ciNotYetTableCount').innerText = '(' + filteredNotYet.length + ' รายการ)';
+                const tbNotYet = document.getElementById('tbCiNotYet');
+                if (filteredNotYet.length === 0) {
+                    tbNotYet.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">ไม่พบข้อมูล</td></tr>';
+                } else {
+                    tbNotYet.innerHTML = filteredNotYet.map(d => {
+                        return `<tr>
+                            <td><div style="font-weight:500;">${escapeHTML(d.name)}</div></td>
+                            <td><a href="tel:${escapeHTML(d.phone)}" style="color:var(--accent);text-decoration:none;">${escapeHTML(d.phone)}</a></td>
+                            <td>${formatBatchDisplay(d.batch, d.role)}</td>
+                            <td>${formatEventType(d.eventType)}</td>
+                            <td class="text-center">${d.totalPeople}</td>
+                        </tr>`;
+                    }).join('');
+                }
+            }
 
             function switchTab(event, tabId) {
                 document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
