@@ -348,6 +348,7 @@
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxoUw_ndO0eRf9M07cgDb1N02R_gBx_E_ZjdcARHOi__Yqt9ZbVmQd5bcuCLQ9ctrTjWQ/exec"; 
     const OPERATOR_NAME = "STAFF_GATE_1"; 
     let ADMIN_PIN = "";
+    window.cachedTickets = []; // เก็บข้อมูล Ticket ทั้งหมดไว้ค้นหา
 
     async function login() {
         const pin = document.getElementById('pinInput').value;
@@ -356,10 +357,11 @@
             return;
         }
 
-        showLoading("กำลังตรวจสอบสิทธิ์...");
+        showLoading("กำลังเข้าสู่ระบบและเตรียมข้อมูล...");
         try {
-            const res = await fetchGAS({ action: "verifyAdmin", pin: pin });
+            const res = await fetchGAS({ action: "getAdminData", pin: pin });
             if (res.success) {
+                window.cachedTickets = res.data || [];
                 Swal.close();
                 ADMIN_PIN = pin;
                 document.getElementById('authSection').style.display = 'none';
@@ -475,17 +477,34 @@
     async function handleManualSearch(e) {
         e.preventDefault();
         if (isProcessing) return;
-        isProcessing = true;
         
-        showLoading("กำลังค้นหาข้อมูล...");
-        try {
-            const res = await fetchGAS({ action: "search", Phone: document.getElementById('searchPhone').value, FirstName: document.getElementById('searchName').value, mode: "ALL", pin: ADMIN_PIN });
-            if (res.success && res.multiple) {
-                showTicketSelector(res.results);
-            } else {
-                processTicketData(res);
-            }
-        } catch(e) { Swal.fire('Error', `ขัดข้อง: ${e.message}`, 'error').then(() => { isProcessing = false; }); }
+        const phone = document.getElementById('searchPhone').value.trim();
+        const name = document.getElementById('searchName').value.trim().toLowerCase();
+        
+        if (!phone && !name) {
+            Swal.fire('แจ้งเตือน', 'กรุณากรอกเบอร์โทรหรือชื่อเพื่อค้นหา', 'warning');
+            return;
+        }
+
+        // ค้นหาจาก cachedTickets ในเครื่อง
+        const results = window.cachedTickets.filter(t => {
+            const matchPhone = phone ? (t.phone && t.phone.toString() === phone) : false;
+            const matchName = name ? (t.name && t.name.toLowerCase().includes(name)) : false;
+            if (phone && name) return matchPhone && matchName;
+            return matchPhone || matchName;
+        });
+
+        if (results.length === 0) {
+            Swal.fire('ไม่พบข้อมูล', 'ไม่พบชื่อหรือเบอร์โทรนี้ในระบบ', 'warning');
+            return;
+        }
+
+        if (results.length > 1) {
+            showTicketSelector(results);
+        } else {
+            // ส่ง object แบบเดียวกับ API คืนกลับไป
+            processTicketData({ success: true, ...results[0] });
+        }
     }
 
     function showTicketSelector(tickets) {
@@ -880,10 +899,12 @@
             img.onload = function() {
                 const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
                 let width = img.width, height = img.height;
-                if (width > 800) { height = Math.round((height * 800) / width); width = 800; }
+                // ปรับขนาดรูปภาพลงอีกเป็น 400px เพื่อให้เซฟได้เร็วที่สุดและหลีกเลี่ยง Timeout Error
+                if (width > 400) { height = Math.round((height * 400) / width); width = 400; }
                 canvas.width = width; canvas.height = height;
                 ctx.drawImage(img, 0, 0, width, height);
-                const base64Url = canvas.toDataURL('image/jpeg', 0.5);
+                // ปรับ Quality เป็น 0.3 (ลดขนาดไฟล์สุดๆ แต่ยังพอมองออกว่าเป็นสลิป)
+                const base64Url = canvas.toDataURL('image/jpeg', 0.3);
                 document.getElementById(previewId).src = base64Url; document.getElementById(previewId).style.display = 'block'; document.getElementById(base64Id).value = base64Url;
             }
             img.src = e.target.result;
