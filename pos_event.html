@@ -84,21 +84,32 @@
         
         <!-- POS View -->
         <div id="pos-view" class="flex-1 flex overflow-hidden transition-opacity duration-300">
-            <!-- Left: Product Grid (70%) -->
-            <section class="w-[70%] flex flex-col bg-gray-50 border-r border-gray-200">
+            <!-- Left: Product Grid (75%) -->
+            <section class="w-[75%] flex flex-col bg-gray-50 border-r border-gray-200">
                 <div class="p-6 overflow-y-auto h-full" id="product-grid-container">
                     <div id="loading-state" class="flex flex-col items-center justify-center h-full text-gray-400">
                         <i class="ph ph-spinner-gap animate-spin text-5xl text-gold mb-4"></i>
                         <p>กำลังโหลดข้อมูลสินค้าและสต็อก...</p>
                     </div>
-                    <div id="product-grid" class="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 hidden">
-                        <!-- Products rendered via JS -->
+                    <div id="product-grid" class="hidden">
+                        <!-- Bundle Section -->
+                        <div id="bundle-grid-section" class="mb-6">
+                            <h3 class="text-sm font-bold text-navy mb-3 flex items-center gap-2"><i class="ph-fill ph-package text-gold text-lg"></i> เซตจับคู่</h3>
+                            <div id="bundle-grid" class="grid grid-cols-5 gap-3">
+                            </div>
+                        </div>
+                        <!-- Single Products -->
+                        <div>
+                            <h3 class="text-sm font-bold text-navy mb-3 flex items-center gap-2"><i class="ph-fill ph-storefront text-gold text-lg"></i> สินค้าเดี่ยว</h3>
+                            <div id="single-grid" class="grid grid-cols-5 gap-4">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Right: Cart (30%) -->
-            <section class="w-[30%] flex flex-col bg-white relative shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.05)]">
+            <!-- Right: Cart (25%) -->
+            <section class="w-[25%] flex flex-col bg-white relative shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.05)]">
                 <div class="p-4 border-b border-gray-100 shrink-0 bg-gray-50">
                     <h2 class="text-lg font-bold text-navy flex items-center gap-2">
                         <i class="ph-fill ph-shopping-cart text-gold text-xl"></i>
@@ -156,8 +167,24 @@
                         </div>
                     </div>
                     
-                    <div id="dash-items-sold" class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                    <div id="dash-items-sold" class="grid grid-cols-5 gap-4 mt-8">
                         <!-- Rendered via JS -->
+                    </div>
+                    
+                    <div class="mt-12 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center cursor-pointer hover:bg-gray-50 transition-colors" onclick="document.getElementById('dash-order-history-content').classList.toggle('hidden')">
+                            <h3 class="text-lg font-bold text-navy flex items-center gap-2">
+                                <i class="ph-fill ph-receipt text-gold"></i> ประวัติออเดอร์ (ล่าสุด)
+                            </h3>
+                            <div class="flex items-center gap-2 text-sm text-gray-500">
+                                กดเพื่อดู <i class="ph ph-caret-down"></i>
+                            </div>
+                        </div>
+                        <div id="dash-order-history-content" class="hidden max-h-[500px] overflow-y-auto">
+                            <div id="dash-order-history" class="divide-y divide-gray-100">
+                                <!-- Rendered via JS -->
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -319,6 +346,19 @@
             { id: 'keychain', shortName: 'พวงกุญแจ', name: 'พวงกุญแจ', price: 99, img: 'image/keychain-design.jpg' },
             { id: 'opener', shortName: 'ที่เปิดขวด', name: 'ที่เปิดขวด', price: 79, img: 'image/bottle-opener-design-1.jpg' },
             { id: 'sticker', shortName: 'สติ๊กเกอร์', name: 'สติ๊กเกอร์', price: 79, img: 'image/sticker.png' }
+        ];
+
+        const bundleProducts = [
+            { id: 'b_shirt_bag_opener_sticker', name: 'เสื้อ+ถุงผ้า+ที่เปิดขวด+สติ๊กเกอร์', price: 719, components: [{id:'shirt',qty:1},{id:'totebag',qty:1},{id:'opener',qty:1},{id:'sticker',qty:1}], hasSize: true },
+            { id: 'b_shirt_bag', name: 'เสื้อ+ถุงผ้า', price: 599, components: [{id:'shirt',qty:1},{id:'totebag',qty:1}], hasSize: true },
+            { id: 'b_shirt_sticker', name: 'เสื้อ+สติ๊กเกอร์', price: 479, components: [{id:'shirt',qty:1},{id:'sticker',qty:1}], hasSize: true },
+            { id: 'b_shirt_opener', name: 'เสื้อ+ที่เปิดขวด', price: 479, components: [{id:'shirt',qty:1},{id:'opener',qty:1}], hasSize: true },
+            { id: 'b_bag_opener_sticker', name: 'ถุงผ้า+ที่เปิดขวด+สติ๊กเกอร์', price: 299, components: [{id:'totebag',qty:1},{id:'opener',qty:1},{id:'sticker',qty:1}], hasSize: false },
+            { id: 'b_bag_opener', name: 'ถุงผ้า+ที่เปิดขวด', price: 249, components: [{id:'totebag',qty:1},{id:'opener',qty:1}], hasSize: false },
+            { id: 'b_bag_sticker', name: 'ถุงผ้า+สติ๊กเกอร์', price: 249, components: [{id:'totebag',qty:1},{id:'sticker',qty:1}], hasSize: false },
+            { id: 'b_opener_sticker', name: 'ที่เปิดขวด+สติ๊กเกอร์', price: 99, components: [{id:'opener',qty:1},{id:'sticker',qty:1}], hasSize: false },
+            { id: 'b_sticker_x2', name: 'สติ๊กเกอร์ ×2', price: 99, components: [{id:'sticker',qty:2}], hasSize: false },
+            { id: 'b_opener_x2', name: 'ที่เปิดขวด ×2', price: 99, components: [{id:'opener',qty:2}], hasSize: false },
         ];
 
         const SIZES = ['SS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL', '6XL'];
@@ -495,9 +535,12 @@
             },
 
             renderProducts: function() {
-                const grid = document.getElementById('product-grid');
-                grid.innerHTML = '';
+                const singleGrid = document.getElementById('single-grid');
+                const bundleGrid = document.getElementById('bundle-grid');
+                singleGrid.innerHTML = '';
+                bundleGrid.innerHTML = '';
                 
+                // --- Render single products ---
                 this.products.forEach(p => {
                     const isOutOfStock = !p.hasSize && p.stock <= 0;
                     const el = document.createElement('div');
@@ -540,8 +583,70 @@
                             <p class="text-primary-orange font-bold font-heading">฿${p.price}</p>
                         </div>
                     `;
-                    grid.appendChild(el);
+                    singleGrid.appendChild(el);
                 });
+
+                // --- Render bundle products ---
+                bundleProducts.forEach(b => {
+                    const isOutOfStock = this.isBundleOutOfStock(b);
+                    const originalPrice = this.getBundleOriginalPrice(b);
+                    const discount = originalPrice - b.price;
+                    
+                    const el = document.createElement('div');
+                    el.className = `bg-white rounded-xl shadow-sm border-2 border-gold/30 overflow-hidden relative transition-all hover:shadow-md cursor-pointer ${isOutOfStock ? 'opacity-60 grayscale-[0.5]' : 'active:scale-95'}`;
+                    
+                    if(isOutOfStock) {
+                        el.innerHTML += `<div class="absolute inset-0 bg-white/50 z-10 flex items-center justify-center">
+                            <span class="bg-red-500 text-white font-bold px-3 py-1 rounded-md shadow text-sm transform -rotate-12">SOLD OUT</span>
+                        </div>`;
+                    }
+                    
+                    el.onclick = () => {
+                        if(isOutOfStock) {
+                            this.showToast(`'เซต ${b.name}' สินค้าหมด`, 'error');
+                            return;
+                        }
+                        if(b.hasSize) {
+                            this.openBundleSizeModal(b);
+                        } else {
+                            this.addBundleToCart(b.id);
+                        }
+                    };
+
+                    el.innerHTML += `
+                        <div class="p-2.5 px-3 flex flex-col gap-1.5">
+                            <div class="flex items-center gap-1">
+                                <span class="bg-gold/20 text-gold text-[9px] font-bold px-1.5 py-0.5 rounded-full">เซต</span>
+                                ${discount > 0 ? `<span class="bg-red-100 text-red-600 text-[9px] font-bold px-1.5 py-0.5 rounded-full">-฿${discount}</span>` : ''}
+                            </div>
+                            <p class="text-[11px] leading-tight font-bold text-navy">${b.name}</p>
+                            <div class="flex items-baseline gap-1.5">
+                                <span class="text-primary-orange font-bold font-heading text-base">฿${b.price}</span>
+                                ${discount > 0 ? `<span class="text-gray-400 text-[10px] line-through">฿${originalPrice}</span>` : ''}
+                            </div>
+                            ${b.hasSize ? '<span class="text-[9px] text-gray-500">เลือก Size</span>' : ''}
+                        </div>
+                    `;
+                    bundleGrid.appendChild(el);
+                });
+            },
+
+            isBundleOutOfStock: function(bundle) {
+                for (const comp of bundle.components) {
+                    if (comp.id === 'shirt') continue; // shirt checked via size modal
+                    const stock = this.stockMap[comp.id] || 0;
+                    if (stock < comp.qty) return true;
+                }
+                return false;
+            },
+
+            getBundleOriginalPrice: function(bundle) {
+                let total = 0;
+                bundle.components.forEach(comp => {
+                    const bp = baseProducts.find(x => x.id === comp.id);
+                    if (bp) total += bp.price * comp.qty;
+                });
+                return total;
             },
 
             // --- Size Modal ---
@@ -586,7 +691,49 @@
 
             confirmSize: function(size, maxStock) {
                 this.closeSizeModal();
-                this.addToCart(this.selectedProductForSize.id, size, maxStock);
+                if (this._pendingBundleForSize) {
+                    const bundle = this._pendingBundleForSize;
+                    this._pendingBundleForSize = null;
+                    this.addBundleToCart(bundle.id, size, maxStock);
+                } else {
+                    this.addToCart(this.selectedProductForSize.id, size, maxStock);
+                }
+            },
+
+            // --- Bundle Size Modal ---
+            openBundleSizeModal: function(bundle) {
+                this._pendingBundleForSize = bundle;
+                const shirtProduct = this.products.find(x => x.id === 'shirt');
+                if (shirtProduct) {
+                    this.selectedProductForSize = shirtProduct;
+                    document.getElementById('size-modal-title').innerText = `เซต ${bundle.name} - เลือก Size เสื้อ`;
+                    
+                    const container = document.getElementById('size-options-container');
+                    container.innerHTML = '';
+                    SIZES.forEach(size => {
+                        const stockId = `shirt_${size}`;
+                        const currentStock = this.stockMap[stockId] || 0;
+                        
+                        const btn = document.createElement('button');
+                        if (currentStock > 0) {
+                            btn.className = "py-3 flex flex-col items-center justify-center rounded-lg border-2 border-gray-200 text-navy hover:border-navy hover:bg-gray-50 active:scale-95 transition-all text-center";
+                            btn.innerHTML = `<span class="font-bold text-lg leading-tight">${size}</span><span class="text-[10px] text-gray-500">เหลือ ${currentStock}</span>`;
+                            btn.onclick = () => this.confirmSize(size, currentStock);
+                        } else {
+                            btn.className = "py-3 flex flex-col items-center justify-center rounded-lg border-2 border-gray-100 text-gray-400 bg-gray-50 cursor-not-allowed";
+                            btn.innerHTML = `<span class="font-bold text-lg leading-tight">${size}</span><span class="text-[10px] text-red-500">หมด</span>`;
+                            btn.disabled = true;
+                        }
+                        container.appendChild(btn);
+                    });
+                    
+                    const m = document.getElementById('size-modal');
+                    const mc = document.getElementById('size-modal-content');
+                    m.classList.remove('hidden');
+                    void m.offsetWidth;
+                    m.classList.remove('opacity-0');
+                    mc.classList.remove('scale-95');
+                }
             },
 
             // --- Cart Logic ---
@@ -623,6 +770,81 @@
                 }
                 
                 this.updateCartUI();
+            },
+
+            // --- Bundle Cart Logic ---
+            addBundleToCart: function(bundleId, size = '', maxStock = null) {
+                const b = bundleProducts.find(x => x.id === bundleId);
+                if (!b) return;
+                
+                const cartKey = size ? `${bundleId}_${size}` : bundleId;
+                const existing = this.cart.find(x => x.cartKey === cartKey);
+                
+                // Check stock for all non-shirt components
+                for (const comp of b.components) {
+                    if (comp.id === 'shirt') continue;
+                    const available = this.stockMap[comp.id] || 0;
+                    const alreadyInCart = this.getCartQtyForComponent(comp.id);
+                    const needed = comp.qty * ((existing ? existing.qty : 0) + 1);
+                    if (alreadyInCart - (existing ? comp.qty * existing.qty : 0) + needed > available) {
+                        this.showToast(`สต็อกไม่พอ`, 'error');
+                        return;
+                    }
+                }
+                // Check shirt stock if applicable
+                if (b.hasSize && size) {
+                    const shirtStockId = `shirt_${size}`;
+                    const available = this.stockMap[shirtStockId] || 0;
+                    const alreadyInCart = this.getCartQtyForComponent(`shirt`, size);
+                    if (alreadyInCart + 1 > available) {
+                        this.showToast(`สต็อกเสื้อ Size ${size} ไม่พอ`, 'error');
+                        return;
+                    }
+                }
+                
+                if (existing) {
+                    existing.qty++;
+                } else {
+                    this.cart.push({
+                        id: bundleId,
+                        size: size,
+                        cartKey: cartKey,
+                        name: `เซต ${b.name}${size ? ` (${size})` : ''}`,
+                        price: b.price,
+                        img: '',
+                        qty: 1,
+                        maxStock: 999, // bundles limited by component stock
+                        isBundle: true,
+                        components: b.components
+                    });
+                }
+                this.updateCartUI();
+            },
+
+            getCartQtyForComponent: function(compId, size = '') {
+                let total = 0;
+                this.cart.forEach(item => {
+                    if (item.isBundle) {
+                        item.components.forEach(c => {
+                            if (c.id === compId) {
+                                if (compId === 'shirt') {
+                                    if (item.size === size) total += c.qty * item.qty;
+                                } else {
+                                    total += c.qty * item.qty;
+                                }
+                            }
+                        });
+                    } else {
+                        if (item.id === compId) {
+                            if (compId === 'shirt' || item.id === 'shirt') {
+                                if (item.size === size) total += item.qty;
+                            } else {
+                                total += item.qty;
+                            }
+                        }
+                    }
+                });
+                return total;
             },
 
             updateQty: function(cartKey, delta) {
@@ -844,9 +1066,25 @@
 
                 // Deduct local stock immediately
                 this.cart.forEach(c => {
-                    const stockId = c.size ? `${c.id}_${c.size}` : c.id;
-                    if (this.stockMap[stockId] !== undefined) {
-                        this.stockMap[stockId] = Math.max(0, this.stockMap[stockId] - c.qty);
+                    if (c.isBundle) {
+                        // Deduct each component
+                        c.components.forEach(comp => {
+                            if (comp.id === 'shirt' && c.size) {
+                                const stockId = `shirt_${c.size}`;
+                                if (this.stockMap[stockId] !== undefined) {
+                                    this.stockMap[stockId] = Math.max(0, this.stockMap[stockId] - comp.qty * c.qty);
+                                }
+                            } else {
+                                if (this.stockMap[comp.id] !== undefined) {
+                                    this.stockMap[comp.id] = Math.max(0, this.stockMap[comp.id] - comp.qty * c.qty);
+                                }
+                            }
+                        });
+                    } else {
+                        const stockId = c.size ? `${c.id}_${c.size}` : c.id;
+                        if (this.stockMap[stockId] !== undefined) {
+                            this.stockMap[stockId] = Math.max(0, this.stockMap[stockId] - c.qty);
+                        }
                     }
                 });
                 
@@ -857,13 +1095,24 @@
                     }
                 });
 
-                // Prepare sale record
+                // Prepare sale record - flatten bundles to components
+                const flatItems = [];
+                this.cart.forEach(c => {
+                    if (c.isBundle) {
+                        c.components.forEach(comp => {
+                            flatItems.push({ id: comp.id, size: comp.id === 'shirt' ? c.size : '', qty: comp.qty * c.qty });
+                        });
+                    } else {
+                        flatItems.push({ id: c.id, size: c.size, qty: c.qty });
+                    }
+                });
+
                 const saleRecord = {
                     transactionId: 'tx_' + Date.now() + '_' + Math.floor(Math.random()*1000),
                     timestamp: new Date().toISOString(),
                     method: method,
                     total: this.cart.reduce((s, c) => s + (c.price * c.qty), 0),
-                    items: this.cart.map(c => ({ id: c.id, size: c.size, qty: c.qty }))
+                    items: flatItems
                 };
                 
                 // Save to queue
@@ -901,11 +1150,19 @@
                 content.classList.add('hidden');
 
                 try {
-                    const res = await fetch(API_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({ action: 'getPOSDailySummary', adminPassword: this.adminPassword })
-                    });
-                    const data = await res.json();
+                    const [resSummary, resHistory] = await Promise.all([
+                        fetch(API_URL, {
+                            method: 'POST',
+                            body: JSON.stringify({ action: 'getPOSDailySummary', adminPassword: this.adminPassword })
+                        }),
+                        fetch(API_URL, {
+                            method: 'POST',
+                            body: JSON.stringify({ action: 'getPOSOrderHistory', adminPassword: this.adminPassword })
+                        })
+                    ]);
+                    
+                    const data = await resSummary.json();
+                    const historyData = await resHistory.json();
                     
                     if(data.success) {
                         document.getElementById('dash-total-sales').innerText = data.totalSales.toLocaleString();
@@ -950,12 +1207,12 @@
 
                                 let sizesHtml = '';
                                 if (g.bp.hasSize) {
-                                    sizesHtml = `<div class="mt-4 space-y-2 border-t border-gray-100 pt-3">`;
+                                    sizesHtml = `<div class="mt-3 border-t border-gray-100 pt-3 flex flex-wrap gap-2">`;
                                     g.items.forEach(it => {
                                         sizesHtml += `
-                                            <div class="flex justify-start gap-4 items-center text-sm">
-                                                <span class="text-gray-600 font-medium bg-gray-100 px-2 py-1 rounded w-12 text-center">${it.size}</span>
-                                                <span class="text-gray-500">${it.qty} ชิ้น</span>
+                                            <div class="flex items-center text-xs bg-gray-50 border border-gray-100 rounded-md overflow-hidden">
+                                                <span class="text-gray-600 font-bold bg-gray-200/50 px-2 py-1 text-center min-w-[32px]">${it.size}</span>
+                                                <span class="text-gray-600 font-medium px-2 py-1">${it.qty}</span>
                                             </div>
                                         `;
                                     });
@@ -963,31 +1220,58 @@
                                 }
 
                                 return `
-                                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col hover:shadow-md transition-shadow">
-                                        <div class="flex items-start justify-between mb-2">
-                                            <div>
-                                                <h4 class="font-bold text-navy text-lg">${g.bp.shortName}</h4>
-                                                <p class="text-xs text-gray-400">฿${g.bp.price} / ชิ้น</p>
-                                            </div>
-                                        </div>
-                                        <div class="flex justify-between items-end mt-2 mb-1">
-                                            <div class="text-gray-500 text-sm">ขายแล้ว <span class="font-bold text-navy text-base">${g.totalQty}</span> ชิ้น</div>
-                                            <div class="text-primary-orange font-bold text-xl tracking-tight">฿${g.totalPrice.toLocaleString()}</div>
-                                        </div>
+                                    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col hover:shadow-md transition-shadow">
+                                        <h4 class="font-bold text-navy text-base mb-1">${g.bp.shortName}</h4>
+                                        <div class="text-gray-500 text-xs mb-2">ขายแล้ว <span class="font-bold text-navy text-lg">${g.totalQty}</span> ชิ้น</div>
                                         ${sizesHtml}
                                     </div>
                                 `;
                             };
 
-                            let htmlCol1 = buildCard(grouped['shirt']);
-                            let htmlCol2 = buildCard(grouped['totebag']) + buildCard(grouped['keychain']);
-                            let htmlCol3 = buildCard(grouped['opener']) + buildCard(grouped['sticker']);
+                            let htmlCards = '';
+                            htmlCards += buildCard(grouped['shirt']);
+                            htmlCards += buildCard(grouped['totebag']);
+                            htmlCards += buildCard(grouped['keychain']);
+                            htmlCards += buildCard(grouped['opener']);
+                            htmlCards += buildCard(grouped['sticker']);
 
-                            container.innerHTML = `
-                                <div class="flex flex-col gap-6">${htmlCol1}</div>
-                                <div class="flex flex-col gap-6">${htmlCol2}</div>
-                                <div class="flex flex-col gap-6">${htmlCol3}</div>
-                            `;
+                            container.innerHTML = htmlCards;
+                            
+                            // Render History
+                            if (historyData.success) {
+                                const historyContainer = document.getElementById('dash-order-history');
+                                if (historyData.orders.length === 0) {
+                                    historyContainer.innerHTML = `<div class="p-6 text-center text-gray-400">ยังไม่มีประวัติออเดอร์</div>`;
+                                } else {
+                                    let historyHtml = '';
+                                    historyData.orders.forEach(order => {
+                                        const d = new Date(order.timestamp);
+                                        const timeStr = d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+                                        
+                                        let itemsStr = order.items.map(it => {
+                                            const base = baseProducts.find(b => b.id === it.id);
+                                            const name = base ? base.shortName : it.id;
+                                            return `${name}${it.size ? ' ('+it.size+')' : ''} x${it.qty}`;
+                                        }).join(', ');
+                                        
+                                        const isCash = order.method === 'CASH';
+                                        
+                                        historyHtml += `
+                                            <div class="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
+                                                <div class="flex flex-col gap-1">
+                                                    <span class="text-xs font-bold text-gray-400"><i class="ph ph-clock"></i> ${timeStr}</span>
+                                                    <span class="text-sm font-medium text-navy">${itemsStr}</span>
+                                                </div>
+                                                <div class="flex flex-col items-end gap-1">
+                                                    <span class="font-bold text-lg ${isCash ? 'text-green-600' : 'text-blue-600'} leading-none">฿${order.total.toLocaleString()}</span>
+                                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isCash ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'} leading-none">${isCash ? 'เงินสด' : 'เงินโอน'}</span>
+                                                </div>
+                                            </div>
+                                        `;
+                                    });
+                                    historyContainer.innerHTML = historyHtml;
+                                }
+                            }
                         }
                         
                         loader.classList.add('hidden');
