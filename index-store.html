@@ -141,32 +141,9 @@
         <!-- Main Scrollable Content -->
         <main class="flex-1 overflow-y-auto" id="main-content">
 
-            <!-- Hero Carousel -->
+            <!-- Hero -->
             <section id="home" class="relative w-full aspect-[5/4] bg-navy overflow-hidden">
-                <div id="carousel-inner" class="flex h-full w-full">
-                    <img src="image/promo-image-1.png" class="w-full h-full object-cover shrink-0" alt="Promo 1">
-                    <img src="image/promo-image-2.png" class="w-full h-full object-cover shrink-0" alt="Promo 2">
-                    <img src="image/promo-image-3.jpg" class="w-full h-full object-cover shrink-0" alt="Promo 3">
-                    <img src="image/promo-image-4.jpg" class="w-full h-full object-cover shrink-0" alt="Promo 4">
-                    <img src="image/promo-image-5.png" class="w-full h-full object-cover shrink-0" alt="Promo 5">
-                    <img src="image/promo-image-6.png" class="w-full h-full object-cover shrink-0" alt="Promo 6">
-                    <img src="image/promo-image-7.png" class="w-full h-full object-cover shrink-0" alt="Promo 7">
-                    <img src="image/promo-image-8.jpg" class="w-full h-full object-cover shrink-0" alt="Promo 8">
-                    <img src="image/promo-image-9.png" class="w-full h-full object-cover shrink-0" alt="Promo 9">
-                </div>
-                <button id="carousel-prev" class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/20 hover:bg-black/40 rounded-full flex items-center justify-center text-white backdrop-blur-sm transition-colors z-10" onclick="app.prevSlide()"><i class="ph ph-caret-left text-xl"></i></button>
-                <button id="carousel-next" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/20 hover:bg-black/40 rounded-full flex items-center justify-center text-white backdrop-blur-sm transition-colors z-10" onclick="app.nextSlide()"><i class="ph ph-caret-right text-xl"></i></button>
-                <div class="absolute bottom-4 left-0 w-full flex justify-center gap-2" id="carousel-dots">
-                    <div class="w-2 h-2 rounded-full bg-white opacity-100 transition-opacity" data-index="0"></div>
-                    <div class="w-2 h-2 rounded-full bg-white opacity-50 transition-opacity" data-index="1"></div>
-                    <div class="w-2 h-2 rounded-full bg-white opacity-50 transition-opacity" data-index="2"></div>
-                    <div class="w-2 h-2 rounded-full bg-white opacity-50 transition-opacity" data-index="3"></div>
-                    <div class="w-2 h-2 rounded-full bg-white opacity-50 transition-opacity" data-index="4"></div>
-                    <div class="w-2 h-2 rounded-full bg-white opacity-50 transition-opacity" data-index="5"></div>
-                    <div class="w-2 h-2 rounded-full bg-white opacity-50 transition-opacity" data-index="6"></div>
-                    <div class="w-2 h-2 rounded-full bg-white opacity-50 transition-opacity" data-index="7"></div>
-                    <div class="w-2 h-2 rounded-full bg-white opacity-50 transition-opacity" data-index="8"></div>
-                </div>
+                <img src="image/pre-order.png" class="w-full h-full object-cover" alt="Pre-order">
             </section>
 
             <!-- Catalog Section -->
@@ -306,21 +283,11 @@
                         </div>
                     </div>
                     <div class="bg-white p-5 rounded-2xl border border-beige/50 shadow-sm">
-                        <h3 class="text-base font-bold text-navy mb-4 flex items-center gap-2"><i class="ph ph-truck text-gold text-xl"></i> วิธีรับสินค้า</h3>
-                        <div class="space-y-2 text-sm">
-                            <label class="flex items-start gap-3 p-3 border border-beige rounded-xl cursor-pointer bg-gray-50">
-                                <input type="radio" name="shipping-option" value="pickup_all" class="mt-0.5 text-gold" checked>
-                                <div><div class="font-medium">รับหน้างาน (ฟรี)</div></div>
-                            </label>
-                            <label class="flex items-start gap-3 p-3 border border-beige rounded-xl cursor-pointer bg-gray-50">
-                                <input type="radio" name="shipping-option" value="ship_once" class="mt-0.5 text-gold">
-                                <div>
-                                    <div class="font-medium">จัดส่งทางไปรษณีย์</div>
-                                    <div class="text-[10px] text-charcoal/60">ค่าส่งคำนวณตามจำนวนสินค้า</div>
-                                </div>
-                            </label>
+                        <h3 class="text-base font-bold text-navy mb-4 flex items-center gap-2"><i class="ph ph-truck text-gold text-xl"></i> ที่อยู่จัดส่ง</h3>
+                        <div class="hidden">
+                            <input type="radio" name="shipping-option" value="ship_once" checked>
                         </div>
-                        <textarea id="cust-address" rows="2" class="w-full mt-3 p-3 border border-beige rounded-xl bg-gray-50 text-sm focus:bg-white focus:outline-none focus:border-gold hidden" placeholder="ที่อยู่จัดส่ง..."></textarea>
+                        <textarea id="cust-address" rows="3" class="w-full p-3 border border-beige rounded-xl bg-gray-50 text-sm focus:bg-white focus:outline-none focus:border-gold" placeholder="กรอกที่อยู่จัดส่งที่นี่..." required></textarea>
                     </div>
                     <div class="bg-white p-5 rounded-2xl border border-beige/50 shadow-sm">
                         <h3 class="text-base font-bold text-navy mb-4 flex items-center gap-2"><i class="ph ph-credit-card text-gold text-xl"></i> ชำระเงิน</h3>
@@ -574,7 +541,7 @@
 
         // --- Init ---
         renderProducts();
-        setupCarousel();
+        // setupCarousel(); // Removed for static hero image
         setupEventListeners();
         setupSlipUpload();
         updateCartUI();
@@ -782,9 +749,10 @@
             var remainTb = Math.max(0, limitTb - soldTb);
 
             products.forEach(function(p) {
-                // Hide cancelled and out of stock items (and their bundles)
-                var hiddenIds = ['shirt_kids', 'tumbler', 'promo_ultimate', 'promo_alumni', 'promo_family', 'promo_essential', 'promo_everyday'];
-                if (hiddenIds.indexOf(p.id) !== -1) return;
+                // Pre-order รอบสุดท้าย: แสดงเฉพาะเสื้อเท่านั้น (whitelist)
+                var allowedIds = ['shirt', 'shirt_kids'];
+                var pFrontId = p._frontId || p.id;
+                if (allowedIds.indexOf(p.id) === -1 && allowedIds.indexOf(pFrontId) === -1) return;
 
                 // Check stock limits
                 var isSoldOut = false;
@@ -810,7 +778,7 @@
                 if (p.hasSize && !p.isBundle) {
                     var sizesList = (p.id === 'shirt_kids') ? sizesKids : sizes;
                     var optionsHtml = sizesList.map(function(s) { 
-                        var remain = p.id === 'shirt_kids' ? -1 : (meta["REMAIN_shirt_" + s.val] !== undefined && meta["REMAIN_shirt_" + s.val] !== "" ? parseInt(meta["REMAIN_shirt_" + s.val]) : -1);
+                        var remain = -1; // Pre-order unlimited stock
                         var optLabel = s.label;
                         var disabledStr = "";
                         if (remain === 0) {
@@ -901,7 +869,7 @@
 
             if (productId === 'shirt') {
                 var meta = window.metaData || {};
-                var remain = meta["REMAIN_shirt_" + selectedSize] !== undefined && meta["REMAIN_shirt_" + selectedSize] !== "" ? parseInt(meta["REMAIN_shirt_" + selectedSize]) : -1;
+                var remain = -1; // Pre-order unlimited stock
                 if (remain !== -1) {
                     var cartQty = getShirtQtyInCart(selectedSize);
                     if (cartQty + 1 > remain) {
@@ -1342,7 +1310,7 @@
             if (product.items.shirt) {
                 var meta = window.metaData || {};
                 var optionsHtml = sizes.map(function(s) { 
-                    var remain = meta["REMAIN_shirt_" + s.val] !== undefined && meta["REMAIN_shirt_" + s.val] !== "" ? parseInt(meta["REMAIN_shirt_" + s.val]) : -1;
+                    var remain = -1; // Pre-order unlimited stock
                     var optLabel = s.label;
                     var disabledStr = "";
                     if (remain === 0) {
@@ -1444,7 +1412,7 @@
             var meta = window.metaData || {};
             var hasError = false;
             Object.keys(sizeCount).forEach(function(s) {
-                var remain = meta["REMAIN_shirt_" + s] !== undefined && meta["REMAIN_shirt_" + s] !== "" ? parseInt(meta["REMAIN_shirt_" + s]) : -1;
+                var remain = -1; // Pre-order unlimited stock
                 if (remain !== -1) {
                     var cartQty = getShirtQtyInCart(s);
                     if (cartQty + sizeCount[s] > remain) {
